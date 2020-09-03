@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://www.mibx.com/smi" xmlns="http://www.mibx.com/smi">
+    
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+        schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
+
+    <xs:element name="SMI">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:choice maxOccurs="unbounded">
+                    <xs:element ref="option"/>
+                    <xs:element ref="import"/>
+                    <xs:element ref="typedef"/>
+                    <xs:element ref="node"/>
+                    <xs:element ref="scalar"/>
+                    <xs:element ref="table"/>
+                    <xs:element ref="notification"/>
+                </xs:choice>
+                <xs:element ref="module"/>
+                <xs:choice maxOccurs="unbounded">
+                    <xs:element ref="option"/>
+                    <xs:element ref="import"/>
+                    <xs:element ref="typedef"/>
+                    <xs:element ref="node"/>
+                    <xs:element ref="scalar"/>
+                    <xs:element ref="table"/>
+                    <xs:element ref="notification"/>
+                </xs:choice>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="module">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="organization" type="textType"/>
+                <xs:element name="contact" type="textType"/>
+                <xs:element name="description" type="textType"/>
+                <xs:element name="revision" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="date" type="xs:dateTime"/>
+                            <xs:element name="description" type="textType"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="identity" type="xs:string"/>
+                <xs:element name="oid" type="xs:string"/>
+            </xs:sequence>
+            <xs:attribute ref="xml:base"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="option">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="import"/>
+                <xs:element ref="typedef"/>
+                <xs:element ref="node"/>
+                <xs:element ref="scalar"/>
+                <xs:element ref="table"/>
+                <xs:element ref="notification"/>
+            </xs:choice>
+            <xs:attribute name="test" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="import">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="module" type="xs:string"/>
+                <xs:element name="name" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="typedef">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="status" type="objectStatusType" default="current" minOccurs="0"/>
+                <xs:element name="syntax" type="objectSyntaxType"/>
+                <xs:element name="display" type="textType" minOccurs="0"/>
+                <xs:element name="description" type="textType" minOccurs="0"/>
+                <xs:element name="reference" type="textType" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="node">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="oid" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="scalar" type="objectType"/>
+
+    <xs:element name="table">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="status" type="objectStatusType" minOccurs="0"/>
+                <xs:element name="oid" type="xs:string"/>
+                <xs:element name="description" type="textType" minOccurs="0"/>
+                <xs:element name="reference" type="textType" minOccurs="0"/>
+                <xs:element name="row" type="rowType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="row" type="rowType"/>
+    <xs:element name="column" type="objectType"/>
+
+    <xs:element name="notification" type="notificationType"/>
+
+    <xs:complexType name="rangeType">
+        <xs:sequence>
+            <xs:element name="min" type="xs:integer"/>
+            <xs:element name="max" type="xs:integer"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="namedNumberType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="number" type="xs:integer"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="objectSyntaxType">
+        <xs:sequence>
+            <xs:element name="baseType" type="xs:string"/>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="range" type="rangeType"/>
+                <xs:element name="namedNumber" type="namedNumberType"/>
+                <xs:element name="option">
+                    <xs:complexType>
+                        <xs:choice>
+                            <xs:element name="range" type="rangeType"/>
+                            <xs:element name="namedNumber" type="namedNumberType"/>
+                        </xs:choice>
+                        <xs:attribute name="test" use="required" type="xs:string"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="objectAccessType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="not-accessible"/>
+            <xs:enumeration value="accessible-for-notify"/>
+            <xs:enumeration value="read-only"/>
+            <xs:enumeration value="read-write"/>
+            <xs:enumeration value="read-create"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="objectStatusType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="current"/>
+            <xs:enumeration value="obsolete"/>
+            <xs:enumeration value="deprecated"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="objectType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="syntax" type="objectSyntaxType"/>
+            <xs:element name="access" type="objectAccessType"/>
+            <xs:element name="status" type="objectStatusType" default="current" minOccurs="0"/>
+            <xs:element name="oid" type="xs:string"/>
+            <xs:element name="description" type="textType" minOccurs="0"/>
+            <xs:element name="reference" type="textType" minOccurs="0"/>
+            <xs:element name="units" type="xs:string" minOccurs="0"/>
+            <xs:element name="default" type="textType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="rowType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="status" type="objectStatusType" default="current" minOccurs="0"/>
+            <xs:element name="oid" type="xs:string"/>
+            <xs:choice>
+                <xs:element name="index" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="name" type="xs:string"/>
+                            <xs:element name="implied" type="xs:boolean" default="false"
+                                minOccurs="0"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="augments" type="xs:string"/>
+            </xs:choice>
+            <xs:element name="description" type="textType" minOccurs="0"/>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="option">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="column" type="objectType"/>
+                        </xs:sequence>
+                        <xs:attribute name="test" use="required" type="xs:string"/>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="column" type="objectType"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="notificationType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="objects">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="object" type="xs:string" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="status" type="objectStatusType" minOccurs="0" default="current"/>
+            <xs:element name="description" type="textType" minOccurs="0"/>
+            <xs:element name="oid" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="textType" mixed="true">
+        <xs:sequence>
+            <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="test" use="required" type="xs:string"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    
+</xs:schema>

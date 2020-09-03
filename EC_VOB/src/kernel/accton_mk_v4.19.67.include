@@ -1,0 +1,22 @@
+# Common definitions for kernel mode library
+#
+
+ACCTONSRC_DIR = $(ACCSRC)
+OEM_INCLUDEDIR = $(ACCTONSRC_DIR)/sysinclude/oem/$(PROJECT_NAME)
+
+ACCTON_CPPFLAGS = \
+    -I$(OEM_INCLUDEDIR) \
+    -I$(ACCTONSRC_DIR)/sysinclude \
+    -I$(ACCTONSRC_DIR)/sysinclude/mibconstants \
+    -I$(ACCTONSRC_DIR)/cmnlib/common/include \
+    -I$(ACCTONSRC_DIR)/cmnlib/kernel/include \
+    -I$(ACCTONSRC_DIR)/cmnlib/kernel/kernel/linux \
+    -I$(ACCTONSRC_DIR)/cmnlib/user/include
+
+ifneq ($(LINUX_INCLUDE),)
+# Fall into this condition when building Broadcom SDK
+else
+# to overwrite kernel include path
+endif
+
+export ACCTON_CPPFLAGS

@@ -1,0 +1,73 @@
+#ifndef _CONFIG_AGENT_HEADER_VERSION_H_
+#define _CONFIG_AGENT_HEADER_VERSION_H_
+
+
+/**
+ * CONFIG_AGENT_MAJOR_VERSION:
+ *
+ * MONGOC major version component (e.g. 1 if %CONFIG_AGENT_VERSION is 1.2.3)
+ */
+#define CONFIG_AGENT_MAJOR_VERSION (0)
+
+
+/**
+ * CONFIG_AGENT_MINOR_VERSION:
+ *
+ * MONGOC minor version component (e.g. 2 if %CONFIG_AGENT_VERSION is 1.2.3)
+ */
+#define CONFIG_AGENT_MINOR_VERSION (0)
+
+
+/**
+ * CONFIG_AGENT_MICRO_VERSION:
+ *
+ * MONGOC micro version component (e.g. 3 if %CONFIG_AGENT_VERSION is 1.2.3)
+ */
+#define CONFIG_AGENT_MICRO_VERSION (1)
+
+
+/**
+ * CONFIG_AGENT_VERSION:
+ *
+ * MONGOC version.
+ */
+#define CONFIG_AGENT_VERSION (0.0.1)
+
+
+/**
+ * CONFIG_AGENT_VERSION_S:
+ *
+ * MONGOC version, encoded as a string, useful for printing and
+ * concatenation.
+ */
+#define CONFIG_AGENT_VERSION_S "0.0.1"
+
+
+/**
+ * CONFIG_AGENT_VERSION_HEX:
+ *
+ * MONGOC version, encoded as an hexadecimal number, useful for
+ * integer comparisons.
+ */
+#define CONFIG_AGENT_VERSION_HEX (CONFIG_AGENT_MAJOR_VERSION << 24 | \
+                          CONFIG_AGENT_MINOR_VERSION << 16 | \
+                          CONFIG_AGENT_MICRO_VERSION << 8)
+
+
+/**
+ * CONFIG_AGENT_CHECK_VERSION:
+ * @major: required major version
+ * @minor: required minor version
+ * @micro: required micro version
+ *
+ * Compile-time version checking. Evaluates to %TRUE if the version
+ * of MONGOC is greater than the required one.
+ */
+#define CONFIG_AGENT_CHECK_VERSION(major,minor,micro)   \
+        (CONFIG_AGENT_MAJOR_VERSION > (major) || \
+         (CONFIG_AGENT_MAJOR_VERSION == (major) && CONFIG_AGENT_MINOR_VERSION > (minor)) || \
+         (CONFIG_AGENT_MAJOR_VERSION == (major) && CONFIG_AGENT_MINOR_VERSION == (minor) && \
+          CONFIG_AGENT_MICRO_VERSION >= (micro)))
+
+
+#endif /* _CONFIG_AGENT_HEADER_VERSION_H_ */

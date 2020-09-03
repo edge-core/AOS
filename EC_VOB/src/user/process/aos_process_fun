@@ -1,0 +1,75 @@
+AOS_PROCESS_LIST="/sbin/onlp_platmgrd -d
+    /sbin/sysinit_proc
+    /bin/sys_debug_proc
+    /bin/driver_proc
+    /bin/watchdog_proc
+    /bin/stkctrl_proc
+    /bin/stktplg_proc
+    /bin/core_util_proc
+    /bin/l2_l4_proc
+    /bin/xfer_proc
+    /bin/poe_proc
+    /bin/auth_protocol_proc
+    /bin/app_protocol_proc
+    /bin/nsm_proc
+    /bin/rip_proc
+    /bin/ospf_proc
+    /bin/ospf6_proc
+    /bin/bgp_proc
+    /bin/pim_proc
+    /bin/netcfg_proc
+    /bin/sys_mgmt_proc
+    /bin/ip_service_proc
+    /bin/snmp_proc
+    /bin/cli_proc
+    /bin/web_proc
+    /bin/vrrp_proc
+    /bin/sflow_proc
+    /bin/dot1x_sup_proc
+    /bin/sys_callback_proc
+    /bin/fpm_proc &
+    /bin/mac_sync_proc &
+    /bin/ofagent  -l0.0.0.0:6633 > /var/log/of_debug 2>&1"
+
+get_exe_cmd()
+{
+    local org_cmd exe_cmd
+
+    org_cmd=$1
+    if [ "$CURRENT_MODE" = "$LEGACY_MODE" ] || [ "$CURRENT_MODE" = "$DEVELOP_MODE" ] 
+    then
+        exe_cmd="${CMD_PFX}${org_cmd}"
+    elif [ "$CURRENT_MODE" = "$OF_MODE" ]
+    then
+        exe_cmd=`echo "${CMD_PFX}${org_cmd}" | sed -e 's:bin/:bin/of/:'`
+    fi
+    echo $exe_cmd
+}
+
+aos_init_proc()
+{
+    while read cmd args <&4; do
+        EXE_CMD=$(get_exe_cmd ${cmd})
+        test -e ${EXE_CMD} && {
+            ${ECHO} ${EXE_CMD} ${args}
+            eval ${DEBUG_PRELOAD} ${EXE_CMD} ${args} 4>&-
+        }
+    done 4<< EOLST
+        $AOS_PROCESS_LIST
+EOLST
+}
+
+aos_kill_proc()
+{
+    while read cmd args <&4; do
+        EXE_CMD=$(get_exe_cmd ${cmd})
+        test -e ${EXE_CMD} && {
+             start-stop-daemon --quiet --stop --oknodo --exec ${EXE_CMD}
+        }
+    done 4<< EOLST
+        $AOS_PROCESS_LIST
+EOLST
+}
+
+
+

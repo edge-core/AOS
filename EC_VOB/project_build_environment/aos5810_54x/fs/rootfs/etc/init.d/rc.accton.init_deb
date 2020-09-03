@@ -1,0 +1,132 @@
+#!/bin/bash
+#ifconfig CRAFT | grep inet > /dev/NULL
+#if [ $? -eq 0 ]; then
+#    apt-get update
+#fi
+
+AOS_PATH=
+#export AOS_PATH=/initrd
+#export LD_LIBRARY_PATH=${AOS_PATH}/lib2:${AOS_PATH}/usr/lib
+#export AOS_LD_LIBRARY_PATH=${AOS_PATH}/lib2
+
+create_dev_node()
+{
+	cd /dev
+	mknod -m 644 linux-kernel-bde c 127 0
+	mknod -m 644 linux-uk-proxy c 125 0
+	mknod -m 644 linux-user-bde c 126 0
+	mknod -m 644 ram b 1 1
+#	mknod mtdblock0 b 31 0
+#	mknod mtdblock1 b 31 1
+#	mknod mtdblock2 b 31 2
+#	mknod mtdblock3 b 31 3
+#	mknod mtdblock4 b 31 4
+#	mknod mtdblock5 b 31 5
+#	mknod mtdblock6 b 31 6
+#	mknod mtdblock7 b 31 7
+#        mknod mtd0      c 90 0
+#        mknod mtd0ro    c 90 1
+#        mknod mtd1      c 90 2
+#        mknod mtd1ro    c 90 3
+#        mknod mtd2      c 90 4
+#        mknod mtd2ro    c 90 5
+#        mknod mtd3      c 90 6
+#        mknod mtd3ro    c 90 7
+#        mknod mtd4      c 90 8
+#        mknod mtd4ro    c 90 9
+#        mknod mtd5      c 90 10
+#        mknod mtd5ro    c 90 11
+#        mknod mtd6      c 90 12
+#        mknod mtd6ro    c 90 13
+#        mknod mtd7      c 90 14
+#        mknod mtd7ro    c 90 15	
+	cd -
+}
+
+create_dev_node > /dev/null 2>&1
+
+## $1 - filename
+execute_file()
+{
+    if test -e ${AOS_PATH}/etc/init.d/$1; then
+        . ${AOS_PATH}/etc/init.d/$1
+    else
+        echo "${AOS_PATH}/etc/init.d/$1 is not existed."
+    fi
+}
+
+## $1 - filename
+mk_file_link()
+{
+#    if ! [[ -L $1 || -f $1 || -d $1 ]]; then        
+#        ln -s ${AOS_PATH}$1 $1
+#    fi
+     return 0
+}
+
+## build file links needed for AOS
+for file in \
+  /etc/fw_env.config \
+  /etc/get_uboot_ver.sh \
+  /etc/runtime_ver \
+  /etc/udhcpc.sh \
+  /etc/exception_log.sh \
+  /etc/upload_exception_log.sh \
+  /etc/sw_wtd_log.sh \
+  /etc/gen_fw_env_config.sh \
+  /etc/get_mtd_id_by_name.sh \
+  /etc/aos_change_startup_installer.sh \
+  /etc/aos_get_installer_ver.sh \
+  /etc/aos_util_functions \
+  /etc/aos_verify_installer.sh \
+  /etc/mount_usbdisk.sh \
+  /etc/usb_dev_util_functions \
+  /etc/ar_core.sh \
+  /etc/pack_dbginfo.sh \
+  /sbin/udhcpc \
+  /usr/sbin/fw_printenv \
+  /usr/sbin/fw_setenv \
+  /usr/sbin/i2c \
+  /usr/sbin/onie_install \
+  /usr/bin/tftp \
+  /usr/config.bcm \
+  /usr/config.bcm.1 \
+  /usr/rc.soc \
+  /usr/rc.soc.1 \
+;
+do
+    mk_file_link ${file}
+done
+
+for dir in \
+  /usr/webroot \
+;
+do
+  mk_file_link ${dir}
+done
+
+# Enable generation of core dump file when an exception occurs
+ulimit -c unlimited
+
+# Set the proc node to invoke /etc/ar_core.sh when core dump file is
+# generated
+#echo "|/etc/ar_core.sh %e %p %s %t" > /proc/sys/kernel/core_pattern
+
+# Create the mount point for mmc card if not exists
+#if [ ! -d /mnt/mmc ]; then
+#    mkdir -p /mnt/mmc || echo "Failed to create /mnt/mmc"
+#fi
+
+#if [ -d /mnt/mmc ]; then
+#    ( mount -t vfat /dev/mmcblk0 /mnt/mmc 2>&1 1>/dev/null ) || \
+#    ( mount -t vfat /dev/mmcblk0p1 /mnt/mmc 2>&1 1>/dev/null ) || \
+#    echo -e "Failed to mount mmc card.\nTry to execute 'mkfs.vfat /dev/mmcblk0' to fix."
+#fi
+
+INIT_K="rc.accton.init_k"
+INIT_F="rc.accton.init"
+
+execute_file ${INIT_K}
+execute_file ${INIT_F}
+
+exit 0

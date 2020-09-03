@@ -1,0 +1,38 @@
+#!/bin/bash
+
+ROOTFS_DIR=`cd ${ACCROOTFS} && pwd`
+
+## Include directories
+export CPPFLAGS="-I${ACCSRC}/sysinclude \
+                 -I${ACCSRC}/sysinclude/oem/${PROJECT_NAME} \
+                 -I${ACCSRC}/sysinclude/mibconstants \
+                 -I${ACCSRC}/cmnlib/user/include \
+                 -I${ACCSRC}/cmnlib/common/include \
+                 -I${ACCSRC}/user/apps/backdoor/include \
+                 -I${ACCSRC}/user/apps/snmpmgmt/v3/snmp/include \
+                 -I${ACCSRC}/user/core/l2/vlan/include \
+                 -I${ACCSRC}/user/core/l3/netcfg/include \
+                 -I${ACCSRC}/user/core/mgmt/syslog/include \
+                 -I${ACCSRC}/user/core/mgmt/sysrsc/include \
+                 -I${ACCSRC}/user/core/mgmt/sys_callback/include \
+                 -I${ACCSRC}/user/core/mgmt/trapmgmt/include \
+                 -I${ACCSRC}/user/protocol/IPI_7.4.0.t40_accton/ZebOS5/nsm \
+                 -I${ACCSRC}/user/core/qos_v2/include \
+                 -I${ACCSRC}/user/core/qos_v2/cos/include \
+                 -I${ACCSRC}/user/core/mgmt/dai/include \
+                 -I${ACCSRC}/user/driver/swdrv/include \
+                 -I${ACCSRC}/user/driver/devdrv/include \
+                 -I${ACCSRC}/user/driver/iscdrv/include \
+                 -I${ACCSRC}/user/driver/landrv/include \
+                 -I${ACCSRC}/user/process/bgp_proc/include"
+
+## After the execution of ./configure, config.h will be created at quagga main directory
+## The "#define ZEBRA_SERV_PATH" in config.h will be redefined in zebra.h (use NSM server)
+${ACCSRC}/user/protocol/quagga/configure --build=${BUILD_GNU_TYPE} --host=${HOST_GNU_TYPE} \
+  --prefix=${ROOTFS_DIR} --disable-isisd --disable-ospfd --disable-ripd \
+  --disable-rtadv --disable-ripngd --disable-opaque-lsa --disable-ospf6d \
+  --disable-watchquagga --disable-doc --disable-zebra --disable-capabilities \
+  --enable-bgpd --enable-bgp-announce --enable-static --enable-ipv6 \
+  --enable-multipath=8
+
+ 

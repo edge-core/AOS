@@ -1,0 +1,97 @@
+-- ***************************************************************************
+--
+-- Name:      3Com SuperStack III 802.1X Port Access Entity MIB
+--
+-- Description:
+--
+-- This is the 3Com proprietary MIB to extend operation of an IEEE 802.1X
+-- Port Access Entity (PAE). 
+-- It complements the IEEE 802.1X PAE standard MIB.
+--
+--  History    Date               Reason for Change
+--  1.00       Mar 31 2003        Created to control user-based port configuration.
+--
+-- *************************************************************************
+-- Copyright 3Com Corporation. All Rights Reserved.
+-- *************************************************************************
+
+A3COM-PAE-MIB DEFINITIONS ::= BEGIN
+
+   IMPORTS
+	OBJECT-TYPE
+		FROM RFC-1212 
+	TEXTUAL-CONVENTION, TruthValue
+		FROM SNMPv2-TC
+	dot1xPaePortNumber FROM IEEE8021-PAE-MIB
+	a3ComPaeMIB FROM A3COM0004-GENERIC
+    ;
+
+-- *************************************************************************
+--
+--  3Com Supplement to IEEE 802.1X IEEE8021-PAE-MIB
+--
+-- *************************************************************************
+
+a3ComPaePortTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF A3ComPaePortEntry
+	ACCESS  not-accessible
+	STATUS  mandatory
+	DESCRIPTION
+	    "The (conceptual) table listing the per-port PAE objects."
+	::= { a3ComPaeMIB 1 }
+
+a3ComPaePortEntry OBJECT-TYPE
+	SYNTAX  A3ComPaePortEntry
+	ACCESS  not-accessible
+	STATUS  mandatory
+	DESCRIPTION
+	    "An entry (conceptual row) representing information related to the
+	     3Com entensions to the PAE operation for a port."
+	INDEX	{ dot1xPaePortNumber }
+	::= { a3ComPaePortTable  1 }
+
+A3ComPaePortEntry ::= SEQUENCE {
+	a3ComPaePortAssignEnable    TruthValue,
+	a3ComPaePortVlanAssignment  OCTET STRING,
+	a3ComPaePortQosAssignment   OCTET STRING
+}  
+
+
+a3ComPaePortAssignEnable OBJECT-TYPE
+	SYNTAX  TruthValue
+	ACCESS  read-write
+	STATUS  mandatory
+	DESCRIPTION
+	    "The user-based port configuration control. Setting this attribute
+	     TRUE causes the port to be configured with any configuration 
+	     parameters supplied by the authentication server. Setting this
+	     attribute to FALSE causes any configuration parameters supplied
+	     by the authentication server to be ignored."
+	::= { a3ComPaePortEntry  1 }
+
+
+a3ComPaePortVlanAssignment OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..128))
+	ACCESS  read-only
+	STATUS  mandatory
+	DESCRIPTION
+	    "The VLAN membership assigned to the port for the authorised user.
+	     This contains the actual value received from the authentication
+	     server. This object will contain a null value if there is no user
+	     authorised to access the port or if the authorised user was not
+	     assigned a VLAN membership."
+	::= { a3ComPaePortEntry  2 }
+        
+a3ComPaePortQosAssignment OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..128))
+	ACCESS  read-only
+	STATUS  mandatory
+	DESCRIPTION
+	    "The QoS profile assigned to the port for the currently authorised
+	     user. This contains the actual value received from the 
+	     authentication server. This object will contain a null value if
+	     there is no user authorised to access the port or if the user was
+	     not assigned a QoS profile."
+	::= { a3ComPaePortEntry  3 }
+
+END

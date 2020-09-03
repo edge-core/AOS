@@ -1,0 +1,14 @@
+[Unit]
+Description=platform-baseconf Service
+Before=serial-getty@ttyS1.service
+
+[Service]
+Type=oneshot
+ExecStart=/etc/init.d/platform-baseconf
+ExecStartPost=/bin/sleep 3
+RemainAfterExit=yes
+SuccessExitStatus=SIGHUP
+StandardOutput=journal+console
+
+[Install]
+WantedBy=getty.target

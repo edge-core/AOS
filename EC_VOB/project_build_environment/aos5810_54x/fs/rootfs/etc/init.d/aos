@@ -1,0 +1,49 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          aos
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     umountnfs
+# Default-Start:     3 
+# Default-Stop:      6
+# Short-Description: aos
+# Description:       aos
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+. /lib/init/vars.sh
+. /lib/lsb/init-functions
+
+### set AOS path
+if [ -z "${AOS_PATH}" ]; then
+    AOS_PATH=""
+fi
+
+case "$1" in
+  start)
+        exit 0
+        . /etc/init.d/rc.accton.init_deb
+	;;
+  stop)
+        CurrentBoot=${AOS_PATH}/usr/share/aos/CurrentBoot
+        if [ -e "$CurrentBoot" ]; then
+            runtime="`cat $CurrentBoot`"
+            rm -f ${AOS_PATH}/usr/share/aos/CurrentBoot
+        
+            log_action_begin_msg "Install AOS image: ${runtime}"
+
+            . /etc/init.d/aos_process_fun
+#            aos_kill_proc
+#            sleep 1
+
+            ${AOS_PATH}/etc/aos_installer.sh $runtime 1>/dev/null 2>&1
+
+            log_action_end_msg 0
+        fi
+	;;
+  *)
+	echo "Usage: aos [start|stop]" >&2
+	exit 3
+	;;
+esac
+
+exit 0

@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# This script is used to pack files that are required for installation into
+# the onie installer file
+# Usage: make_onie_installer [runtime filename in $ACCPROJ/runtime]
+
+if [ $# -ne 1 ]; then
+        runtime_file_name=runtime
+else
+        runtime_file_name=$1
+fi
+
+kernel_file=aos_vmlinuz
+initrd_file=initrd.cpio.gz
+aos_file=aos_files.tgz
+debian_rootfs_addon_file=onl_rootfs_addon.tar.xz
+debian_rootfs_file=onl_rootfs.tar.xz
+
+if [ ! -r $ACCPROJ/runtime/$kernel_img ]; then
+	echo "$ACCPROJ/runtime/$kernel_img not found!"
+	exit 1
+fi
+
+
+onie_installer_filename="$runtime_file_name.swi"
+
+#debian_rootfs_file="wheezy_rootfs.tar.xz"
+
+cd $ACCPROJ/runtime && $ACCPROJ/utils/onie-mk-installer.sh $kernel_file $initrd_file $aos_file $debian_rootfs_addon_file $debian_rootfs_file $onie_installer_filename
+
+if [ $? != "0" ]; then
+	echo "onie-mk-installer.sh returns error"
+	exit 1
+fi
+
+
+echo
+echo "$ACCPROJ/runtime/"
+
+ls -l | grep "$onie_installer_filename"
+
+exit 0

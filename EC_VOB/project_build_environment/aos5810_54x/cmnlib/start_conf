@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# check if we need to use '--install'
+if [ ! -f ./aclocal.m4 ]; then
+    autoreconf --install --force
+else
+    autoreconf --install --force
+fi
+
+if [ $? -ne 0 ]; then
+    echo "autoreconf error."
+    exit 1;
+fi
+
+PREFIX_PATH=`cd ../fs/rootfs/usr && pwd`
+
+./configure --build=${BUILD_GNU_TYPE} --host=${HOST_GNU_TYPE} \
+            --enable-static=no \
+            --exec-prefix="$PREFIX_PATH" \
+	    --disable-dependency-tracking \
+            --prefix="$PREFIX_PATH"
+
+if [ $? -ne 0 ]; then
+    echo "configure error."
+    exit 1;
+fi

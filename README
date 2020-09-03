@@ -1,0 +1,41 @@
+Building AOS procdeure:
+0. Prepare environment
+  The AOS is building under docker.
+
+1. Build docker
+  cd AOS/EC_VOB/project_build_environment/aos5810_54x/utils/
+  source build_env_init
+  cd ../docker/
+  make build
+
+  NOTE: if docker image is built successfully, it will have docker image tagged accton/build-aos5810_54x:9.1.
+
+2. Enter build environment, under AOS/EC_VOB/project_build_environment/aos5810_54x/docker
+  ./run_docker.sh
+
+3. Init build environment variable
+  root@3f26c0a36c31:/home/aos5810_54x/project_build_environment/aos5810_54x/utils# source build_env_init
+
+4.a build all with sdk,
+  put sdk related files into the build environment,
+  then under docker root@3f26c0a36c31:/home/aos5810_54x/project_build_environment/aos5810_54x/
+
+  ./make_all
+  or execute the scripts from number 1 - 8
+
+4.b build all without sdk
+  put prebuilt binary tarball into /home/aos5810_54x/project_build_environment/aos5810_54x/,
+  then under docker root@3f26c0a36c31:/home/aos5810_54x/project_build_environment/aos5810_54x/
+
+  export WITHOUT_SDK_FLAG=1
+  ./make_all
+  or execute the scripts from number 1 - 8
+
+5. generate image
+  ./make_runtime
+  ./make_onie_installer
+
+  In docker, the final image file is located at folder, /home/aos5810_54x/project_build_environment/aos5810_54x/runtime/
+  or outside docker, EC_VOB/project_build_environment/aos5810_54x/runtime/
+
+

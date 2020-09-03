@@ -1,0 +1,37 @@
+#!/bin/sh
+
+show_err_and_exit()
+{
+	echo "An error occurs on ${OP}"
+	exit 1
+}
+
+run_cmd()
+{
+	OP=$1
+	echo "${OP}"
+	eval ${OP}
+}
+
+trap show_err_and_exit ERR
+
+if ! utils/check_build_env; then
+	cd utils
+	. ./build_env_init
+	cd -
+fi
+
+run_cmd "mkdir -p ${KBUILD_OUTPUT}"
+
+run_cmd "cd ${KERNDIR}"
+run_cmd "make clean"
+run_cmd "make mrproper"
+run_cmd "make ${MODEL_NAME}_defconfig"
+
+run_cmd "cd ${KBUILD_OUTPUT}"
+run_cmd "make bzImage"
+#make all 2>&1 | tee ${KBUILD_OUTPUT}/../makekernel.log
+run_cmd "make modules"
+run_cmd "INSTALL_MOD_PATH=${ACCROOTFS} make modules_install"
+echo "Done"
+exit 0

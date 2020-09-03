@@ -1,0 +1,78 @@
+-- ------------------------------------------------------------
+-- Copyright (c) 3Com Corporation. All Rights Reserved.
+-- ------------------------------------------------------------
+
+A3COM446-SWITCHING-UDPHELPER-MIB DEFINITIONS ::= BEGIN 
+ 
+   IMPORTS 
+       DisplayString
+           FROM RFC1213-MIB 
+       OBJECT-TYPE
+           FROM RFC-1212 
+       enterprises, IpAddress
+           FROM RFC1155-SMI 
+       RowStatus 
+           FROM SNMPv2-TC
+       a3ComSysIpGroup
+           FROM A3COM-SWITCHING-SYSTEMS-MIB
+       ; 
+ 
+a3Com		OBJECT IDENTIFIER ::= { enterprises 43 }
+switchingSystemsMibs                OBJECT IDENTIFIER ::= { a3Com 29 }
+a3ComSwitchingSystemsMib            OBJECT IDENTIFIER ::= { switchingSystemsMibs 4 }
+a3ComSysIpGroup   OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 15 }
+a3ComUdpHelper    OBJECT IDENTIFIER ::= { a3ComSysIpGroup 3 }
+
+a3ComUdpHelperTable   OBJECT-TYPE
+    SYNTAX    SEQUENCE OF A3ComUdpHelperEntry
+    ACCESS    not-accessible
+    STATUS    mandatory
+    DESCRIPTION
+        "Table of Udp ports and IP address to forward messages to."
+::= { a3ComUdpHelper  1 }
+
+a3ComUdpHelperEntry	OBJECT-TYPE
+    SYNTAX    A3ComUdpHelperEntry
+    ACCESS    not-accessible
+    STATUS    mandatory
+    DESCRIPTION
+        "An entry used to define a UDP helper server. A row in this table is created by setting a3ComUdpHelperRowStatus to createAndGo(4) indexed by (UdpHelperPort, UdphelperIPaddress).  An entry in this table is deleted by setting a3ComUdpHelperRowStatus to destroy(6), indexed by (UdpHelperPort, UdpHelperIpAddress)."
+   INDEX       {a3ComUdpHelperPort , a3ComUdpHelperIpAddress}
+::= { a3ComUdpHelperTable  1 }
+
+A3ComUdpHelperEntry  ::=
+    SEQUENCE {
+	a3ComUdpHelperPort          	INTEGER,
+      a3ComUdpHelperIpAddress       IpAddress,
+      a3ComUdpHelperRowStatus       RowStatus
+}
+
+a3ComUdpHelperPort   OBJECT-TYPE
+    SYNTAX    INTEGER (1..65535)
+    ACCESS    read-only
+    STATUS    mandatory
+    DESCRIPTION
+        "This object defines the UDP port for which all messages will be relayed to the IP address in this table entry. Messages to port 67 (BOOTP/DHCP) will be handled by the BOOTP relay agent according to RFC 1542"
+
+::= { a3ComUdpHelperEntry 1 }
+
+a3ComUdpHelperIpAddress   OBJECT-TYPE
+    SYNTAX    IpAddress
+    ACCESS    read-only
+    STATUS    mandatory
+    DESCRIPTION
+        "Messages to the UDP port in this entry will be forwarded to this IP address."
+
+::= { a3ComUdpHelperEntry 2 }
+
+a3ComUdpHelperRowStatus   OBJECT-TYPE
+    SYNTAX    RowStatus
+    ACCESS    read-write
+    STATUS    mandatory
+    DESCRIPTION
+       "RowStatus object for the UDP Helper entry.  This object is used to create a row in the a3ComUdpHelperTable by setting this object to createAndGo(4). A row is deleted by setting this object to destroy(6)."
+
+::= { a3ComUdpHelperEntry 3 }
+
+END
+

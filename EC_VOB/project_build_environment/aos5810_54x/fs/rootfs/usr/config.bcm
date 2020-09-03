@@ -1,0 +1,198 @@
+# 
+# 2014.01.06 
+# Project - ES5654BT
+# 
+# 48 + 6 XG ports
+# 
+# using BCM SDK 6.3.1 support BCM56854
+
+os=unix
+bcm_stat_flags=0
+parity_enable=0
+parity_correction=0
+
+l2xmsg_thread_usec=0
+l2_mem_entries=163840
+l3_mem_entries=81920
+num_ipv6_lpm_128b_entries=0
+
+#port_init_cl72=0
+#phy_an_c73=5 # TSCMOD_CL73_CL37
+phy_an_fec=1
+
+xgxs_lcpll_xtal_refclk=1
+tslam_dma_enable=1
+table_dma_enable=1
+
+#for 72 ports with 48 10G ports and 6 40G ports for breakout mode
+pbmp_oversubscribe=0x1fffffffffffffffffe
+pbmp_xport_xe=0x1fffffffffffffffffe
+
+rate_ext_mdio_divisor=96
+
+#SFP+ 1-4 from WC3
+portmap_1=13:10
+portmap_2=14:10
+portmap_3=15:10
+portmap_4=16:10
+
+#SFP+ 5-8 from WC5
+portmap_5=21:10
+portmap_6=22:10
+portmap_7=23:10
+portmap_8=24:10
+
+#SFP+ 9-12 from WC6
+portmap_9=25:10
+portmap_10=26:10
+portmap_11=27:10
+portmap_12=28:10
+
+#SFP+ 13-16 from WC7
+portmap_13=29:10
+portmap_14=30:10
+portmap_15=31:10
+portmap_16=32:10
+
+#SFP+ 17-20 from WC11
+portmap_17=45:10
+portmap_18=46:10
+portmap_19=47:10
+portmap_20=48:10
+
+#SFP+ 21-24 from WC12
+portmap_21=49:10
+portmap_22=50:10
+portmap_23=51:10
+portmap_24=52:10
+
+#SFP+ 25-28 from WC13
+portmap_25=53:10
+portmap_26=54:10
+portmap_27=55:10
+portmap_28=56:10
+
+#SFP+ 29-32 from WC14
+portmap_29=57:10
+portmap_30=58:10
+portmap_31=59:10
+portmap_32=60:10
+
+#SFP+ 33-36 from WC15
+portmap_33=61:10
+portmap_34=62:10
+portmap_35=63:10
+portmap_36=64:10
+
+#SFP+ 37-40 from WC16
+portmap_37=65:10
+portmap_38=66:10
+portmap_39=67:10
+portmap_40=68:10
+
+#SFP+ 41-44 from WC17
+portmap_41=69:10
+portmap_42=70:10
+portmap_43=71:10
+portmap_44=72:10
+
+#SFP+ 45-48 from WC18
+portmap_45=73:10
+portmap_46=74:10
+portmap_47=75:10
+portmap_48=76:10
+
+
+
+# QSFP+ 49/WC24/port 49
+portmap_49=97:40
+portmap_50=98:10:i
+portmap_51=99:10:i
+portmap_52=100:10:i
+
+
+# QSFP+ 51/WC25/port 50
+portmap_53=101:40
+portmap_54=102:10:i
+portmap_55=103:10:i
+portmap_56=104:10:i
+
+
+# QSFP+ 53/WC20/port 51
+portmap_57=81:40
+portmap_58=82:10:i
+portmap_59=83:10:i
+portmap_60=84:10:i
+
+
+# QSFP+ 50/WC26/port 52
+portmap_61=105:40
+portmap_62=106:10:i
+portmap_63=107:10:i
+portmap_64=108:10:i
+
+
+# QSFP+ 52/WC27/port 53
+portmap_65=109:40
+portmap_66=110:10:i
+portmap_67=111:10:i
+portmap_68=112:10:i
+
+
+# QSFP+ 54/WC19/port 54
+portmap_69=77:40
+portmap_70=78:10:i
+portmap_71=79:10:i
+portmap_72=80:10:i
+
+# MMU
+#
+# - base on default lossless=0 config
+# - use static cpu queue size for burst
+# - enable color drop
+mmu_lossless=0
+mmu_config_override=0
+buf.prigroup.device_headroom_enable=1
+buf.prigroup.pool_resume=16
+buf.prigroup.flow_control_enable=1
+buf.mqueue.color_discard_enable=1
+buf.mqueue.red_limit=25%
+buf.mqueue.yellow_limit=50%
+buf.mqueue.pool_scale_cpu=-1
+buf.mqueue.pool_limit_cpu=0
+buf.mqueue.guarantee_cpu=0
+buf.mqueue0.guarantee_cpu=48
+buf.mqueue1.guarantee_cpu=48
+buf.mqueue2.guarantee_cpu=48
+buf.mqueue3.guarantee_cpu=48
+buf.mqueue4.guarantee_cpu=48
+buf.mqueue5.guarantee_cpu=48
+buf.mqueue6.guarantee_cpu=48
+buf.mqueue7.guarantee_cpu=48
+buf.queue.color_discard_enable=1
+buf.queue.red_limit=25%
+buf.queue.yellow_limit=50%
+
+# L3 ECMP
+# - In Trident2, VP LAGs share the same table as ECMP group table.
+#   The first N entries are reserved for VP LAGs, where N is the value of the
+#   config property "max_vp_lags". By default this was set to 256
+l3_max_ecmp_mode=1
+max_vp_lags=0
+
+# Accton
+suppress_unknown_prop_warnings=1
+accton_led_linkscan=1
+accton_ipmc_l2_distr_conf=1
+
+# avoid incorrect TDM and LSS/HSP after port resource reconfig
+accton_skip_resource_speed_set=1
+
+accton_buf.device.cell_size=208
+accton_buf.prigroup.pool_limit=0x13948
+accton_buf.fc.pool_limit=45
+accton_buf.fc.headroom=182
+accton_buf.fc20000.headroom=262
+accton_buf.fc40000.headroom=461
+accton_buf.pfc.pool_limit=8
+accton_buf.pfc.headroom=65

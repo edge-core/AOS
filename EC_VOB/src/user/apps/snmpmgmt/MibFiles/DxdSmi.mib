@@ -1,0 +1,24 @@
+--
+-- DXD root SMI
+--
+-- Comments to: <peder.jorgensen@dxd.ericsson.se>
+--
+DXD-SMI DEFINITIONS ::= BEGIN
+
+     IMPORTS
+         ericsson
+               FROM ERICSSON-TOP-MIB;
+         
+     diaxMIB	OBJECT IDENTIFIER ::= { ericsson 72 }
+                                             
+	-- 
+	-- Please contact peder.jorgensen@dxd.ericsson.se for new 'diaxMIB' numbers
+	--                                             
+	-- om2MIBObjects MODULE-IDENTITY ::= { diaxMIB 100 }
+	-- diaxHBS OBJECT IDENTIFIER ::= { diaxMIB 200 }
+	-- ipDSLAMModemPool OBJECT IDENTIFIER ::= { diaxMIB 300 }                                         
+	-- publicEthernetManager MODULE-IDENTITY ::= { diaxMIB 400 }
+	-- pemStandardObjects MODULE-IDENTITY ::= { diaxMIB 500 }
+	-- pemStandardObjectsTC MODULE-IDENTITY ::= { diaxMIB 501 }
+
+END

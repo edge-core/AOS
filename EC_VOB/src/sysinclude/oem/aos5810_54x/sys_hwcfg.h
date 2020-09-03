@@ -1,0 +1,1502 @@
+#ifndef SYS_HWCFG_H
+#define SYS_HWCFG_H
+
+/*----------------------------------------------------------------------------
+ * Package: SYS_HWCFG.H                                                        
+ * Purpose: This package defines the hardware adaptation value for the project. 
+ * Note: The naming constant defined in this package shall be reused by   
+ *        all the BNBU L2/L3 switch projects .
+ *  History
+ *
+ *   ryan     07/16/2001      new created
+ *   jjyoung  10/21/2002      modified for Alps(XGS) project
+ * 
+ * ------------------------------------------------------------------------
+ * Copyright(C)							  	ACCTON Technology Corp. , 2001      
+ * ------------------------------------------------------------------------
+ */
+
+
+/* INCLUDE FILE DECLARATIONS
+ */
+#include "sys_type.h"
+#include "sys_hwcfg_common.h"
+
+#define SYS_HWCFG_LITTLE_ENDIAN_CPU TRUE
+
+#define LED_PROGRAM_RAM_SIZE  0x100
+/* Flash device type :
+ *
+ * SYS_HWCFG_FLASH_MEM_INTEL_28F160B3   : for Intel 28F160B3
+ * SYS_HWCFG_FLASH_MEM_INTEL_28F320C3BA : for Intel 28F320C3BA
+ * SYS_HWCFG_FLASH_MEM_INTEL_28F320J3A  : for Intel 28F320J3A
+ * SYS_HWCFG_FLASH_MEM_INTEL_28F640J3A  : for Intel 28F640J3
+ */
+//#define SYS_HWCFG_FLASH_MEM_INTEL_28F128J3A 
+/* Two of 28F640J3A (64Mbit, 8MByte) Intel Strata Flash memory chips */
+
+/* Data width for a single flash chip */
+//#define SYS_HWCFG_FLASH_MEM_DATA_ACCESS_8BIT
+
+/* Data width for a flash block */
+//#define SYS_HWCFG_FLASH_MEM_DATA_BANDWIDTH_8BIT
+
+/* How many RCS we use for flash, and the extention start address of flash */
+//#define SYS_HWCFG_FLASH_RCS_NUMBER                  3
+//#define SYS_HWCFG_FLASH_MEM_EXT_ADDR                0xFF000000  /* 2nd flash chip (NOR) */
+//#define SYS_HWCFG_FLASH_MEM_EXT_ADDR_1              0xB0000000  /* 3rd flash chip (NAND) */
+
+//#define SYS_HWCFG_STK_STATUS              0xEA0a0007
+
+/* NAMING CONSTANT DECLARATIONS 
+ */
+
+/* The constants ROM_TEXT_ADRS, ROM_SIZE, RAM_HIGH_ADRS, and RAM_LOW_ADRS
+ * are used in config.h and Makefile.
+ * All definitions for these constants must be identical.
+ */
+ 
+/* If you update these constants, you must update the WPJ of BSP */ 
+//#define SYS_HWCFG_ROM_BASE_ADRS           0xfff00000      /* base address of ROM */
+//#define SYS_HWCFG_ROM_TEXT_ADRS           (SYS_HWCFG_ROM_BASE_ADRS+0x0100) /* with PC & SP */
+//#define SYS_HWCFG_ROM_WARM_ADRS           (SYS_HWCFG_ROM_TEXT_ADRS+0x0004) /* warm reboot entry */
+//#define SYS_HWCFG_ROM_SIZE                0x00008000      /* 32KB ROM space */
+//#define SYS_HWCFG_RAM_LOW_ADRS            0x00010000      /* RAM address for vxWorks */
+//#define SYS_HWCFG_RAM_HIGH_ADRS           0x07B00000      /* RAM address for bootrom */
+
+
+/* FLASH Memory Mapping
+ * Note: The following information will be stored in the 8M bytes flash memory:
+ *       1. Loader image                    - 32K bytes
+ *       2. Agent board information         - 256 bytes
+ *       3. main board information          - 256 bytes
+ *       4. flash disk system               - (8M - 32K - 256 - 256) bytes
+ *          - system confguration data file    
+ *          - PROM image file in compressed format                    
+ *          - Run Time (Agent) image file in compressed format
+ *          - System log file
+ *          - Error log file        
+ */
+
+//#define SYS_HWCFG_FLASH_MEM_BASE_ADDR               0xFE000000  /* 1st flash chip (NOR) */
+//#define SYS_HWCFG_FLASH_MEM_SIZE                    (96 * SYS_TYPE_1M_BYTES)
+//#define SYS_HWCFG_FLASH_MAX_RCS0_CONFIG_SIZE        (16 * SYS_TYPE_1M_BYTES)
+
+/* LOADER Image Memory Mapping
+ * Note: Reserve 32K bytes flash for Loader image. 
+ */
+//#define SYS_HWCFG_LOADER_START_ADDR	                0xFFF00100
+//#define SYS_HWCFG_LOADER_CODE_SIZE                  (64 * SYS_TYPE_1K_BYTES)
+
+/* Loader Parameters, needed by loader */
+//#define SYS_HWCFG_LOADER_DOWNLOAD_BUFFER_ADDRESS    0x07800000
+//#define SYS_HWCFG_LOADER_DOWNLOAD_BUFFER_SIZE       0x00600000
+//#define	SYS_HWCFG_LOADER_APPLICATION_START_ADDRESS  0x00010000
+
+//#define BSP_DownloadBuffer                          SYS_HWCFG_LOADER_DOWNLOAD_BUFFER_ADDRESS
+//#define BSP_DownloadBufferSize                      SYS_HWCFG_LOADER_DOWNLOAD_BUFFER_SIZE
+//#define BSP_ApplicationStartAddress                 SYS_HWCFG_LOADER_APPLICATION_START_ADDRESS
+
+
+/* Agent/Main Board Info Memory Mapping
+ * Note: 1. Reserve 256 bytes for agent board information.
+ *       2. Reserve 256 bytes for main board information.
+ */
+//#define SYS_HWCFG_AGENT_BOARD_INFO_START_ADDR       0xFE020000  /* Block 1: save H/W info */
+//#define SYS_HWCFG_AGENT_BOARD_INFO_BUF_SIZE         SYS_TYPE_256_BYTES  
+
+//#define SYS_HWCFG_MAIN_BOARD_INFO_START_ADDR        (SYS_HWCFG_AGENT_BOARD_INFO_START_ADDR + SYS_HWCFG_AGENT_BOARD_INFO_BUF_SIZE)                                                   
+//#define SYS_HWCFG_MAIN_BOARD_INFO_BUF_SIZE          SYS_TYPE_256_BYTES  
+
+/* Although this project has nand flash, it is accessed through usb
+ * and is behind a nand flash controller, which is not a raw flash directly
+ * accessed by CPU.
+ */
+#define SYS_HWCFG_FLASH_TYPE          SYS_HWCFG_FLASH_TYPE_NOR
+#define SYS_HWCFG_LOADER_FLASH_TYPE   SYS_HWCFG_FLASH_TYPE_NOR
+#define SYS_HWCFG_HWINFO_FLASH_TYPE   SYS_HWCFG_FLASH_TYPE_NOR
+#define SYS_HWCFG_RUNTIME_FLASH_TYPE  SYS_HWCFG_FLASH_TYPE_NOR
+
+/* PCI device
+ */
+#define SYS_HWCFG_SUPPORT_PCI                       TRUE
+
+/* Thermal device
+ */
+/* SYS_HWCFG_SUPPORT_THERMAL is referenced by diag to determine that whether
+ * thermal driver should be included.
+ */
+#define SYS_HWCFG_SUPPORT_THERMAL                   FALSE
+
+/* SYS_HWCFG_SUPPORT_DIFFERENT_THERMAL_NUM is defined as TRUE when the number
+ * of thermal sensor is different among different board ids.
+ * 
+ */
+#define SYS_HWCFG_SUPPORT_DIFFERENT_THERMAL_NUM     TRUE
+
+#define SYS_HWCFG_FAN_SUPPORT_TYPE_BMP (1UL<<SYS_HWCFG_FAN_ONLP)
+#define SYS_HWCFG_THERMAL_SUPPORT_TYPE_BMP (1UL<<SYS_HWCFG_THERMAL_ONLP)
+
+/* Flash Disk Memory Mapping
+ */
+//#define SYS_HWCFG_FLASH_DISK_START_ADDR	            (SYS_HWCFG_MAIN_BOARD_INFO_START_ADDR + SYS_HWCFG_MAIN_BOARD_INFO_BUF_SIZE)
+//#define SYS_HWCFG_FLASH_DISK_SIZE                   (SYS_HWCFG_FLASH_MEM_BASE_ADDR + SYS_HWCFG_FLASH_MEM_SIZE - SYS_HWCFG_FLASH_DISK_START_ADDR)
+
+/* DRAM Memory Mapping and Clock Setting
+ */
+#define SYS_HWCFG_DRAM_BASE_ADDR                    0x00000000
+#define SYS_HWCFG_DRAM_SIZE                         (8192UL * (unsigned long)SYS_TYPE_1M_BYTES)
+#define SYS_HWCFG_USER_RESERVED_MEM_SIZE            (4 * SYS_TYPE_1M_BYTES) /* For UC only */
+
+/* This setting value will impact the UART baud rate as well  */
+
+/* Define the Decremental Clock Rate.
+   Note:  If No RTC is supported, this value must be filled in.
+ */
+/* This setting value will impact the UART baud rate as well  */
+//#define SYS_HWCFG_INPUT_CLOCK_FREQ                  100000000
+//#define SYS_HWCFG_DRAM_CLOCK_FREQ                   100000000
+//#define SYS_HWCFG_MAIN_CLOCK_FREQ                   (SYS_HWCFG_INPUT_CLOCK_FREQ*4)
+//#define SYS_HWCFG_BRG_CLOCK_FREQ                    (SYS_HWCFG_MAIN_CLOCK_FREQ/4)
+
+/* Define the Decremental Clock Rate.
+ * Note:  If No RTC is supported, this value must be filled in.
+ */
+//#define SYS_HWCFG_DEC_CLOCK_FREQ                    (SYS_HWCFG_INPUT_CLOCK_FREQ/4)
+#if 0
+#define SYS_HWCFG_DRAM_CLOCK_FREQ                   133000000
+#define SYS_HWCFG_DEC_CLOCK_FREQ                    33000000
+#endif
+
+//#define SYS_CLK_RATE 100
+
+#define CONSOLE_BAUD_RATE 115200
+/* System Interrupt Vector Table
+ */
+//#define SYS_HWCFG_INTR_VECTOR_BASE_ADDR             SYS_HWCFG_DRAM_BASE_ADDR
+//#define SYS_HWCFG_INTR_VECTOR_TABLE_SIZE            (12 * SYS_TYPE_1K_BYTES)
+
+/* Unclear Memory Mapping
+ * 1. Warm Boot: Stack Topology Change, Software Reset/Restart Request
+ * 2. System Log
+ * 3. Please make sure you know everything will use UC and allocate enough memory 
+ */
+#define SYS_HWCFG_UC_MEM_SIZE                       SYS_HWCFG_USER_RESERVED_MEM_SIZE
+
+/* On this board, the top 4k bytes DRAM will be used by uboot(loader) to setup
+ * second core, it cannot be used by UC, define SYS_HWCFG_SYS_TOP_MEMORY_RESERVED_SIZE
+ * to skip the region.
+ * 
+ */
+#define SYS_HWCFG_SYS_TOP_MEMORY_RESERVED_SIZE      (4 * SYS_TYPE_1K_BYTES)
+
+#ifndef SYS_HWCFG_SYS_TOP_MEMORY_RESERVED_SIZE
+#define	SYS_HWCFG_UC_MEM_END_ADDR                   (SYS_HWCFG_DRAM_BASE_ADDR + SYS_HWCFG_DRAM_SIZE - 1)
+#else
+#define	SYS_HWCFG_UC_MEM_END_ADDR                   (SYS_HWCFG_DRAM_BASE_ADDR + SYS_HWCFG_DRAM_SIZE - SYS_HWCFG_SYS_TOP_MEMORY_RESERVED_SIZE - 1)
+#endif
+#define	SYS_HWCFG_UC_MEM_START_ADDR		            (SYS_HWCFG_UC_MEM_END_ADDR + 1 - SYS_HWCFG_UC_MEM_SIZE)
+
+/* LAN Buffer Static Memory Mapping
+ * Why static?  Because we want to allocate these packet buffer and be used by NIC driver.
+ * But for NIC driver, it could use PCI DMA to write to these buffers directly and these
+ * memory space can not be cached.  So we need to separate the buffer from the normal memory
+ * area.
+ */
+/* Moved to SYS_ADPT.H. 5/6/2004, Charles, requested by Wuli
+ */
+/* 
+#define SYS_HWCFG_MAX_LAN_RX_BUF_SIZE_PER_PACKET    1600
+#define SYS_HWCFG_MAX_NBR_OF_LAN_PACKET_RX_BUFFER   512
+#define SYS_HWCFG_LAN_BUF_SIZE                      (SYS_HWCFG_MAX_LAN_RX_BUF_SIZE_PER_PACKET * SYS_HWCFG_MAX_NBR_OF_LAN_PACKET_RX_BUFFER)
+*/
+#define SYS_HWCFG_LAN_BUF_START_ADDR                (SYS_HWCFG_UC_MEM_END_ADDR + 1 - SYS_HWCFG_USER_RESERVED_MEM_SIZE)
+
+/* PROM/Run Time Image Memory Mapping/Working Area
+ * NOTE: 1. The following naming constants are used to define the image header of PROM/Run Time code.
+ *       2. The TFTP/XMODEM download utility shall verify the image header of downloaded PROM/Run Time code
+ *       3. The BOOT LOADER shall load the PROM/Run Time code to the proper working area based on 
+ *          the SYS_HWCFG_PROM_CODE_START_ADDR/SYS_HWCFG_RUN_CODE_START_ADDR defined in image header.   
+ */
+//#define SYS_HWCFG_PROM_CODE_START_ADDR              (SYS_HWCFG_DRAM_BASE_ADDR + SYS_HWCFG_INTR_VECTOR_TABLE_SIZE)
+//#define SYS_HWCFG_RUN_CODE_START_ADDR               SYS_HWCFG_PROM_CODE_START_ADDR
+
+/* CPLD related definitions START */
+/* For board id 0(AOS5700-54X)
+ */
+#define SYS_HWCFG_I2C_SLAVE_BID_0_CPLD1          0x60 /* EPM570T System CPLD */
+#define SYS_HWCFG_I2C_SLAVE_BID_0_CPLD1_BUS_IDX  0x3
+
+#define SYS_HWCFG_I2C_SLAVE_BID_0_CPLD2          0x61 /* EPM1270 Fiber Ctrl Signal CPLD */
+#define SYS_HWCFG_I2C_SLAVE_BID_0_CPLD2_MUX_REG  0x2
+#define SYS_HWCFG_I2C_SLAVE_BID_0_CPLD2_BUS_IDX  0x3
+
+#define SYS_HWCFG_I2C_SLAVE_BID_0_CPLD3          0x62 /* EPM1270 Fiber Ctrl Signal CPLD */
+#define SYS_HWCFG_I2C_SLAVE_BID_0_CPLD3_MUX_REG  0x2
+#define SYS_HWCFG_I2C_SLAVE_BID_0_CPLD3_BUS_IDX  0x3
+
+/* For board id 1(AOS6700-32X)
+ */
+#define SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1_BUS_IDX 1
+#define SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1 0x31
+#define SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1_MUX_REG 0x60
+#define SYS_HWCFG_I2C_SLAVE_BID_1_CPLD2_BUS_IDX 1
+#define SYS_HWCFG_I2C_SLAVE_BID_1_CPLD2 0x35 /* CPLD for fan detection and control */
+
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PSU1_BUS_IDX 3
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PSU1_EEPROM  0x3A
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PSU2_BUS_IDX 3
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PSU2_EEPROM  0x39
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PSU_MUX_IDX  3
+
+/* CPLD related definitions STOP  */
+
+/* Define LED display address
+ */
+#define SYS_HWCFG_BID_0_SYSTEM_LED_0_ADDR                 (0x0A) /* on SYS_HWCFG_I2C_SLAVE_BID_0_CPLD1 */
+
+#if 0 /* not used on this project */
+/* Stacking link LED */
+#define SYS_HWCFG_SYSTEM_STACK_LINK_LED_ADDR        SYS_HWCFG_SYSTEM_LED_0_ADDR
+#define SYS_HWCFG_SYSTEM_STACK_LINK_LED_MASK        0x03
+#define SYS_HWCFG_SYSTEM_STACK_LINK_LED_SHIFT       0
+#define SYS_HWCFG_SYSTEM_STACK_LINK_OK              0x01
+#define SYS_HWCFG_SYSTEM_STACK_LINK_DOWN_OR_NOSTACK 0x02
+#define SYS_HWCFG_SYSTEM_STACK_LINK_OFF             0x03
+#endif
+
+/* Diag LED */
+#define SYS_HWCFG_BID_0_SYSTEM_DIAG_LED_ADDR        SYS_HWCFG_BID_0_SYSTEM_LED_0_ADDR /* on SYS_HWCFG_I2C_SLAVE_BID_0_CPLD1 */
+#define SYS_HWCFG_BID_0_SYSTEM_DIAG_LED_MASK        0x0C
+#define SYS_HWCFG_BID_0_SYSTEM_DIAG_SHIFT           2
+#define SYS_HWCFG_BID_0_SYSTEM_DIAG_OK              0x02
+#define SYS_HWCFG_BID_0_SYSTEM_DIAG_FAIL            0x01
+#define SYS_HWCFG_BID_0_SYSTEM_DIAG_OFF             0x03
+
+/* Location LED */
+#define SYS_HWCFG_BID_0_SYSTEM_LOCATION_LED_ADDR    SYS_HWCFG_BID_0_SYSTEM_LED_0_ADDR /* on SYS_HWCFG_I2C_SLAVE_BID_0_CPLD1 */
+#define SYS_HWCFG_BID_0_SYSTEM_LOC_LED_MASK         0x30
+#define SYS_HWCFG_BID_0_SYSTEM_LOCATION_SHIFT       4
+#define SYS_HWCFG_BID_0_SYSTEM_LOCATION_BLINK       0x02
+#define SYS_HWCFG_BID_0_SYSTEM_LOCATION_OFF         0x01
+
+
+#if 0 /* not used on this project */
+/* Master/Slave LED */
+#define SYS_HWCFG_SYSTEM_BASE_LED_ADDR              SYS_HWCFG_SYSTEM_LED_0_ADDR
+#define SYS_HWCFG_SYSTEM_BASE_LED_MASK              0x30
+#define SYS_HWCFG_SYSTEM_BASE_LED_SHIFT             4
+#define SYS_HWCFG_SYSTEM_BASE_MASTER_UNIT           0x10
+#define SYS_HWCFG_SYSTEM_BASE_SECOND_UNIT           0x20
+#define SYS_HWCFG_SYSTEM_BASE_OTHER_UNIT            0x30
+#endif
+
+/*7 segment LED  (Read/Write, 0xE0100009)
+ */
+#define SYS_HWCFG_7_SEGMENT_LED_OFFSET              0x4
+#define SYS_HWCFG_7_SEGMENT_LED_ADDR                SYS_HWCFG_CPLD_BASE + SYS_HWCFG_7_SEGMENT_LED_OFFSET  /*0xEA0A0004*/
+
+#define SYS_HWCFG_7_SEGMENT_LED_UP                  0xfe
+#define SYS_HWCFG_7_SEGMENT_LED_RIGHT_UP            0xfd
+#define SYS_HWCFG_7_SEGMENT_LED_RIGHT_DOWN          0xfb
+#define SYS_HWCFG_7_SEGMENT_LED_DOWN                0xf7
+#define SYS_HWCFG_7_SEGMENT_LED_LEFT_DOWN           0xef
+#define SYS_HWCFG_7_SEGMENT_LED_LEFT_UP             0xdf
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_0             0xc0
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_1             0xf9
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_2             0xa4
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_3             0xb0
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_4             0x99
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_5             0x92
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_6             0x82
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_7             0xf8
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_8             0x80
+#define SYS_HWCFG_7_SEGMENT_LED_DIGIT_9             0x90
+#define SYS_HWCFG_7_SEGMENT_LED_OFF                 0xff
+#define SYS_HWCFG_7_SEGMENT_LED_E                   0x86
+
+/* CPLD(EPLD) on AOS5700-54X is accessed through I2C bus;
+ * Those naming constants prefixed with SYS_HWCFG_EPLD_ is referenced
+ * when the CPLD is accessed through PHYADDR_ACCESS APIs.
+ */
+#if 0
+/*epld define*/
+#define SYS_HWCFG_EPLD_PAGE_SIZE        0x16
+#define SYS_HWCFG_EPLD_PAGE1_ADDR       SYS_HWCFG_CPLD_BASE
+#define SYS_HWCFG_EPLD_MIN_PAGE         1
+#define SYS_HWCFG_EPLD_MAX_PAGE         1
+#endif
+
+#if 0 /* ALARM is not supported on AOS5700-54X */
+/* constants that will be referenced when (SYS_CPNT_ALARM_DETECT == TRUE)
+ * BEGIN
+ */
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_MASK           0x03
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_MAJOR_MASK     0x02
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_MINOR_MASK     0x01
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_MAJOR          0x02
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_MINOR          0x01
+
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_LED_MASK       0x06
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_LED_MAJOR_MASK 0x02
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_LED_MINOR_MASK 0x04
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_LED_MAJOR_ON   0x0
+#define SYS_HWCFG_SYSTEM_ALARM_OUTPUT_LED_MINOR_ON   0x0
+/* constants that will be referenced when (SYS_CPNT_ALARM_DETECT == TRUE)
+ * END
+ */
+
+
+/* Constants that will be referenced when (SYS_CPNT_ALARM_INPUT_DETECT == TRUE)
+ * BEGIN
+ */
+/* Alarm Input register address
+ */
+#define SYS_HWCFG_SYSTEM_ALARM_INPUT_REG_ACCESS_METHOD SYS_HWCFG_REG_ACCESS_METHOD_PHYADDR
+#define SYS_HWCFG_SYSTEM_ALARM_INPUT_ADDR            (SYS_HWCFG_CPLD_BASE + 0x06) /* 0xE0100006 */
+/* Alarm Input Status
+ */
+#define SYS_HWCFG_SYSTEM_ALARM_INPUT_1_MASK          0x08
+#define SYS_HWCFG_SYSTEM_ALARM_INPUT_2_MASK          0x10
+#define SYS_HWCFG_SYSTEM_ALARM_INPUT_3_MASK          0x20
+#define SYS_HWCFG_SYSTEM_ALARM_INPUT_4_MASK          0x40
+#define SYS_HWCFG_SYSTEM_ALARM_INPUT_SHIFT           0x3
+/* define SYS_HWCFG_SYSTEM_ALARM_INPUT_ASSERTED as 0 if asserted low
+ * define SYS_HWCFG_SYSTEM_ALARM_INPUT_ASSERTED as 1 if asserted high
+ */
+#define SYS_HWCFG_SYSTEM_ALARM_INPUT_ASSERTED        0x0
+/* Constants that will be referenced when (SYS_CPNT_ALARM_INPUT_DETECT == TRUE)
+ * END
+ */
+#endif /* end of #if 0 ALARM is not supported on AOS5700-54X */
+
+#define SYS_HWCFG_POWER_DETECT_POWER_STATUS_BY_STKTPLG_BOARD TRUE
+/* PSU 1(Left Rear Side) Power Status
+ * PSU 2(Right Rear Side) Power status
+ * PSU1 -> PWR
+ * PSU2 -> RPS
+ */
+/* SYS_HWCFG_POWER_STATUS_ADDR_ARRAY is obsoleted by SYS_HWCFG_POWER_DETECT_POWER_STATUS_BY_STKTPLG_BOARD=TRUE
+#define SYS_HWCFG_POWER_STATUS_ADDR_ARRAY           {SYS_HWCFG_PWR_POWER_STATUS_ADDR, SYS_HWCFG_RPS_POWER_STATUS_ADDR}
+ */
+
+/* for board id 0
+ */
+#define SYS_HWCFG_BID_0_PWR_POWER_STATUS_ADDR       (0x02)
+#define SYS_HWCFG_BID_0_RPS_POWER_STATUS_ADDR       (0x02)
+
+/* for board id 1
+ */
+#define SYS_HWCFG_BID_1_PWR_POWER_STATUS_ADDR       (0x02)
+#define SYS_HWCFG_BID_1_RPS_POWER_STATUS_ADDR       (0x02)
+
+#if 0 /* AOS5700-54X do not have power type */
+#define SYS_HWCFG_POWER_TYPE_ADDR                   (SYS_HWCFG_CPLD_BASE + 0x05)
+#define SYS_HWCFG_POWER_TYPE_MASK_POWER_1           0x30
+#define SYS_HWCFG_POWER_TYPE_MASK_POWER_2           0xC0
+#define SYS_HWCFG_POWER_TYPE_MASK_ARRAY             {SYS_HWCFG_POWER_TYPE_MASK_POWER_1, SYS_HWCFG_POWER_TYPE_MASK_POWER_2}
+#define SYS_HWCFG_POWER_TYPE_BIT_SHIFT_POWER_1      4
+#define SYS_HWCFG_POWER_TYPE_BIT_SHIFT_POWER_2      6
+#define SYS_HWCFG_POWER_TYPE_BIT_SHIFT_ARRAY        {SYS_HWCFG_POWER_TYPE_BIT_SHIFT_POWER_1, SYS_HWCFG_POWER_TYPE_BIT_SHIFT_POWER_2}
+
+/* reg value     power type
+ * -------------------------------------
+ * 0x0           DC/DC-48 to +12V Module
+ * 0x1           DC/DC +27V to +12V Module
+ * 0x2           AC90~264V to +12V Module
+ * 0x3           Reserved
+ */
+#define SYS_HWCFG_POWER_TYPE_REG_VAL_TO_POWER_TYPE_ARRAY {SYS_HWCFG_COMMON_POWER_DC_N48_MODULE_TYPE, \
+                                                          SYS_HWCFG_COMMON_POWER_DC_P24_MODULE_TYPE, \
+                                                          SYS_HWCFG_COMMON_POWER_AC_MODULE_TYPE, \
+                                                          SYS_HWCFG_COMMON_POWER_UNKNOWN_MODULE_TYPE}
+#endif
+
+
+/* CPLD1 PSU Status(i2c bus idx=3, dev_addr=0x60, reg_addr=0x02)
+ * ---------------------------------------------------------------------------------------------------
+ * |      7    |     6    |      5     |      4      |     3    |    2    |      1     |    0        |
+ * |-----------|----------|------------|-------------|----------|---------|------------|-------------|
+ * |  RESERVED | PS2_AC_  | PS2_12V_PG | PS2_PRESENT | RESERVED | PS1_AC_ | PS1_12V_PG | PS1_PRESENT |
+ * |           |  ALERT   |            |             |          |  ALERT  |            |             |
+ * ---------------------------------------------------------------------------------------------------
+ *
+ *   PS2_AC_ALERT(Bit 6): 0:AC is not OK, 1:AC is OK (Note: The Signal may be asserted(pull low) by the power supply for any supported status events from PSU)
+ *   PS2_12V_PG  (Bit 5): 0:12V Power Fail, 1:12V Power Good
+ *   PS2_PRESENT (Bit 4): 0:PSU present, 1:PSU does not present
+ *   PS1_AC_ALERT(Bit 2): 0:AC is not OK, 1:AC is OK (Note: The Signal may be asserted(pull low) by the power supply for any supported status events from PSU)
+ *   PS1_12V_PG  (Bit 1): 0:12V Power Fail, 1:12V Power Good
+ *   PS1_PRESENT (Bit 0): 0:PSU present, 1:PSU does not present
+ */
+/* these masks specify the bit to use
+ */
+#define SYS_HWCFG_RPS600W_NEW_DEFINITION              FALSE
+
+/* board id 0 definitions
+ */
+#define SYS_HWCFG_BID_0_PWR_PRES_MASK                 0x01    /* 0000_0001 */
+#define SYS_HWCFG_BID_0_PWR_PRES_OK                   0x00    /* 0000_0000 */
+#define SYS_HWCFG_BID_0_PWR_STATUS_MASK               0x02    /* 0000_0010 */
+#define SYS_HWCFG_BID_0_PWR_STATUS_OK                 0x02    /* 0000_0010 */
+#define SYS_HWCFG_BID_0_PWR_ALERT_MASK                0x04    /* 0000_0100 */
+#define SYS_HWCFG_BID_0_PWR_ALERT_ASSERTED            0x00    /* 0000_0000 */
+#define SYS_HWCFG_BID_0_RPS_PRES_MASK                 0x10    /* 0001_0000 */
+#define SYS_HWCFG_BID_0_RPS_PRES_OK                   0x00    /* 0000_0000 */
+#define SYS_HWCFG_BID_0_RPS_STATUS_MASK               0x20    /* 0010_0000 */
+#define SYS_HWCFG_BID_0_RPS_STATUS_OK                 0x20    /* 0010_0000 */
+#define SYS_HWCFG_BID_0_RPS_ALERT_MASK                0x40    /* 0100_0000 */
+#define SYS_HWCFG_BID_0_RPS_ALERT_ASSERTED            0x00    /* 0000_0000 */
+
+/* board id 1 definitions
+ */
+#define SYS_HWCFG_BID_1_PWR_PRES_MASK                 0x04    /* 0000_0100 */
+#define SYS_HWCFG_BID_1_PWR_PRES_OK                   0x00    /* 0000_0000 */
+#define SYS_HWCFG_BID_1_PWR_STATUS_MASK               0x10    /* 0001_0000 */
+#define SYS_HWCFG_BID_1_PWR_STATUS_OK                 0x10    /* 0001_0000 */
+/* On board id 1(AOS6700-32X), the function of power alert had been removed in
+ * CPLD V05 according to the information from the hardware engineer Rex_Wu.
+ * Define power alert mask as 0 and power alert asserted value as 0xFF to
+ * disable the monitor of power alert status.
+ */
+#define SYS_HWCFG_BID_1_PWR_ALERT_MASK                0x00    /* 0000_0000 */ /* disabled */
+#define SYS_HWCFG_BID_1_PWR_ALERT_ASSERTED            0xFF    /* 1111_1111 */ /* disabled */
+#define SYS_HWCFG_BID_1_RPS_PRES_MASK                 0x20    /* 0010_0000 */
+#define SYS_HWCFG_BID_1_RPS_PRES_OK                   0x00    /* 0000_0000 */
+#define SYS_HWCFG_BID_1_RPS_STATUS_MASK               0x80    /* 1000_0000 */
+#define SYS_HWCFG_BID_1_RPS_STATUS_OK                 0x80    /* 1000_0000 */
+#define SYS_HWCFG_BID_1_RPS_ALERT_MASK                0x00    /* 0000_0000 */ /* disabled */
+#define SYS_HWCFG_BID_1_RPS_ALERT_ASSERTED            0xFF    /* 1111_1111 */ /* disabled */
+
+
+/* these value specify the value of the status
+ */
+#define SYS_HWCFG_RPS_FAIL                            0x81    /* 10000001 */ /* BIT7:BIT0 =1:1 RPS fail */
+#define SYS_HWCFG_RPS_FAN_OR_THERMAL_FAIL             0x40    /* 01000000 */ /* BIT6 = 1 RPS Thermal or fan fail */
+
+#define SYS_HWCFG_BID_0_FAN_1_FAULT_MASK  0x01
+#define SYS_HWCFG_BID_0_FAN_2_FAULT_MASK  0x02
+#define SYS_HWCFG_BID_0_FAN_3_FAULT_MASK  0x04
+#define SYS_HWCFG_BID_0_FAN_4_FAULT_MASK  0x08
+#define SYS_HWCFG_BID_0_FAN_5_FAULT_MASK  0x10
+#define SYS_HWCFG_BID_0_FAN_FAULT_REG     0x0C
+
+#define SYS_HWCFG_BID_0_FANR_1_FAULT_MASK SYS_HWCFG_BID_0_FAN_1_FAULT_MASK
+#define SYS_HWCFG_BID_0_FANR_2_FAULT_MASK SYS_HWCFG_BID_0_FAN_2_FAULT_MASK
+#define SYS_HWCFG_BID_0_FANR_3_FAULT_MASK SYS_HWCFG_BID_0_FAN_3_FAULT_MASK
+#define SYS_HWCFG_BID_0_FANR_4_FAULT_MASK SYS_HWCFG_BID_0_FAN_4_FAULT_MASK
+#define SYS_HWCFG_BID_0_FANR_5_FAULT_MASK SYS_HWCFG_BID_0_FAN_5_FAULT_MASK
+#define SYS_HWCFG_BID_0_FANR_FAULT_REG    0x1F
+
+#define SYS_HWCFG_BID_0_FAN_FAULT_MASK_ARRAY \
+    { \
+         SYS_HWCFG_BID_0_FAN_1_FAULT_MASK,  \
+         SYS_HWCFG_BID_0_FANR_1_FAULT_MASK, \
+         SYS_HWCFG_BID_0_FAN_2_FAULT_MASK,  \
+         SYS_HWCFG_BID_0_FANR_2_FAULT_MASK, \
+         SYS_HWCFG_BID_0_FAN_3_FAULT_MASK,  \
+         SYS_HWCFG_BID_0_FANR_3_FAULT_MASK, \
+         SYS_HWCFG_BID_0_FAN_4_FAULT_MASK,  \
+         SYS_HWCFG_BID_0_FANR_4_FAULT_MASK, \
+         SYS_HWCFG_BID_0_FAN_5_FAULT_MASK,  \
+         SYS_HWCFG_BID_0_FANR_5_FAULT_MASK, \
+    }
+
+/* SYS_HWCFG_FAN_FAULT_STATUS_MAX_ARRAY_SIZE will be rererenced in the location shown below:
+ *   1. array size of the second argument "local_unit_fan_status" of SYS_HWCFG_GetFANStatusByBID()
+ *   2. array size of SYSDRV_Shmem_Data_T.sysdrv_local_unit_fan_status_bd_dbg
+ *   3. one bit is occupied by one fan fault status. If there are 10 fans, the
+ *      required array size would be (10+7)/8=2
+ */
+#define SYS_HWCFG_FAN_FAULT_STATUS_MAX_ARRAY_SIZE     2
+
+#define SYS_HWCFG_SFP_PRESENT_STATUS_ACCESS_METHOD SYS_HWCFG_REG_ACCESS_METHOD_I2C_WITH_CHANNEL
+
+/* the constants here are for generic combo SFP detection 
+ */
+/* This bit will tell the bit mask result and telling whether GBIC module is present
+ */
+#define SYS_HWCFG_GBIC_PRESENT_BIT                      0
+
+/* Whether the RX_LOS signal of the GBIC is available
+ *
+ * Combo port sfp preferred will take the status of RX_LOS signal
+ * into consideration when SYS_HWCFG_GBIC_HAS_RX_LOS is defined as TRUE
+ *
+ * To be more precisely, combo port sfp preferred will change port type
+ * to fiber port when sfp module is present and RX_LOS signal does not
+ * assert when SYS_HWCFG_GBIC_HAS_RX_LOS is defined as TRUE.
+ *
+ * Combo port sfp preferred will change port type to fiber port
+ * when sfp module is present when  SYS_HWCFG_GBIC_HAS_RX_LOS is defined
+ * as FALSE.
+ */
+#define SYS_HWCFG_GBIC_HAS_RX_LOS                       FALSE
+
+#if (SYS_HWCFG_GBIC_HAS_RX_LOS==TRUE)
+/* If the bit mask result match SYS_HWCFG_GBIC_RX_LOS_BIT,
+ * GBIC module RX_LOS signal is asserted.
+ */
+#define SYS_HWCFG_GBIC_RX_LOS_BIT                       1
+#endif
+
+/* SFP present bit and msks definitions for board id 0(AOS5700-54X) Start */
+#define SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT 0
+#define SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT 1
+#define SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT 2
+#define SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT 3
+#define SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT 4
+#define SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT 5
+#define SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT 6
+#define SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT 7
+#define SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT 0
+#define SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT 1
+#define SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT 2
+#define SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT 3
+#define SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT 4
+#define SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT 5
+#define SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT 6
+#define SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT 7
+#define SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT 0
+#define SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT 1
+#define SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT 2
+#define SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT 3
+#define SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_BIT_SHIFT 4
+#define SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_BIT_SHIFT 5
+#define SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_BIT_SHIFT 6
+#define SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_BIT_SHIFT 7
+#define SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_BIT_SHIFT 0
+#define SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_BIT_SHIFT 1
+#define SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_BIT_SHIFT 2
+#define SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_BIT_SHIFT 3
+#define SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_BIT_SHIFT 4
+#define SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_BIT_SHIFT 5
+#define SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_BIT_SHIFT 6
+#define SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_BIT_SHIFT 7
+#define SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT33_SFP_MODULE_PRESENT_BIT_SHIFT 0
+#define SYS_HWCFG_PORT33_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT33_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT34_SFP_MODULE_PRESENT_BIT_SHIFT 1
+#define SYS_HWCFG_PORT34_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT34_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT35_SFP_MODULE_PRESENT_BIT_SHIFT 2
+#define SYS_HWCFG_PORT35_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT35_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT36_SFP_MODULE_PRESENT_BIT_SHIFT 3
+#define SYS_HWCFG_PORT36_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT36_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT37_SFP_MODULE_PRESENT_BIT_SHIFT 4
+#define SYS_HWCFG_PORT37_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT37_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT38_SFP_MODULE_PRESENT_BIT_SHIFT 5
+#define SYS_HWCFG_PORT38_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT38_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT39_SFP_MODULE_PRESENT_BIT_SHIFT 6
+#define SYS_HWCFG_PORT39_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT39_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT40_SFP_MODULE_PRESENT_BIT_SHIFT 7
+#define SYS_HWCFG_PORT40_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT40_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT41_SFP_MODULE_PRESENT_BIT_SHIFT 0
+#define SYS_HWCFG_PORT41_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT41_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT42_SFP_MODULE_PRESENT_BIT_SHIFT 1
+#define SYS_HWCFG_PORT42_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT42_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT43_SFP_MODULE_PRESENT_BIT_SHIFT 2
+#define SYS_HWCFG_PORT43_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT43_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT44_SFP_MODULE_PRESENT_BIT_SHIFT 3
+#define SYS_HWCFG_PORT44_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT44_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT45_SFP_MODULE_PRESENT_BIT_SHIFT 4
+#define SYS_HWCFG_PORT45_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT45_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT46_SFP_MODULE_PRESENT_BIT_SHIFT 5
+#define SYS_HWCFG_PORT46_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT46_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT47_SFP_MODULE_PRESENT_BIT_SHIFT 6
+#define SYS_HWCFG_PORT47_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT47_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT48_SFP_MODULE_PRESENT_BIT_SHIFT 7
+#define SYS_HWCFG_PORT48_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT48_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_BIT_SHIFT 0
+#define SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_BIT_SHIFT 2
+#define SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_BIT_SHIFT 4
+#define SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_BIT_SHIFT 1
+#define SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_BIT_SHIFT 3
+#define SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+#define SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_BIT_SHIFT 5
+#define SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_MASK      (1 << SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_BIT_SHIFT)
+
+/* SFP present bit and msks definitions for board id 0(AOS5700-54X) End   */
+
+/* SFP present bit and msks definitions for board id 1(AOS6700-34X) Start */
+#define SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 0
+#define SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 1
+#define SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 2
+#define SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 3
+#define SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 4
+#define SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 5
+#define SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 6
+#define SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 7
+#define SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 0
+#define SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 1
+#define SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 2
+#define SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 3
+#define SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 4
+#define SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 5
+#define SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 6
+#define SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 7
+#define SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 0
+#define SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 1
+#define SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 2
+#define SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 3
+#define SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 2
+#define SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 3
+#define SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 4
+#define SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 5
+#define SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 6
+#define SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 7
+#define SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 2
+#define SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 3
+#define SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 4
+#define SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 5
+#define SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 6
+#define SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+
+#define SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1 7
+#define SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_MASK_BID_1      (1 << SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1)
+/* SFP present bit and msks definitions for board id 1(AOS6700-34X) End   */
+
+/* If this constant is defined, an array for present bit shift of each combo
+ * port will be declared in stktplg_om.c
+ */
+#define SYS_HWCFG_SFP_MODULE_PRESENT_BIT_SHIFT_ARRAY_BODY SYS_HWCFG_SFP_MODULE_PRESENT_BIT_SHIFT_ARRAY_BODY_BID_0
+
+/* SFP present bit shift array definitions for board id 0(AOS5700-54X) */
+#define SYS_HWCFG_SFP_MODULE_PRESENT_BIT_SHIFT_ARRAY_BODY_BID_0 \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT33_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT34_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT35_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT36_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT37_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT38_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT39_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT40_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT41_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT42_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT43_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT44_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT45_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT46_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT47_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT48_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_BIT_SHIFT, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_BIT_SHIFT
+
+/* SFP present bit shift array definitions for board id 1(AOS6700-32X) */
+#define SYS_HWCFG_SFP_MODULE_PRESENT_BIT_SHIFT_ARRAY_BODY_BID_1 \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_BIT_SHIFT_BID_1
+
+#define SYS_HWCFG_SFP_MODULE_PRESENT_MASK_ARRAY_BODY SYS_HWCFG_SFP_MODULE_PRESENT_MASK_ARRAY_BODY_BID_0
+/* SFP present mask array definitions for board id 0(AOS5700-54X) */
+#define SYS_HWCFG_SFP_MODULE_PRESENT_MASK_ARRAY_BODY_BID_0 \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT33_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT34_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT35_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT36_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT37_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT38_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT39_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT40_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT41_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT42_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT43_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT44_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT45_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT46_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT47_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT48_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT49_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT50_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT51_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT52_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT53_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_MASK, \
+    SYS_HWCFG_PORT54_SFP_MODULE_PRESENT_MASK
+
+/* SFP present mask array definitions for board id 1(AOS6700-32X) */
+#define SYS_HWCFG_SFP_MODULE_PRESENT_MASK_ARRAY_BODY_BID_1 \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT21_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT22_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT23_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT24_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT25_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT26_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT27_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT28_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT29_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT30_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT31_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT32_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT1_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT2_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT3_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT4_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT5_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT6_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT7_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT8_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT9_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT10_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT11_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT12_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT13_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT14_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT15_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT16_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT17_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT18_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT19_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_MASK_BID_1, \
+    SYS_HWCFG_PORT20_SFP_MODULE_PRESENT_MASK_BID_1
+
+/* Although AOS5700-54X does not has intermidate I2C mux device,
+ * SYS_HWCFG_I2C_MAX_INTERMEDIATE_MUX_NUM still need to be set as 1 to
+ * avoid declaration of 0 as array size.
+ *
+ * On board id 1(AOS6700-32X), there will be at most 1 intermediate mux device in
+ * the I2C mux device architecture.
+ */
+#define SYS_HWCFG_I2C_MAX_INTERMEDIATE_MUX_NUM       1
+
+/* Note that the real value to be set is translated through SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_BITMAP_TO_VAL_2
+ * in function I2C_MuxTranslateChannelBMPToSetVal
+ */
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_1_INT_MUX_1_CHANNEL_IDX 20
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_2_INT_MUX_1_CHANNEL_IDX 21
+
+#define SYS_HWCFG_PCA9548_DATAADDR                   0
+#define SYS_HWCFG_PCA9548_DEFAULT_CHANNEL            0
+
+/* Board id 0(AOS5700-54X) I2C Mux Layout - Total 3 I2C Mux devices
+ * The I2C mux for accessing SFP Transceiver EEPROM is implemented through
+ * CPLD2 and CPLD3.
+ * layout of I2C MUX devices on AOS5700-54X
+ * /---------------\   /---------------------------------\
+ * |I2C Bus Index 1|---|PCA9548 (I2C Mux Idx 0,Addr 0x70)|
+ * \---------------/   \---------------------------------/
+ *
+ * /---------------\   /--------------------------------------------------\
+ * |I2C Bus Index 3|-+-|CPLD 2(I2C Mux Idx 1,Addr 0x61, SetChannelReg=0x2 |
+ * \---------------/ | \--------------------------------------------------/
+ *                   |
+ *                   | /--------------------------------------------------\
+ *                   +-|CPLD 3(I2C Mux Idx 2,Addr 0x62),SetChannelReg=0x2 |
+ *                     \--------------------------------------------------/
+ */
+
+/* Board id 1(AOS6700-32X) I2C Mux Layout - Total 4 I2C Mux devices
+ * The I2C mux for accessing SFP Transceiver EEPROM is implemented through
+ * I2C Mux Idx 0(For Port 1~20), I2C Mux Idx 1(For Port 21~26), and
+ * I2C Mux Idx 2(For Port 27~32)
+ * 
+ * layout of I2C MUX devices on AOS6700-32X
+ *
+ * /---------------\   /-------------------------------------------------------------\   /-------------------------------------------------------------------------\
+ * |I2C Bus Index 1|-+-|CPLD for system (I2C Mux Idx 0,Addr 0x31, SetChannelReg=0x60)|-+-|PCA9548 (I2C Mux Idx 1, Addr 0x70, On I2C Mux Idx 0 Channel_Reg_Val=0x21)|
+ * \---------------/   \-------------------------------------------------------------/ | \-------------------------------------------------------------------------/
+ *                                                                                     |
+ *                                                                                     | /-------------------------------------------------------------------------\
+ *                                                                                     +-|PCA9548 (I2C Mux Idx 2, Addr 0x70, On I2C Mux Idx 0 Channel_Reg_Val=0x22)|
+ *                                                                                       \-------------------------------------------------------------------------/
+ *
+ * /---------------\   /---------------------------------\
+ * |I2C Bus Index 3|---|PCA9546 (I2C Mux Idx 3,Addr 0x70)|
+ * \---------------/   \---------------------------------/
+ */
+
+/* SYS_HWCFG_NUM_OF_I2C_MUX shall defines the maximum number of i2c mux devices
+ * if the number of i2c mux devices is different on different boards
+ */
+#define SYS_HWCFG_NUM_OF_I2C_MUX                     4
+
+#define SYS_HWCFG_I2C_MULTI_LEVEL_MUX_INFO_WITH_MULTIPLE_BIDS_ARRAY \
+{ \
+    { /* board id 0 */ \
+        {{SYS_HWCFG_I2C_SLAVE_BID_0_PCA9548_BUS_IDX, 0, SYS_HWCFG_I2C_SLAVE_BID_0_PCA9548, FALSE, 0,                                       SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_DIRECT       },{0x0}, {0}}, /* I2C MUX 0 (Top level Mux) */ \
+        {{SYS_HWCFG_I2C_SLAVE_BID_0_CPLD2_BUS_IDX,   0, SYS_HWCFG_I2C_SLAVE_BID_0_CPLD2,   TRUE,  SYS_HWCFG_I2C_SLAVE_BID_0_CPLD2_MUX_REG, SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_BITMAP_TO_VAL},{0x0}, {0}}, /* I2C MUX 1 (Top level Mux) */ \
+        {{SYS_HWCFG_I2C_SLAVE_BID_0_CPLD3_BUS_IDX,   0, SYS_HWCFG_I2C_SLAVE_BID_0_CPLD3,   TRUE,  SYS_HWCFG_I2C_SLAVE_BID_0_CPLD3_MUX_REG, SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_BITMAP_TO_VAL},{0x0}, {0}}, /* I2C MUX 2 (Top level Mux) */ \
+    }, \
+    { /* board id 1 */ \
+        {{SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1_BUS_IDX,     0, SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1,     TRUE,  SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1_MUX_REG, SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_BITMAP_TO_VAL_2},{0x0                            }, {0                                                        }, {0}   , {0                                      }, {0                                                                               }}, /* I2C MUX 0 (Top level Mux) */ \
+        {{SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_1_BUS_IDX, 1, SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_1, FALSE, 0,                                       SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_DIRECT         },{SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1}, {SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_1_INT_MUX_1_CHANNEL_IDX}, {TRUE}, {SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1_MUX_REG}, {SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_BITMAP_TO_VAL_2}}, /* I2C MUX 1 */ \
+        {{SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_2_BUS_IDX, 1, SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_2, FALSE, 0,                                       SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_DIRECT         },{SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1}, {SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_2_INT_MUX_1_CHANNEL_IDX}, {TRUE}, {SYS_HWCFG_I2C_SLAVE_BID_1_CPLD1_MUX_REG}, {SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_BITMAP_TO_VAL_2}}, /* I2C MUX 2 */ \
+        {{SYS_HWCFG_I2C_SLAVE_BID_1_PCA9544_BUS_IDX  , 0, SYS_HWCFG_I2C_SLAVE_BID_1_PCA9544,   FALSE, 0,                                       SYS_HWCFG_COMMON_I2C_MUX_CHANNEL_BMP_TO_SET_VAL_TRANSLATION_TYPE_DIRECT         },{0x0                            }, {0                                                        }, {0},    {0                                      }, {0                                                                               }}, /* I2C MUX 3 (Top level Mux) */ \
+    } \
+}
+
+/* Define SYS_HWCFG_I2C_INIT_PHERIPHERAL as TRUE if
+ * the project need to init pheripheral through I2C bus.
+ * SYS_HWCFG_GetI2CPeripheralInitOpers() must be implemented when
+ * SYS_HWCFG_I2C_INIT_PHERIPHERAL is TRUE.
+ */
+#define SYS_HWCFG_I2C_INIT_PHERIPHERAL TRUE
+
+/* PIC device numbers, needed by diagnostic
+ */
+#define SYS_HWCFG_PCI_DEVICE_NUM_1                  21 /* In diag, thomas */
+#define SYS_HWCFG_PCI_DEVICE_NUM_2                  22
+#define SYS_HWCFG_PCI_DEVICE_NUM_3                  23
+#define SYS_HWCFG_PCI_DEVICE_NUM_4                  24
+#define SYS_HWCFG_PCI_DEVICE_NUM_5                  25
+
+/*  If this project is multi-chip and need to addr sync for different chips
+ */
+#define SYS_HWCFG_ADDR_MULTI_CHIP_SYNC              TRUE /* Useless, for future 50 port */
+
+/* Real Time Clock definition
+ * Note: On AOS5700-54X/AOS6700-32X, the operations to RTC is done
+ *       through the rc script(wheezy_rootfs/etc/init.d/hwclock.sh).
+ *       So SYS_HWCFG_SUPPORT_RTC should be defined as FALSE here.
+ */
+#define SYS_HWCFG_SUPPORT_RTC                       FALSE
+
+#define SYS_HWCFG_HAS_EPLD TRUE
+
+/* EPLD Version Register Format:
+ * Board id 0(AOS5700-54X)
+ * System CPLD(I2C Addr 0x60)/CPLD 2 (I2C Addr 0x61)/CPLD 3 (I2C Addr 0x62)
+ * Register 0x01
+ * -------------------------------------------------------------------------------------------------
+ * |     7    |     6    |     5    |   4      |    3       |     2      |     1      |     0      |
+ * |----------|----------|----------|----------|------------|------------|------------|------------|
+ * | Reserved | Reserved | Reserved | Reserved |EPLD Version|EPLD Version|EPLD Version|EPLD Version|
+ * |          |          |          |          |Bit 3       |Bit 2       |Bit 1       |Bit 0       |
+ * -------------------------------------------------------------------------------------------------
+ * This register can be read to show the system CPLD code revision information
+ * Revision Bit[Bit 3..0]:
+ *   0000: CPLD Code Revision is 00
+ *   0001: CPLD Code Revision is 01
+ *   0010: CPLD Code Revision is 02
+ *   0011: CPLD Code Revision is 03
+ *    ...
+ *   1111: CPLD Code Revision is 15
+ *
+ * Board id 1(AOS6700-32X)
+ * System CPLD(I2C Addr 0x31)
+ * Register 0x0
+ * ---------------------------------------------------------------------------------
+ * |     7    |     6    |     5    |     4    |    3   |    2   |   1    |   0    |
+ * |----------|----------|----------|----------|--------|--------|--------|--------|
+ * | Reserved | Reserved | Reserved | Reserved |Release |Revision|Revision|Revision|
+ * |          |          |          |          |Bit     |Bit 2   |Bit 1   |Bit 0   |
+ * ---------------------------------------------------------------------------------
+ * Revision Bit[Bit 2..0]:
+ *   0000: EPLD Code Revision is X.00
+ *   0001: EPLD Code Revision is X.01
+ *   0010: EPLD Code Revision is X.02
+ *   0011: EPLD Code Revision is X.03
+ *    ...
+ *   1111: EPLD Code Revision is X.07
+ *
+ * Release Bit[Bit 3]:
+ *   0: EPLD Code is RD Revision (0.XX)
+ *   1: EPLD Code is Release Revision (1.XX)
+ *
+ * Fan Control CPLD(I2C Addr 0x35)
+ * No register for CPLD version avaiable.
+ */
+
+/* SYS_HWCFG_BID_0_I2C_SFP_EEPROM_BUS_IDX:
+ * SYS_HWCFG_BID_1_I2C_SFP_EEPROM_BUS_IDX:i2c bus index for accessing SFP EEPROM
+ */
+#define SYS_HWCFG_BID_0_I2C_SFP_EEPROM_BUS_IDX      3
+#define SYS_HWCFG_BID_1_I2C_SFP_EEPROM_BUS_IDX      1
+
+#define SYS_HWCFG_I2C_SLAVE_EEPROM                  0x50 /* after left shift 1bit, the value will be 0xa0 */
+#define SYS_HWCFG_I2C_SLAVE_EEPROM_DDM              0x51 /* after left shift 1bit, the value will be 0xa2 */
+
+/* for board id 0(AOS5700-54X)
+ */
+#define SYS_HWCFG_I2C_SLAVE_BID_0_PCA9548                 0x70
+#define SYS_HWCFG_I2C_SLAVE_BID_0_PCA9548_BUS_IDX         1
+
+/* for board id 1(AOS6700-32X)
+ */
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_1_BUS_IDX       1
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_1               0x70
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_2_BUS_IDX       1
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9548_2               0x70
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9506_1_BUS_IDX       1
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9506_1               0x20
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9506_2_BUS_IDX       1
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9506_2               0x20
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9544_BUS_IDX         3
+#define SYS_HWCFG_I2C_SLAVE_BID_1_PCA9544                 0x70
+
+
+#define SYS_HWCFG_FAN_DETECT_FAN_STATUS_BY_STKTPLG_BOARD     TRUE
+/* On AOS5700-54X, fan fault bit value in the register is 1
+ */
+#define SYS_HWCFG_FAN_DETECT_FAN_STAUS_BY_CPLD_FAULT_REG_BIT_VAL_IS_ZERO FALSE
+
+#define SYS_HWCFG_FAN_SPEED_DETECT_SUPPORT          TRUE
+
+#define SYS_HWCFG_THERMAL_1                         0x27
+
+#define SYS_HWCFG_THERMAL_ADDRESS_REG               0x4A
+#define SYS_HWCFG_THERMAL_2_ADD_MASK                0x07
+#define SYS_HWCFG_THERMAL_3_ADD_MASK                0x70
+#define SYS_HWCFG_BANK_SEL                          0x4E
+#define SYS_HWCFG_THERMAL_2_H                       0x50
+#define SYS_HWCFG_THERMAL_2_L                       0x51
+#define SYS_HWCFG_THERMAL_DIODE_SELECT              0x59
+#define SYS_HWCFG_THERMAL_TYPE_SELECT               0x5D
+
+#define SYS_HWCFG_MAX_NBR_OF_THERMAL_PER_UNIT      5 
+#define SYS_HWCFG_NBR_OF_THERMAL_BID_0              4 /* AS5812-54X */
+#define SYS_HWCFG_NBR_OF_THERMAL_BID_1              4 /* AS5812-54T */
+#define SYS_HWCFG_NBR_OF_THERMAL_BID_2              5 /* AS6812-32X */
+
+#define SYS_HWCFG_FAN_SPEED_MAX                     100  /* 100% duty cycle */
+#define SYS_HWCFG_FAN_SPEED_MID                     50   /*  50% duty cycle */
+#define SYS_HWCFG_FAN_SPEED_MAX_ARRAY_ELM           SYS_HWCFG_FAN_SPEED_MAX
+#define SYS_HWCFG_FAN_SPEED_MID_ARRAY_ELM           SYS_HWCFG_FAN_SPEED_MID
+
+#define SYS_HWCFG_MAX_NBR_OF_FAN_PER_UNIT           6
+#define SYS_HWCFG_DEFAULT_FAN_SPEED_MODE 1 /* fan speed level 1(slowest) */
+
+
+/* The followng definitions are for build only and useless */
+
+#define SYS_HWCFG_SYSTEM_MODULE_1_BUS_ENABLE        0x00
+#define SYS_HWCFG_SYSTEM_MODULE_1_BUS_DISABLE       0x04
+
+#define SYS_HWCFG_SYSTEM_MODULE_2_BUS_ENABLE        0x00
+#define SYS_HWCFG_SYSTEM_MODULE_2_BUS_DISABLE       0x02
+
+#define SYS_HWCFG_SYSTEM_MODULE_1_BUS_MASK          0x04
+#define SYS_HWCFG_SYSTEM_MODULE_2_BUS_MASK          0x02
+
+#define SYS_HWCFG_FLASH_MTD_NAME_LEN        32
+
+typedef struct SYS_HWCFG_FlashEntry_S 
+{
+	UI32_T  mtdnum;
+    UI32_T  address;
+    UI32_T  size;
+    UI32_T  type;
+    BOOL_T  writeable;
+    UI8_T   name[SYS_HWCFG_FLASH_MTD_NAME_LEN];
+} SYS_HWCFG_FlashEntry_T;
+
+typedef struct SYS_HWCFG_MultiLevelMuxInfoEntry_S
+{
+    SYS_HWCFG_COMMON_MultiLevelMuxInfoEntry_T common_info;
+    UI8_T dev_addr_of_intermediate_mux[SYS_HWCFG_I2C_MAX_INTERMEDIATE_MUX_NUM];
+    UI8_T channel_idx_on_mux[SYS_HWCFG_I2C_MAX_INTERMEDIATE_MUX_NUM];
+    BOOL_T intermediate_mux_has_channel_reg[SYS_HWCFG_I2C_MAX_INTERMEDIATE_MUX_NUM];
+    UI8_T intermediate_mux_channel_reg_addr[SYS_HWCFG_I2C_MAX_INTERMEDIATE_MUX_NUM];
+    SYS_HWCFG_COMMON_I2C_Mux_Channel_BMP_To_Set_Val_Translation_Type_T intermediate_mux_channel_bmp_xslt_type[SYS_HWCFG_I2C_MAX_INTERMEDIATE_MUX_NUM];
+} SYS_HWCFG_MultiLevelMuxInfoEntry_T;
+
+/*---------------------------------------------------------------------------------
+ * FUNCTION NAME: SYS_HWCFG_GetGBIC_I2CMuxAndChannelInfo
+ *---------------------------------------------------------------------------------
+ * PURPOSE: Get I2C multiplexer device index and channel info.
+ * INPUT:   board_id       : board id
+ *          device_index   : SFP port index (1 based)
+ * OUTPUT:  reg_info_p     : I2C multiplexer related information
+ * RETUEN:  TRUE   -  Success
+ *          FALSE  -  Failed
+ * NOTES:
+ *---------------------------------------------------------------------------------
+ */
+BOOL_T SYS_HWCFG_GetGBIC_I2CMuxAndChannelInfo(UI32_T board_id, UI32_T device_index, SYS_HWCFG_i2cRegAndChannelInfo_T *reg_info_p);
+
+/*---------------------------------------------------------------------------------
+ * FUNCTION NAME: SYS_HWCFG_GetSFPPresentStatusRegInfo
+ *---------------------------------------------------------------------------------
+ * PURPOSE: Get the info of the register to access sfp present status of the given
+ *          sfp device index.
+ * INPUT:   board_id     : board id
+ *          device_index : SFP port index (1 based)
+ * OUTPUT:  reg_info_p   : register info for accessing sfp present status of device_index
+ * RETUEN:  TRUE  -  Get reg info successfully
+ *          FALSE -  Failed to get reg info
+ * NOTES:   This API is implemented for
+ *          SYS_HWCFG_SFP_PRESENT_STATUS_ACCESS_METHOD == SYS_HWCFG_REG_ACCESS_METHOD_I2C_WITH_CHANNEL
+ *---------------------------------------------------------------------------------
+ */
+BOOL_T SYS_HWCFG_GetSFPPresentStatusRegInfo(UI32_T board_id, UI32_T device_index, SYS_HWCFG_i2cRegAndChannelInfo_T *reg_info_p);
+
+/*---------------------------------------------------------------------------------
+ * FUNCTION NAME: SYS_HWCFG_SwitchChip_MiscInit
+ *---------------------------------------------------------------------------------
+ * PURPOSE: config EPLD important bit for module
+ * INPUT:    
+ * OUTPUT: 
+ * RETUEN:  TRUE/FALSE
+ * NOTES:   
+ *---------------------------------------------------------------------------------
+ */
+BOOL_T SYS_HWCFG_SwitchChip_MiscInit(void);
+
+/*---------------------------------------------------------------------------------
+ * FUNCTION NAME: SYS_HWCFG_GetI2CPeripheralInitOpers
+ *---------------------------------------------------------------------------------
+ * PURPOSE: Output I2C peripheral initialization operations.
+ * INPUT:   board_id        --   board id.
+ * OUTPUT:  i2c_trans_lst_pp--   i2c peripheral initialization transactions list
+ *          lst_size_p      --   list size of i2c_trans_lst_p
+ * RETUEN:  TRUE if success. FALSE if failed.
+ * NOTES:   This function is called when SYS_HWCFG_I2C_INIT_PHERIPHERAL is TRUE.
+ *---------------------------------------------------------------------------------
+ */
+BOOL_T SYS_HWCFG_GetI2CPeripheralInitOpers(UI32_T board_id, const SYS_HWCFG_I2CTransactionEntry_T **i2c_trans_lst_pp, UI32_T* lst_size_p);
+
+#endif
+/* End of SYS_HWCFG.H */
+
+
+

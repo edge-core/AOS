@@ -1,0 +1,2 @@
+#!/bin/sh
+[ "$PROJECT_NAME" == "aos5810_54x" ]

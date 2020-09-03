@@ -1,0 +1,33 @@
+#Loader version is set in the script file make_loader
+#The definied values here are not used
+LOADER_VER=1.3.2
+LOADER_CUSTOMIZED_VER=0.1
+
+#Kernel version is set in src/linux_kernel/linux-2.6.32/Makefile
+#The definied value here is not used
+KERNEL_VER=3.2.65
+
+#POST_VER defines the diag version
+POST_VER=1.0.0.0
+POST_CUSTOMIZED_VER=
+
+#Rootfs version is not used now. Use runtime version, which
+#is set through project_build_environment/${PROJECT_NAME}/8_build_rootfs -V
+ROOTFS_VER=0.0.0.1
+ROOTFS_CUSTOMIZED_VER=
+
+#For loader version compability version check. Obsoleted now
+LOADER_COMPAT_VER_ORG_PART_START=*
+LOADER_COMPAT_VER_ORG_PART_END=*
+
+#For loader version compability version check. Obsoleted now
+LOADER_COMPAT_VER_ACCTON_PART_START=*
+LOADER_COMPAT_VER_ACCTON_PART_END=*
+
+#For linux kernel version compability version check. Obsoleted now.
+KERNEL_COMPAT_VER_ORG_PART_START=*
+KERNEL_COMPAT_VER_ORG_PART_END=*
+
+#For linux kernel version compability version check. Obsoleted now.
+KERNEL_COMPAT_VER_ACCTON_PART_START=*
+KERNEL_COMPAT_VER_ACCTON_PART_END=*

@@ -1,0 +1,207 @@
+#!/bin/bash
+
+LIBF_NAME='prebuilt.tgz'
+PDIR_NAME='prebuilt'
+CFGF_NAME='bld_cfg'
+
+IS_PRB_OK=
+IS_SDK_OK=
+
+function rm_old_prb () {
+    printf '\n###\n### Removing old prebuilt files in directory: %s \n###\n' $PDIR_NAME
+    test -d $PDIR_NAME && rm -rf $PDIR_NAME
+    test -h $SDKPROJ/build/unix-user/aos7710_32x/libbcmsdk.a && rm -rf $SDKPROJ/build/
+    echo ' done'
+}
+
+# $1 - is_echo_msg : 0/1
+function is_prb_ok () {
+    if [ "$IS_PRB_OK" == "" ]; then
+        printf '\n###\n### Checking binary tarball: %s \n###\n' $LIBF_NAME
+        test -e ./$LIBF_NAME
+        IS_PRB_OK=$?
+    fi
+
+    if [ $1 -eq 1 ]; then
+        [[ $IS_PRB_OK -ne 0 ]] && \
+        printf '\n Please put %s here and re-run the script.\n\n' $LIBF_NAME && \
+        exit 1 || echo ' done'
+    fi
+
+    return $IS_PRB_OK
+}
+
+# $1 - is_echo_msg : 0/1
+function is_sdk_ok () {
+    if [ "$IS_SDK_OK" == "" ]; then
+        printf '\n###\n### Checking SDK files\n###\n'
+        test -e $SDK/Makefile
+        IS_SDK_OK=$?
+    fi
+
+    if [ $1 -eq 1 ]; then
+        [[ $IS_SDK_OK -ne 0 ]] && \
+        printf '\n Please put SDK files to the correct place and re-run the script.\n\n' \
+        && exit 1 || echo ' done'
+    fi
+
+    return $IS_SDK_OK
+}
+
+function is_cfg_ok () {
+    printf '\n###\n### Checking cfg file: %s \n###\n' $CFGF_NAME
+
+    test -e $CFGF_NAME
+    IS_CFG_OK=$?
+
+    if [ $IS_CFG_OK -eq 0 ]; then
+        printf '\n###\n### Loading old settings from file.\n###\n'
+        source $CFGF_NAME
+    fi
+
+    echo ' done'
+}
+
+function info_flags () {
+    flag_arr=( WITHOUT_SDK_FLAG DO_STEPS_ONLY SKIP_CHK_PRB )
+
+    printf '\n###\n### FLAG INFO:\n'
+
+    for i in ${flag_arr[@]}; do
+        printf '###   %-20s - %s\n' $i ${!i}
+    done
+
+    printf '###\n'
+
+    if [ $IS_CFG_OK -ne 0 ]; then
+        printf '\n###\n### Generating cfg file: %s \n###\n' $CFGF_NAME
+
+        # save to cfg file
+        for i in ${flag_arr[@]}; do
+            printf 'export %s=%s\n' $i ${!i}
+        done > $CFGF_NAME
+    fi
+}
+
+function setup_bld_env () {
+    if [ "$WITHOUT_SDK_FLAG" == "" ]; then
+        is_prb_ok 0
+        [[ $? -eq 0 ]] && WITHOUT_SDK_FLAG="1" || \
+        printf ' File %s not found.\n' $LIBF_NAME
+
+        if [ "$WITHOUT_SDK_FLAG" == "" ]; then
+            is_sdk_ok 0
+            [[ $? -eq 0 ]] && WITHOUT_SDK_FLAG="0" || \
+            printf ' SDK files not found.\n'
+        fi
+
+        if [ "$WITHOUT_SDK_FLAG" == "" ]; then
+            printf '\n Please put SDK files or prebuilt binary tarball to the correct place,'
+            printf '\n and re-run the script.\n\n'
+            exit 1
+        fi
+
+        export WITHOUT_SDK_FLAG="$WITHOUT_SDK_FLAG"
+    fi
+
+    if [ "$WITHOUT_SDK_FLAG" == "1" ]; then
+        function extract_tgz () {
+            mkdir -p $PDIR_NAME
+            tar -C $PDIR_NAME -xf $LIBF_NAME
+        }
+
+        is_prb_ok 1
+
+        printf '\n###\n### Extracting %s to directory: %s\n###\n' $LIBF_NAME $PDIR_NAME
+
+        extract_tgz &
+
+        pid_f="$!"
+        while kill -0 "$pid_f" 2> /dev/null ; do
+        sleep 1
+            printf '.'
+        done
+        echo ' done'
+
+        printf '\n###\n### Creating symbolic links\n###\n'
+        ! test -e $SDKPROJ/build/unix-user/aos7710_32x/libbcmsdk.a && \
+        mkdir -p $SDKPROJ/build/unix-user/aos7710_32x/ && \
+        ln -s ../../../../$PDIR_NAME/sdk/libbcmsdk.a $SDKPROJ/build/unix-user/aos7710_32x/libbcmsdk.a
+        echo ' done'
+    else
+        is_sdk_ok 1
+    fi
+}
+
+function chk_prb_kver () {
+    printf '\n###\n### Checking binary tarball kernel config\n###\n'
+
+    KHASHTAG='GITKHAS'
+    HASHFILE='githash.txt'
+    PRB_KVER=`grep $KHASHTAG $PDIR_NAME/version.txt`
+    BLD_KVER=`grep $KHASHTAG $HASHFILE`
+
+    if [ "$PRB_KVER" != "$BLD_KVER" ]; then
+        printf '\n Kernel config in %s is not compatible with current build env.' $LIBF_NAME
+        printf '\n Please get new binary tarball before continuing the build process.'
+        printf '\n\n'
+        exit 1
+    else
+        echo ' done'
+    fi
+}
+
+#### main function starts here ####
+
+pushd ${ACCPROJ} > /dev/null
+
+is_cfg_ok
+
+[ "$SKIP_CHK_PRB" == "1" ] || rm_old_prb
+
+[ "$SKIP_CHK_PRB" == "1" ] && [ "$WITHOUT_SDK_FLAG" != "" ] || setup_bld_env
+
+[ "$WITHOUT_SDK_FLAG" == "1" ] && chk_prb_kver
+
+info_flags
+
+printf '\n###\n### Start building process...\n###\n'
+
+show_err_and_exit() {
+    echo "An error occurs on ${OP}"
+    exit 1
+}
+
+run_script() {
+    OP=$1
+
+    #ex: DO_STEPS_ONLY="6_build_user 8_build_rootfs make_runtime make_onie_installer"
+    if [ ! -z "${DO_STEPS_ONLY}" ] && ! echo "$DO_STEPS_ONLY" | grep -F -q -w "$OP"; then
+        return
+    fi
+
+    [ "$WITHOUT_SDK_FLAG" == "1" ] && [ "$OP" == "2_build_sdk" ] && return
+
+    echo "Run ${OP}"
+    eval $ACCPROJ/${OP}
+}
+
+trap show_err_and_exit ERR
+
+script_list=" \
+1_build_kernel \
+2_build_sdk \
+3_build_accton_module \
+4_build_cmnlib \
+5_build_frr \
+6_build_user \
+8_build_rootfs \
+make_runtime \
+make_onie_installer"
+
+for script in ${script_list}; do
+    run_script ${script}
+done
+
+echo "$0 Done!"
+exit 0

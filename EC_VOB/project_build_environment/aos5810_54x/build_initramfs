@@ -1,0 +1,46 @@
+#!/bin/sh
+
+if ! utils/check_build_env; then
+        cd utils
+        . ./build_env_init
+        cd -
+fi
+
+INITRD_ROOTFS_BASE=initrd_base.cpio.gz
+INITRD_ROOTFS_ARCHIVE=initrd.cpio.gz
+TMP_ROOTFS_DIR=rootfs_tmp
+
+
+cp initramfs/initramfs-tools/hooks/lvm2  /etc/initramfs-tools/hooks
+chmod 755 /etc/initramfs-tools/hooks/lvm2 
+
+cp initramfs/initramfs-tools/scripts/local-top/accton-top    /etc/initramfs-tools/scripts/local-top/accton-top
+chmod 755 /etc/initramfs-tools/scripts/local-top/accton-top
+
+cp initramfs/initramfs-tools/scripts/local-top/lvm2   /etc/initramfs-tools/scripts/local-top/lvm2
+chmod 755 /etc/initramfs-tools/scripts/local-top/lvm2
+
+mkinitramfs -o initramfs/${INITRD_ROOTFS_BASE} ${KERVER} 
+
+cd initramfs
+if [ -d ${TMP_ROOTFS_DIR} ]; then
+        rm -rf ${TMP_ROOTFS_DIR}
+fi
+
+mkdir -p ${TMP_ROOTFS_DIR} || exit 1
+
+cd ${TMP_ROOTFS_DIR}
+gzip -cd ../${INITRD_ROOTFS_BASE} | cpio -i
+if [ $? -ne 0 ]; then
+        echo "Failed to extract archive file '${INITRD_ROOTFS_ARCHIVE}'"
+        exit 1
+fi
+
+cp ${PROJECT_PATH}/initramfs/init ${PROJECT_PATH}/initramfs/${TMP_ROOTFS_DIR}/init
+
+sed -i 's/modprobe ${FSTYPE}/#modprobe ${FSTYPE}/g' scripts/local
+
+cd ../ && ../fs/mkinitramfs.sh ${TMP_ROOTFS_DIR} ${INITRD_ROOTFS_ARCHIVE}
+
+exit 0
+

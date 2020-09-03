@@ -1,0 +1,308 @@
+PEA-EQUIPMENT DEFINITIONS ::= BEGIN          
+
+
+IMPORTS
+    pea														  
+       FROM PEA-SMI 
+
+	-- standar X.733 header for the traps       
+    managedObjectClass, 
+    managedObjectInstance, 
+    sequenceNumber, 
+    perceivedSeverity, 
+    eventTime, 
+    eventTypePem, 
+    probableCause  
+       FROM PEM-STANDARD 
+    OBJECT-TYPE,Integer32,Unsigned32
+       FROM SNMPv2-SMI
+    MacAddress, DisplayString
+	   FROM SNMPv2-TC
+	;
+
+peaEquipment  MODULE-IDENTITY
+    LAST-UPDATED 
+   		 "0302271200Z"
+    ORGANIZATION
+		 "Ericsson Diax A/S - Denmark"
+    CONTACT-INFO
+		 "
+		 Ericsson Diax A/S
+		 Faelledvej 17
+		 DK-7600 Struer
+		 Denmark
+		 
+		 E-mail: support@dxd.ericsson.se
+		 "       
+   DESCRIPTION
+		 "
+		 The public ethernet access software supports a number of standard 
+		 and proprietary MIBs. This MIB module defines objects for reading/writing
+     	 common equipment information.  		 
+		 "                                                           
+		 
+    ::= { pea 1 }
+    
+commonObjects	   	      OBJECT IDENTIFIER ::= { peaEquipment 1 }
+commonTraps		   	      OBJECT IDENTIFIER ::= { peaEquipment 2 }
+pethObjects               OBJECT IDENTIFIER ::= { peaEquipment 3 }
+pethNotifications		  OBJECT IDENTIFIER ::= { peaEquipment 4 }
+pethNotificationTypes     OBJECT IDENTIFIER ::= { pethNotifications 0 }
+
+traps 		   	          OBJECT IDENTIFIER ::= { commonTraps  0 }
+trapsParameters		   	  OBJECT IDENTIFIER ::= { commonTraps  1 }
+
+versions                  OBJECT IDENTIFIER ::= { commonObjects 1 }
+temperature               OBJECT IDENTIFIER ::= { commonObjects 3 }
+fansStatus                OBJECT IDENTIFIER ::= { commonObjects 4 }
+
+--************************************************************************
+-- Equipment Information
+--************************************************************************
+
+sysId OBJECT-TYPE
+	SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "This value includes the full name and version
+ 	 identification of the device software."
+    ::= { versions 1 }    
+
+--************************************************************************
+-- temperature and state of fans
+--************************************************************************
+
+tempControlState OBJECT-TYPE
+	SYNTAX      INTEGER {low(0), normal(1), high(2), tooHigh(3)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "The state of the temperature control can be:
+     0 - Low
+     1 - Normal
+     2 - High
+     3 - TooHigh"
+    ::= { temperature 1 }
+
+tempValue OBJECT-TYPE
+	SYNTAX      Integer32 (1..150)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "The temperature value in the device in grade Celsius."
+    ::= { temperature 2 }
+          
+greenFanStatus OBJECT-TYPE
+	SYNTAX      INTEGER {failed(0), working(1)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "The status of the fan which is placed closest to the green LED.
+     For ESN310, green fan is the fan place to the front"
+    ::= { fansStatus 1 }
+
+redFanStatus OBJECT-TYPE
+	SYNTAX      INTEGER {failed(0), working(1)}
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "The status of the fan which is placed closest to the red LED.
+     For ESN310, red fan is the fan place to the back"
+    ::= { fansStatus 2 }
+
+greenFanSpeed OBJECT-TYPE
+	SYNTAX      Unsigned32 
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "The speed of the fan, which is placed closest to the
+     green LED, measured in rpm (rotations per minute)." 
+    ::= { fansStatus 3 } 
+    
+redFanSpeed OBJECT-TYPE
+	SYNTAX      Unsigned32 
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "The speed of the fan, which is placed closest to the
+     red LED, measured in rpm (rotations per minute)." 
+    ::= { fansStatus 4 }
+
+--************************************************************************
+-- Trap definitions
+--************************************************************************
+
+tempTooHigh      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  tempControlState, tempValue }
+	STATUS  current
+    DESCRIPTION
+    "Temperature is too high. The temperature has increased 
+     above a fixed threshold value. The high temperature value is probably 
+     caused by fan failure or high environment temperature.
+
+	 For the IP DSLAM  the lines are stopped in order to reduce
+     the power consumption and avoid damage to the device."
+    ::= { traps 1 }
+
+tempTooHighCeasing      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  tempControlState, tempValue }
+	STATUS  current
+    DESCRIPTION
+    "Temperature too high ceasing. The temperature has decreased
+     below a fixed threshold value in the normal working area. 
+
+     For the IP DSLAM the lines are brought into service again, which will lead 
+     to increasing power consumption and possibly increased temperature."
+    ::= { traps 2 }  
+
+greenFanFailure      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  greenFanStatus, greenFanSpeed }
+	STATUS  current
+    DESCRIPTION
+    "Indicates a fan failure on the fan closest to the green LED.
+     For ESN310, green fan is the fan place to the front"
+    ::= { traps 3 }      
+
+greenFanCeasing      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  greenFanStatus, greenFanSpeed }
+	STATUS  current
+    DESCRIPTION
+    "Indicates the ceasing of the fan which is closest to the green LED.
+     For ESN310, green fan is the fan place to the front"
+    ::= { traps 4 }      
+
+redFanFailure      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  redFanStatus, redFanSpeed }
+	STATUS  current
+    DESCRIPTION
+    "Indicates a fan failure on the fan closest to the red LED.
+     For ESN310, red fan is the fan place to the back"
+    ::= { traps 5 }      
+
+redFanCeasing      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  redFanStatus, redFanSpeed }
+	STATUS  current
+    DESCRIPTION
+    "Indicates the ceasing of the fan which is closest to the red LED.
+     For ESN310, red fan is the fan place to the back"
+    ::= { traps 6 }
+
+restartAlarm      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+			  postMortemInfo, sysId  }
+	STATUS  current
+    DESCRIPTION
+    "Device restart alarm. The post mortem information
+     will indicate the reason for the restart."
+   ::= { traps 7 } 
+
+bothFansFailed      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  greenFanStatus, redFanStatus, greenFanSpeed, redFanSpeed }
+	STATUS  current
+    DESCRIPTION
+    "Indicates that both fans failed."
+    ::= { traps 15 }      
+
+bothFansFailCeasing      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  greenFanStatus, redFanStatus, greenFanSpeed, redFanSpeed }
+	STATUS  current
+    DESCRIPTION
+    "Indicates the ceasing of both fans failure. 
+     At least one of the fans is working."
+    ::= { traps 16 }
+    
+tempCloseToTooHigh      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  tempValue }
+	STATUS  current
+    DESCRIPTION
+    "Indicates the temperature is close to the too high value,
+     when the subscriber lines are shut down."
+    ::= { traps 22 }    
+    
+tempCloseToTooHighCeasing      NOTIFICATION-TYPE
+	OBJECTS { managedObjectClass, managedObjectInstance, sequenceNumber, 
+    		  perceivedSeverity, eventTime, eventTypePem, probableCause,  
+ 			  tempValue }
+	STATUS  current
+    DESCRIPTION
+    "Indicates that the temperatureCloseToTooHigh alarm is ceased."
+    ::= { traps 23 }          
+
+
+-- PETH (PoE) notifications
+
+pethPsePortFailureNotification NOTIFICATION-TYPE
+
+    OBJECTS     { managedObjectClass,
+                  managedObjectInstance,
+                  sequenceNumber, 
+    		          perceivedSeverity,
+                  eventTime,
+                  eventTypePem,
+                  probableCause }
+
+    STATUS      current
+
+    DESCRIPTION
+    "
+     This notification is sent when the port detects a permanent
+     power failure. It is not specified if the notification is triggered
+     by a malfunction on the PSE, PD or the MAIN PSE HW.
+    "
+
+    ::= { pethNotificationTypes 1 }
+
+
+pethPsePortFailureCeasingNotification NOTIFICATION-TYPE
+
+    OBJECTS     { managedObjectClass,
+                  managedObjectInstance,
+                  sequenceNumber, 
+    		          perceivedSeverity,
+                  eventTime,
+                  eventTypePem,
+                  probableCause }
+
+    STATUS      current
+
+    DESCRIPTION
+    "
+     The CEASING counterpart of pethPsePortFailureNotification.
+    "
+
+    ::= { pethNotificationTypes 2 }
+
+--************************************************************************
+-- special operands for event report operations
+--************************************************************************
+
+postMortemInfo OBJECT-TYPE
+	SYNTAX      DisplayString
+    MAX-ACCESS  accessible-for-notify
+    STATUS      current
+    DESCRIPTION
+    "Indicates the reason of the restart."
+    ::= { trapsParameters 7 }   
+    
+END
+    

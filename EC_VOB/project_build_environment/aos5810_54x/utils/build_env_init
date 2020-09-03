@@ -1,0 +1,42 @@
+source ~/.bashrc
+export ACCTON_PLATFORM_TOP_DIR=`cd ../../../ && pwd`
+
+export D_MODEL_NAME=AOS5810_54X
+
+export MODEL_NAME=aos5810_54x
+export SDK_MODEL_NAME=aos7710_32x
+export PROJECT_NAME=aos5810_54x
+export PROJECT_ID=479
+export PROJECT_PATH=${ACCTON_PLATFORM_TOP_DIR}/project_build_environment/${PROJECT_NAME}
+export SOURCE_PATH=${ACCTON_PLATFORM_TOP_DIR}/src
+export UTILITY_PATH=${ACCTON_PLATFORM_TOP_DIR}/utility
+export ARCH=x86
+export BUILD_GNU_TYPE=$MACHTYPE
+export HOST_GNU_TYPE=x86_64-linux-gnu
+export KBUILD_OUTPUT=${PROJECT_PATH}/linux-4.19.67
+export KERNDIR=${SOURCE_PATH}/linux_kernel/linux-4.19.67
+export KERVER=linux-4.19.67
+export SDKDRV=${SOURCE_PATH}/user/driver/devdrv/broadcom/sdk_6.4.10
+export SDK=${SOURCE_PATH}/kernel/driver/dev_driver/broadcom/sdk_6.4.11
+export SDKKEN=${SDK}
+export SDKPROJ=${PROJECT_PATH}/sdk_6.4.11
+export ACCPROJ=${PROJECT_PATH}
+export ACCSRC=${SOURCE_PATH}
+export ACCUTIL=${UTILITY_PATH}
+export ACCROOTFS=${PROJECT_PATH}/fs/rootfs
+export ACCMAKEFLAGS=-s
+#BUILD_DIR is for u-boot
+export LD_NAME=u-boot-2013.01.01
+export LD_BUILD_DIR=${PROJECT_PATH}/prom/bootloader
+export LD_SRC_DIR=${ACCSRC}/prom/loader
+export BUILD_DIR=${LD_BUILD_DIR}/uboot
+export UBOOT_SRC=${LD_BUILD_DIR}/${LD_NAME}
+export BOOTLOADER_DIR=${UBOOT_SRC}
+#TOOLCHAIN_PATH is for build ZebOS
+export TOOLCHAIN_PATH=/usr/bin
+PATH=${BUILD_DIR}/tools:${KBUILD_OUTPUT}/scripts/dtc:$PATH
+PATH=${UTILITY_PATH}/Python/Versions/Current/bin:${UTILITY_PATH}/Node/Versions/Current/bin:$PATH
+export DEFAULT_LANGUAGE=en-us
+export LANGUAGES=en-us?zh-cn
+export DEFAULT_API_FILE_NAME=api.json
+export FRR_SRC_DIR=${SOURCE_PATH}/user/protocol/frr-7.3.1

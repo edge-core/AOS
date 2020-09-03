@@ -1,0 +1,327 @@
+ENTERASYS-RADIUS-AUTH-CLIENT-MIB DEFINITIONS ::= BEGIN
+
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE                     FROM SNMPv2-SMI
+    MODULE-COMPLIANCE, OBJECT-GROUP                  FROM SNMPv2-CONF
+    TruthValue, RowStatus                            FROM SNMPv2-TC
+    etsysModules                                     FROM ENTERASYS-MIB-NAMES
+    InetAddressType, InetAddress                     FROM INET-ADDRESS-MIB;
+
+etsysRadiusAuthClientMIB MODULE-IDENTITY
+       LAST-UPDATED "0201241557Z"  -- Thu Jan 24 15:57 GMT 2002
+       ORGANIZATION 
+                 "Enterasys Networks"
+       CONTACT-INFO
+             "Enterasys Networks, Inc.
+              35 Industrial Way, P.O. Box 5005
+              Rochester, NH 03867-0505
+              Phone: +1-603-332-9400
+              E-Mail: support@enterasys.com"
+       DESCRIPTION
+             "The Enterasys Networks Proprietary MIB module for entities 
+              implementing the client side of the Remote Access 
+              Dialin User Service (RADIUS) authentication 
+              protocol (RFC2865).
+          
+              This MIB provides read-write access to configuration objects
+              not provided in the standard RADIUS Authentication Client 
+              MIB (RFC2618).  However, the write capability must only
+              be supported for SNMPv3, or other SNMP versions with 
+              adequately strong security.
+
+              Security concerns include Object ID verification, source address
+              verification and timeliness verification."
+
+       REVISION    "0201241557Z"  -- Thu Jan 24 15:57 GMT 2002
+       DESCRIPTION "Changed { etsysRadiusAuthClientOID } to
+                    { etsysModules 4 } so that the released MIB would
+                    work with the NetSNMP stack that is currently
+                    being used by Netsight."
+
+       REVISION    "0011080000Z" -- 08 November 2000
+       DESCRIPTION "Initial version"
+
+       ::= { etsysModules 4 } -- { etsysRadiusAuthClientOID }
+
+
+
+-- ------------------------------------
+-- MIB Objects
+-- ------------------------------------
+
+etsysRadiusAuthClientMIBObjects     OBJECT IDENTIFIER 
+       ::= { etsysRadiusAuthClientMIB 1 }
+
+etsysRadiusAuthClientRetryTimeout OBJECT-TYPE
+      SYNTAX         INTEGER (0..2147483647)
+      MAX-ACCESS     read-write
+      STATUS         current
+      DESCRIPTION
+             "The number of seconds to wait for a RADIUS Server to
+              respond to a request.  This parameter value is maintained
+              across system reboots."
+      ::= { etsysRadiusAuthClientMIBObjects 1 }
+
+etsysRadiusAuthClientRetries OBJECT-TYPE
+      SYNTAX         INTEGER (0..2147483647)
+      MAX-ACCESS     read-write
+      STATUS         current
+      DESCRIPTION
+             "The number of times to resend an authentication packet
+              if a RADIUS Server does not respond to a request.
+              This parameter value is maintained across system reboots."
+      ::= { etsysRadiusAuthClientMIBObjects 2 }
+
+etsysRadiusAuthClientEnable OBJECT-TYPE
+      SYNTAX         INTEGER {
+                         enable(1),
+                         disable(2)
+                     }
+      MAX-ACCESS     read-write
+      STATUS         current
+      DESCRIPTION
+             "This indicates whether or not the RADIUS Client is
+              or is to be, enabled or disabled. This parameter value 
+              is maintained across system reboots."
+      ::= { etsysRadiusAuthClientMIBObjects 3 }
+
+etsysRadiusAuthClientAuthType OBJECT-TYPE
+      SYNTAX         INTEGER {
+                         mac(1),
+                         eapol(2)
+                     }
+      MAX-ACCESS     read-write
+      STATUS         current
+      DESCRIPTION
+             "This indicates which method is being used for 
+              authentication.
+
+              mac(1)   - indicates MAC address authentication
+              eapol(2) - indicates EAPOL authentication
+
+              This list of enumeration constants is subject to
+              change. This parameter value is maintained across 
+              system reboots."
+      ::= { etsysRadiusAuthClientMIBObjects 4 }
+
+etsysRadiusAuthServerTable OBJECT-TYPE
+      SYNTAX         SEQUENCE OF EtsysRadiusAuthServerEntry
+      MAX-ACCESS     not-accessible
+      STATUS         current
+      DESCRIPTION
+            "The (conceptual) table listing the 
+             RADIUS authentication servers."
+      ::= { etsysRadiusAuthClientMIBObjects 5 }
+
+etsysRadiusAuthServerEntry OBJECT-TYPE
+      SYNTAX         EtsysRadiusAuthServerEntry
+      MAX-ACCESS     not-accessible
+      STATUS         current
+      DESCRIPTION
+            "An entry (conceptual row) representing a RADIUS
+             authentication server with which the client shares
+             a secret.
+
+             All created conceptual rows are non-volatile and as such
+             must be maintained upon restart of the agent."
+      INDEX      { etsysRadiusAuthServerIndex }
+      ::= { etsysRadiusAuthServerTable 1 }
+
+EtsysRadiusAuthServerEntry ::= SEQUENCE {
+      etsysRadiusAuthServerIndex                        INTEGER,
+      etsysRadiusAuthClientServerAddressType            InetAddressType,
+      etsysRadiusAuthClientServerAddress                InetAddress,
+      etsysRadiusAuthClientServerPortNumber             INTEGER,
+      etsysRadiusAuthClientServerSecret                 OCTET STRING,
+      etsysRadiusAuthClientServerSecretEntered          TruthValue,
+      etsysRadiusAuthClientServerClearTime              INTEGER,
+      etsysRadiusAuthClientServerStatus                 RowStatus
+}
+
+etsysRadiusAuthServerIndex OBJECT-TYPE
+      SYNTAX         INTEGER (1..2147483647)
+      MAX-ACCESS     not-accessible
+      STATUS         current
+      DESCRIPTION
+             "A number uniquely identifying each conceptual row
+              in the etsysRadiusAuthServerTable.
+   
+              In the event of an agent restart, the same value
+              of etsysRadiusAuthServerIndex must be used to identify 
+              each conceptual row in etsysRadiusAuthServerTable
+              as prior to the restart."
+      ::= { etsysRadiusAuthServerEntry 1 }
+
+etsysRadiusAuthClientServerAddressType OBJECT-TYPE
+      SYNTAX         InetAddressType
+      MAX-ACCESS     read-create
+      STATUS         current
+      DESCRIPTION
+            "The type of Internet address by which the 
+             RADIUS authentication server is reachable."
+      ::= { etsysRadiusAuthServerEntry 2 }
+
+etsysRadiusAuthClientServerAddress OBJECT-TYPE
+      SYNTAX         InetAddress (SIZE(1..64))
+      MAX-ACCESS     read-create
+      STATUS         current
+      DESCRIPTION
+            "The Internet address for the RADIUS authentication
+             server.  Note that implementations must limit
+             themselves to a singe entry in this table per reachable
+             server.
+
+             The etsysRadiusAuthClientServerAddress may not be
+             empty due to the SIZE restriction.  Also the size of
+             a DNS name is limited to 64 characters.
+
+             If a row is created administratively by an SNMP
+             operation and the address type value is dns(16), then
+             the agent stores the DNS name internally. A DNS name
+             lookup must be performed on the internally stored DNS
+             name whenever it is being used to contact the peer.
+             If a row is created by the managed entity itself and
+             the address type value is dns(16), then the agent
+             stores the IP address internally. A DNS reverse lookup
+             must be performed on the internally stored IP address
+             whenever the value is retrieved via SNMP.
+
+             This parameter value is maintained across system reboots."
+      ::= { etsysRadiusAuthServerEntry 3 }
+
+etsysRadiusAuthClientServerPortNumber  OBJECT-TYPE
+      SYNTAX         INTEGER (0..65535)
+      MAX-ACCESS     read-create
+      STATUS         current
+      DESCRIPTION
+            "The UDP port number (0-65535) the client is using
+             to send requests to this server.  This parameter 
+             value is maintained across system reboots."
+      ::= { etsysRadiusAuthServerEntry 4 }
+
+etsysRadiusAuthClientServerSecret  OBJECT-TYPE
+      SYNTAX         OCTET STRING (SIZE(0..255))
+      MAX-ACCESS     read-create
+      STATUS         current
+      DESCRIPTION
+            "This object is the secret shared between the RADIUS 
+             authentication server and RADIUS client.  This 
+             parameter value is maintained across system reboots."
+      ::= { etsysRadiusAuthServerEntry 5 }
+
+etsysRadiusAuthClientServerSecretEntered  OBJECT-TYPE
+      SYNTAX         TruthValue
+      MAX-ACCESS     read-only
+      STATUS         current
+      DESCRIPTION
+            "This indicates the existence of a shared secret."
+      ::= { etsysRadiusAuthServerEntry 6 }
+
+etsysRadiusAuthClientServerClearTime OBJECT-TYPE
+      SYNTAX         INTEGER (1..2147483647)
+      MAX-ACCESS     read-create
+      STATUS         current
+      DESCRIPTION   
+             "This value indicates the date and time since server
+              counters were last cleared.  
+
+              On a write, the server counters will be cleared and
+              the clear time will be set to the current time if the
+              decoded object is zero."
+      ::= { etsysRadiusAuthServerEntry 7 }
+
+etsysRadiusAuthClientServerStatus OBJECT-TYPE
+      SYNTAX         RowStatus
+      MAX-ACCESS     read-create
+      STATUS         current
+      DESCRIPTION   
+             "Lets users create and delete RADIUS authentication
+              server entries on systems that support this capability.
+              
+              Rules
+             
+                 1. When creating a RADIUS Authentication Client, it 
+                    is up to the management station to determine a 
+                    suitable etsysRadiusAuthServerIndex.
+                    To facilitate interoperability, agents should not 
+                    put any restrictions on the 
+                    etsysRadiusAuthServerIndex beyond the 
+                    obvious ones that it be valid and unused.
+
+                 2. Before a new row can become 'active', values
+                    must be supplied for the columnar objects
+                    etsysRadiusAuthClientServerAddress,
+                    etsysRadiusAuthClientServerPortNumber and
+                    etsysRadiusAuthClientServerSecret.
+
+                 3. The value of etsysRadiusAuthClientServerStatus
+                    must be set to 'notInService' in order to modify a 
+                    writable object in the same conceptual row.
+
+                 4. etsysRadiusAuthClientServer entries whose 
+                    status is 'notReady' or 'notInService' will 
+                    not be used for authentication."
+
+      ::= { etsysRadiusAuthServerEntry 8 }
+
+
+-- ------------------------------------
+-- Conformance information
+-- ------------------------------------
+
+etsysRadiusAuthClientMIBConformance
+       OBJECT IDENTIFIER ::= { etsysRadiusAuthClientMIB 2 }
+etsysRadiusAuthClientMIBCompliances
+       OBJECT IDENTIFIER ::= { etsysRadiusAuthClientMIBConformance 1 }
+etsysRadiusAuthClientMIBGroups
+       OBJECT IDENTIFIER ::= { etsysRadiusAuthClientMIBConformance 2 }
+
+
+-- ------------------------------------
+-- Units of conformance
+-- ------------------------------------
+
+etsysRadiusAuthClientMIBGroup OBJECT-GROUP
+     OBJECTS { etsysRadiusAuthClientRetryTimeout,
+               etsysRadiusAuthClientRetries,
+               etsysRadiusAuthClientEnable,
+               etsysRadiusAuthClientAuthType,
+               etsysRadiusAuthClientServerAddressType,
+               etsysRadiusAuthClientServerAddress,
+               etsysRadiusAuthClientServerPortNumber,
+               etsysRadiusAuthClientServerSecret,
+               etsysRadiusAuthClientServerSecretEntered,
+               etsysRadiusAuthClientServerClearTime,
+               etsysRadiusAuthClientServerStatus
+             }
+     STATUS  current
+     DESCRIPTION
+     "The basic collection of objects providing a proprietary
+      extension to the standard RADIUS Client MIB. 
+          
+      This MIB provides read-write access to configuration objects
+      not provided in the standard RADIUS Authentication Client 
+      MIB (RFC2618).  However, the write capability must only
+      be supported for SNMPv3, or other SNMP versions with 
+      adequately strong security."
+     ::= { etsysRadiusAuthClientMIBGroups 1 }
+
+
+-- ------------------------------------
+-- Compliance statements
+-- ------------------------------------
+
+etsysRadiusClientMIBCompliance MODULE-COMPLIANCE
+     STATUS  current
+     DESCRIPTION
+           "The compliance statement for authentication clients
+            implementing the RADIUS Authentication Client MIB."
+     MODULE  -- this module
+            MANDATORY-GROUPS { etsysRadiusAuthClientMIBGroup }
+
+     ::= { etsysRadiusAuthClientMIBCompliances 1 }
+
+
+
+END

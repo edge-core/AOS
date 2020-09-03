@@ -1,0 +1,15 @@
+#!/bin/sh
+
+__PREFIX__=x86_64-linux-gnu
+export AS=$__PREFIX__-as
+export AR=$__PREFIX__-ar
+export CC=$__PREFIX__-gcc
+export CXX=$__PREFIX__-g++
+export CPP=$__PREFIX__-cpp
+export LINK=$__PREFIX__-g++
+export NM=$__PREFIX__-nm
+export OBJCOPY=$__PREFIX__-objcopy
+export OBJDUMP=$__PREFIX__-objdump
+export RANLIB=$__PREFIX__-ranlib
+export STRIP=$__PREFIX__-strip
+exec "$@"

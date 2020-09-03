@@ -1,0 +1,74 @@
+DEV_NAME1="sda"
+DEV_NAME2="sdb"
+DEV_NAME3="sdc"
+DEV_NAME4="sdd"
+DEV_LIST="sda sdb sdc sdd"
+dev_no=0
+
+ONIE_MACHINE_NAME_LIST="as5812_54x as5812_54t as6812_32x"
+INVALID_BOARD_ID=255
+board_id=${INVALID_BOARD_ID}
+
+# probe the board id of the device through the uboot environment "onie_machine"
+# board id 0 - as5812_54x
+# board id 1 - as5812_54t
+# board id 2 - as6812_32x
+probe_board_id()
+{
+    local idx
+    local dev_onie_machine
+    local onie_machine_name
+
+    dev_onie_machine="`onlp_query -ep`"
+    let idx=0
+    for onie_machine_name in ${ONIE_MACHINE_NAME_LIST}
+    do
+        echo ${dev_onie_machine} | grep ${onie_machine_name} > /dev/null
+        if [ "$?" -eq "0" ] ; then
+            board_id=${idx}
+            #echo "Board id is probed as ${board_id}"
+            return 0
+        fi
+        let idx=${idx}+1
+    done
+    echo "Error! Unknown board id.(onie_machine=${dev_onie_machine})"
+    return 1
+}
+
+# find external usb disk device node by looping through sys/block/device_node_name/uevent
+# to find the one contains "1-1.1.1:1.0"(board_id=0)
+find_ext_usb_disk_dev()
+{
+	local devname
+	local i
+	local ext_usb_disk_pattern
+
+	case "${board_id}" in
+		0)
+		ext_usb_disk_pattern="1-1.1.1:1.0"
+		;;
+                1)
+                ext_usb_disk_pattern="1-1.1.1:1.0"
+                ;;
+                2)
+                ext_usb_disk_pattern="1-1.1.1:1.0"
+                ;;
+		*)
+		echo "find_ext_usb_disk_dev() error. Unknown board id."
+		return 1
+		;;
+	esac
+
+	dev_no=0
+	i=0
+	for	devname	in ${DEV_LIST};
+	do
+		let	i=${i}+1
+		ls -l /sys/block/$devname 2>/dev/null | grep ${ext_usb_disk_pattern} > /dev/null
+		if [ $? -eq 0 ]; then
+			dev_no=${i}
+			return 0
+		fi
+	done
+	return 1
+}

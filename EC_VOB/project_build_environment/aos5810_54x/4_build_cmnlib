@@ -1,0 +1,23 @@
+#!/bin/sh
+if ! utils/check_build_env; then
+	cd utils
+	. ./build_env_init
+	cd -
+fi
+
+echo "Compiling LibXML ..."
+./utils/build_libxml2.sh
+if [ $? != 0 ] ; then
+        echo "Error: Build LibXML."
+        exit 1
+fi
+echo "Done"
+
+echo "Compiling cmnlib ..."
+cd ${ACCPROJ}/cmnlib
+make distclean
+./start_conf
+make clean
+make uninstall
+make ${ACCMAKEFLAGS} all install
+[ $? = 0 ] && echo "Done"

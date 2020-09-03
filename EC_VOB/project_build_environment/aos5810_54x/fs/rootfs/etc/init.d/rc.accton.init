@@ -1,0 +1,60 @@
+######################################
+ECHO=echo # for debug
+ECHO=":"  # for release
+#------------------------------------
+#exec_proc() { ${ECHO} $*; test -e $1 && $*; }
+######################################
+
+DEBUG_PRELOAD="env LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so"
+
+### set AOS path
+if [ -z "${AOS_PATH}" ]; then
+    AOS_PATH=""
+fi
+
+##Insert accton platform kernel module
+if test -e ${AOS_PATH}/lib/modules/`uname -r`/acctonlkm.ko
+then
+	insmod ${AOS_PATH}/lib/modules/`uname -r`/acctonlkm.ko
+fi
+
+# init phy for as5812_54t
+dev_onie_machine="`onlp_query -ep`"
+echo ${dev_onie_machine} | grep "as5812_54t" > /dev/null
+if [ "$?" -eq "0" ] ; then
+    i2cset -y -f 0 0x60 0x5  0x0f b #phy-reset
+    i2cset -y -f 0 0x60 0x6  0xff b #phy-reset
+fi
+
+. ${AOS_PATH}/etc/init.d/aos_mode_func
+# init support mode
+support_mode=([$INVALID_MODE]=0 [$LEGACY_MODE]=1 [$OF_MODE]=1)
+
+init_default_mode
+
+#get mode from user input
+main_menu support_mode[@]
+
+CURRENT_MODE=$(get_current_mode)
+
+
+LD_LIB_PATH="${AOS_PATH}/usr/lib"
+
+
+setup_op_mode_env
+
+#FRR initialization
+[ -e /etc/frr/frrinit ] && /etc/frr/frrinit
+
+. ${AOS_PATH}/etc/init.d/aos_process_fun
+aos_init_proc
+
+do_all_mode_stuff
+
+# patch for systemd
+while :
+do
+    sleep 1000
+done
+
+exit 0

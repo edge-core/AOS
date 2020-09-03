@@ -1,0 +1,138 @@
+PEM-STANDARD DEFINITIONS ::= BEGIN
+
+IMPORTS
+	diaxMIB
+		FROM DXD-SMI
+
+	DisplayString
+		FROM RFC1213-MIB
+  
+	DateAndTime
+		FROM SNMPv2-TC
+    
+	ItuPerceivedSeverity,
+	IANAItuProbableCause, IANAItuEventType
+		FROM PEM-STANDARD-TC
+        
+    MODULE-IDENTITY, OBJECT-TYPE, Counter32
+        FROM SNMPv2-SMI;
+
+pemStandardObjects MODULE-IDENTITY
+    LAST-UPDATED
+         "200204040000Z"
+    ORGANIZATION
+		 "Ericsson Diax A/S - Denmark"
+    CONTACT-INFO
+		 "
+		 Ericsson Diax A/S
+		 Faelledvej 17
+		 DK-7600 Struer
+		 Denmark
+		 Phone : +45 97 86 90 22
+
+		 Contact : Peder Joergensen
+		 E-mail: peder.jorgensen@dxd.ericsson.se
+		 "
+   DESCRIPTION
+		 "
+		 This document describe the standard alarm objects.
+		 "
+   REVISION
+   		 "200204041600Z"
+   DESCRIPTION
+		 "
+		 REVISION HISTORY:-
+
+		 REV	DATE		NAME		DESCRIPTION
+		 A		020404		DXDPJN		File created
+		 A		020418		DXDPJN		eventType renamed to eventTypePem  
+		 A		020808		DXDPJN		managedObjectID changed to managedObjectInstance
+		 "
+    ::= { diaxMIB 500 }
+
+	alarmObjects	OBJECT IDENTIFIER ::= { pemStandardObjects 1 }
+
+-- alarm header objects
+
+managedObjectClass OBJECT-TYPE
+    SYNTAX DisplayString
+    MAX-ACCESS  accessible-for-notify
+    STATUS  current
+    DESCRIPTION
+    	"Specifies the class of the Managed Object issuing the alarm"
+    ::= { alarmObjects 1 }
+
+managedObjectInstance OBJECT-TYPE
+    SYNTAX DisplayString
+    MAX-ACCESS  accessible-for-notify
+    STATUS  current
+    DESCRIPTION
+    	"Specifies the specific instance of the Managed Object"
+    ::= { alarmObjects 2 }
+
+sequenceNumber OBJECT-TYPE
+    SYNTAX  Counter32
+    MAX-ACCESS  accessible-for-notify
+    STATUS  current
+    DESCRIPTION
+    	"Specifies a unique trap/notification number."
+    ::= { alarmObjects 3 }
+
+perceivedSeverity OBJECT-TYPE
+	SYNTAX ItuPerceivedSeverity
+	MAX-ACCESS	accessible-for-notify
+	STATUS current
+	DESCRIPTION
+		"ITU perceived severity values as per [M.3100] and [X.733]."
+    ::= { alarmObjects 4 }
+
+eventTime OBJECT-TYPE
+    SYNTAX DateAndTime
+    MAX-ACCESS accessible-for-notify
+    STATUS current
+    DESCRIPTION
+    	"A date-time specification.
+
+             field  octets  contents                  range
+             -----  ------  --------                  -----
+               1      1-2   year                      0..65536
+               2       3    month                     1..12
+               3       4    day                       1..31
+               4       5    hour                      0..23
+               5       6    minutes                   0..59
+               6       7    seconds                   0..60
+                            (use 60 for leap-second)
+               7       8    deci-seconds              0..9
+               8       9    direction from UTC        '+' / '-'
+               9      10    hours from UTC            0..11
+              10      11    minutes from UTC          0..59
+
+            For example, Tuesday May 26, 1992 at 1:30:15 PM EDT would be
+            displayed as:
+
+                             1992-5-26,13:30:15.0,-4:0
+
+            Note that if only local time is known, then timezone
+            information (fields 8-10) is not present."
+    ::= { alarmObjects 5 }
+
+eventTypePem OBJECT-TYPE
+	SYNTAX IANAItuEventType
+	MAX-ACCESS accessible-for-notify
+	STATUS current
+	DESCRIPTION
+		" Represents the event type values for the alarms as per
+		[M.3100], [X.733] and [X.736]"
+	::= { alarmObjects 6 }
+
+probableCause OBJECT-TYPE
+	SYNTAX IANAItuProbableCause
+	MAX-ACCESS accessible-for-notify
+	STATUS current
+	DESCRIPTION
+		"ITU probable cause values as per [M.3100],
+		[X.733] and [X.736]."
+    ::= { alarmObjects 7 }
+
+END
+

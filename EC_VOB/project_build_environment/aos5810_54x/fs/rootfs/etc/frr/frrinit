@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ ! -d /var/log/frr ]; then
+    mkdir /var/log/frr
+    chown frr:frr /var/log/frr
+    chmod 755 /var/log/frr
+fi
+
+cp -r /usr/lib/libyang* /usr/lib/x86_64-linux-gnu/
+
+/usr/bin/frr/watchfrr.sh start
+/usr/bin/frr/frrinit.sh start

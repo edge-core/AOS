@@ -1,0 +1,84 @@
+#!/bin/sh
+
+# Copyright 2014 Cumulus Networks, Inc.
+# All rights reserved
+
+# This script is run *before* the root file system is mounted on
+# ${rootmnt}.
+
+PREREQ="lvm2"
+
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+#. /scripts/cumulus-functions
+
+#if [ $cl_platform = 'quanta_ly8_rangeley' ] || [ $cl_platform = 'quanta_ly6_rangeley' ] || \
+#    [ $cl_platform = 'quanta_ly9_rangeley' ]; then
+    # Quanta LY8/LY6/LY9 use an external RTC present on the I2C bus.
+    # Start using this instead of built-in SOC RTC as soon as you can.
+#    echo ds1339 0x68 > /sys/bus/i2c/devices/i2c-0/new_device
+    # instantiating the device and /dev/rtc1 takes time.
+#    sleep 1
+    # Set system time from RTC1
+#    hwclock -f /dev/rtc1 -s --utc
+#fi
+
+# Always active all volumes.  This allows the file system UUIDs to be
+# visible.
+if [ "$debug" = "y" ] ; then
+    verbose="-v"
+else
+    verbose=
+fi
+
+tmp_lvmlog="/tmp/lvm.log"
+
+# Wait for the physical device to become active
+
+# Default delay is 30s
+slumber=${ROOTDELAY:-30}
+slumber=$(( ${slumber} * 10 ))
+while [ ${slumber} -gt 0 ] ; do
+
+    lvm vgscan $verbose > $tmp_lvmlog 2>&1 || {
+        log_failure_msg "Problems running lvm vgscan"
+        cat $tmp_lvmlog
+        rm -f $tmp_lvmlog
+        cl_panic
+    }
+    if [ "$quiet" = "n" ] ; then
+        cat $tmp_lvmlog
+    fi
+
+    if lvm vgchange -ay $verbose ACCTON > $tmp_lvmlog 2>&1 ; then
+        break
+    fi
+
+    /bin/sleep 0.1
+    slumber=$(( ${slumber} - 1 ))
+done
+
+if [ ${slumber} -le 0 ]; then
+    log_failure_msg "Unable to find LVM volume group: CUMULUS"
+    cat $tmp_lvmlog
+    rm -f $tmp_lvmlog
+    cl_panic
+fi
+
+if [ "$quiet" = "n" ] ; then
+    cat $tmp_lvmlog
+fi
+rm -f $tmp_lvmlog
+
+exit 0

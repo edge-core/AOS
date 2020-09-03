@@ -1,0 +1,50 @@
+#clean kernel dep and uImage etc .#
+if ! utils/check_build_env; then
+	cd utils
+	. ./build_env_init
+	cd -
+fi
+
+#clean uboot
+rm -rf ${BUILD_DIR}
+
+#clean linux kernel
+rm -rf ${KBUILD_OUTPUT}
+mkdir -p ${KBUILD_OUTPUT}
+
+#clean SDK #
+make -C ${SDKPROJ} clean
+make -C ${SDKPROJ} clean-lib
+make -C ${SDKPROJ} uninstall
+rm -rf ${SDKPROJ}/build
+
+#clean syscall #
+cd ${ACCPROJ}/acctonlkm
+make clean
+make uninstall
+
+#clean CMNLIB #
+cd ${ACCPROJ}/cmnlib
+rm aclocal.m4
+./start_conf
+make clean
+make uninstall
+make distclean
+#clean user#
+cd ${ACCPROJ}/user
+rm aclocal.m4
+./start_conf
+make clean
+make uninstall
+make distclean
+#clean prom#
+cd ${ACCPROJ}/prom
+rm aclocal.m4
+./start_conf
+make clean
+make uninstall
+make distclean
+#clean sysbol map
+rm ${ACCPROJ}/fs/rootfs/usr/map/*.*
+#clean web page files
+rm -rf ${ACCPROJ}/fs/rootfs/usr/webroot

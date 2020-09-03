@@ -1,0 +1,22 @@
+--
+-- DXD root SMI 
+-- CONTACT-INFO: 
+-- 		 Ericsson Diax A/S - Denmark
+--		 Faelledvej 17
+--		 DK-7600 Struer
+--		 Denmark
+--		 Phone : +45 97 86 90 62
+--		 
+--		 Contact : Dorina Ciubotaru
+--		 E-mail: dorina.ciubotaru@dxd.ericsson.se
+
+PEA-SMI DEFINITIONS ::= BEGIN
+
+     IMPORTS
+         diaxMIB
+               FROM DXD-SMI;
+         
+    pea	OBJECT IDENTIFIER ::= { diaxMIB 600 }
+
+END
+

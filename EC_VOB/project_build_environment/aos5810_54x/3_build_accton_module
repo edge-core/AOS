@@ -1,0 +1,13 @@
+#!/bin/sh
+if ! utils/check_build_env; then
+	cd utils
+	. ./build_env_init
+	cd -
+fi
+
+echo "Compiling accton module ..."
+cd ${ACCPROJ}/acctonlkm
+make clean
+make uninstall
+make ${ACCMAKEFLAGS} all install
+[ $? = 0 ] && echo "Done"

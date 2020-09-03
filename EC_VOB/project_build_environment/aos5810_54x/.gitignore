@@ -1,0 +1,9 @@
+initramfs/initrd.cpio.gz
+initramfs/initrd_base.cpio.gz
+initramfs/rootfs_tmp/
+runtime/aos_files.tgz
+runtime/aos_vmlinuz
+runtime/initrd.cpio.gz
+runtime/mibx.dtd
+runtime/mibx.json
+runtime/runtime.swi

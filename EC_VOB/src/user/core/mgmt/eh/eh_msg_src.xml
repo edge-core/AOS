@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE EH SYSTEM "eh_ui_msg_no.dtd">
+<EH xmlns="http://www.edgecore.com/eh"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.edgecore.com/eh file:eh_msg.xsd">
+    <message>
+        <UI_Msg_No>&EH_UI_MSG_NO_SWCTRL_OUT_OF_RANGE;</UI_Msg_No>
+        <string>
+            <en-EN>out of range.</en-EN>
+            <zh-CN>超过合理范围</zh-CN>
+        </string>
+    </message>
+    <message>
+        <UI_Msg_No>&EH_UI_MSG_NO_SWCTRL_INVALID_IP;</UI_Msg_No>
+        <string>
+            <en-EN>Invalid IP address.</en-EN>
+            <zh-CN>无效的互联网位址</zh-CN>
+        </string>
+    </message>
+    <message>
+        <UI_Msg_No>&EH_UI_MSG_NO_SWCTRL_TEST_ARG1;</UI_Msg_No>
+        <string>
+            <en-EN>Test message 1, arg1 = %d.</en-EN>
+            <zh-CN>测试讯息1,引数1=%d</zh-CN>
+        </string>
+    </message>
+    <message>
+        <UI_Msg_No>&EH_UI_MSG_NO_SWCTRL_TEST_ARG2;</UI_Msg_No>
+        <string>
+            <en-EN>Test message 2, arg1 = %d, arg2 = %d</en-EN>
+            <zh-CN>测试讯息2,引数1=%d,引数2=%d</zh-CN>
+        </string>
+    </message>
+    <message>
+        <UI_Msg_No>&EH_UI_MSG_NO_SWCTRL_TEST_ARG3;</UI_Msg_No>
+        <string>
+            <en-EN>Test message 3, arg1 = %d, arg2 = %d, arg3 = %d</en-EN>
+            <zh-CN>测试讯息3,引数1=%d,引数2=%d,引数3=%d</zh-CN>
+        </string>
+    </message>
+</EH>
+

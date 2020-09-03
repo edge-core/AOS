@@ -1,0 +1,16 @@
+{
+    "Product Name" : "5812-54X-O-AC-F",
+    "Part Number" : "FP1ZZ5654035A",
+    "Serial Number" : "581254X1744047",
+    "MAC": "a8:2b:b5:d2:8f:ec",     "MAC Range": 74,
+    "Manufacture Date" : "11/13/2017 17:09:03",
+    "Vendor" : "Edgecore",
+    "Platform Name" : "x86_64-accton_as5812_54x-r0",
+    "Device Version": 0,
+    "Label Revision" : "R03C",
+    "Country Code" : "TW",
+    "Diag Version" : "1.0.0.8",
+    "Service Tag" : null,
+    "ONIE Version" : "2015.11.00.01",
+    "CRC": "0xb3e4a530"
+}

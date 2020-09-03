@@ -1,0 +1,119 @@
+ENTERASYS-MIB-NAMES DEFINITIONS ::= BEGIN
+
+--  enterasys-mib-names.txt
+--
+--  This module provides authoritative definitions for Enterasys
+--  Networks' MIB Names.  
+--
+--  This module will be extended, as needed.
+
+--  Enterasys Networks reserves the right to make changes in
+--  specification and other information contained in this document
+--  without prior notice.  The reader should consult Enterasys
+--  Networks to determine whether any such changes have been made.
+--
+--  In no event shall Enterasys Networks be liable for any incidental,
+--  indirect, special, or consequential damages whatsoever (including
+--  but not limited to lost profits) arising out of or related to this
+--  document or the information contained in it, even if Enterasys
+--  Networks has been advised of, known, or should have known, the
+--  possibility of such damages.
+--
+--  Enterasys Networks grants vendors, end-users, and other interested 
+--  parties a non-exclusive license to use this Specification in connection 
+--  with the management of Enterasys products.
+
+--  Copyright November, 2000 Enterasys Networks, Inc.
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-IDENTITY, enterprises
+        FROM SNMPv2-SMI;
+
+-- Global definition for Enterasys tree
+enterasys OBJECT-IDENTITY
+    STATUS      current
+    DESCRIPTION
+        "Global definition of the enterasys enterprise branch
+         as provided by the Internet Assigned Numbers Authority
+         (IANA)."
+    ::= { enterprises 5624 }
+
+etsysMibs      OBJECT IDENTIFIER ::= { enterasys 1 }
+-- All MIBs are under this branch.
+
+etsysOids      OBJECT IDENTIFIER ::= { enterasys 2 }
+-- All OIDs are under this branch.
+
+etsysAgentCaps OBJECT IDENTIFIER ::= { enterasys 3 }
+-- All Agent Capabilities Statements are under this branch.
+
+etsysModules   OBJECT IDENTIFIER ::= { etsysMibs 2 }
+-- All OIDs to be used for MODULE-IDENTITY macro invocation 
+-- are under this branch.  Further expansion of this branch is 
+-- detailed in the ENTERASYS-MIB-ORG module.
+
+
+etsysModuleName  MODULE-IDENTITY
+    LAST-UPDATED "0011132121Z"  -- Mon Nov 13 21:21:28 GMT 2000
+    ORGANIZATION "Enterasys Networks"
+    CONTACT-INFO
+    "Postal: Enterasys Networks
+             35 Industrial Way, P.O. Box 5005
+             Rochester, NH 03867-0505
+
+     Phone:  +1 603 332 9400
+     E-mail: support@enterasys.com
+     WWW:    http://www.enterasys.com"
+   
+    DESCRIPTION
+        "This MIB module defines a portion of the SNMP enterprise
+         MIBs under Enterasys Networks enterprise OID.
+
+         This module embodies the top level hierarchy of all
+         OIDs, MIBs, and AGENT-CAPABILITIES statements for
+         Enterasys Networks' devices.
+
+         This leaf lexicographically falls under the etsysMibs branch
+         of the enterasys enterprise tree."
+
+    REVISION    "0011132121Z"
+    DESCRIPTION "Imported OBJECT-IDENTITY from SNMPv2-SMI.
+                 Removed company address from the document header."
+
+    REVISION    "0010051300Z"
+    DESCRIPTION "Obsoleted etsysNamesMib, etsysConformance,
+                 etsysConformName, etsysConformOID.  This is the 
+                 first non-experimental 
+                 version of this module."
+
+    REVISION    "0004070000Z"
+    DESCRIPTION "Fix many of the bugs in the first edit."
+
+    REVISION    "0003210000Z"
+    DESCRIPTION "The initial version of this MIB module."
+--    ::= { enterprises 5624 1 2 1 } 
+		::= { etsysModules 1 } 
+
+
+
+etsysNamesMib OBJECT-IDENTITY 
+    STATUS      obsolete
+    DESCRIPTION "Obsolete."
+    ::= { etsysMibs 1 }
+
+etsysConformance OBJECT-IDENTITY 
+    STATUS      obsolete
+    DESCRIPTION "Obsolete."
+    ::= { etsysMibs 3 }
+
+etsysConformName OBJECT-IDENTITY 
+    STATUS      obsolete
+    DESCRIPTION "Obsolete"
+    ::= { etsysConformance 1 }
+
+etsysConformOID OBJECT-IDENTITY 
+    STATUS      obsolete
+    DESCRIPTION "Obsolete"
+    ::= { etsysConformance 2 }
+
+END

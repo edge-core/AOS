@@ -1,0 +1,98 @@
+#!/bin/sh
+if ! utils/check_build_env; then
+	cd utils
+	. ./build_env_init
+	cd -
+fi
+
+if [ ! -d ${ACCROOTFS}/usr/lib ]; then
+	mkdir ${ACCROOTFS}/usr/lib || \
+		( echo "Failed to create directory ${ACCROOTFS}/usr/lib" && \
+		  exit 1 )
+fi
+
+if [ ! -d ${ACCROOTFS}/usr/bin ]; then
+	mkdir ${ACCROOTFS}/usr/bin || \
+		( echo "Failed to create directory ${ACCROOTFS}/usr/bin" && \
+		  exit 1 )
+fi
+
+if [ ! -d ${ACCROOTFS}/usr/sbin ]; then
+	mkdir ${ACCROOTFS}/usr/sbin || \
+		( echo "Failed to create directory ${ACCROOTFS}/usr/sbin" && \
+		  exit 1 )
+fi
+
+echo "Compiling LibXML ..."
+./utils/build_libxml2.sh
+if [ $? != 0 ] ; then
+        echo "Error: Build LibXML."
+        exit 1
+fi
+echo "Done"
+
+echo "Compiling LibXslt ..."
+./utils/build_libxslt.sh
+if [ $? != 0 ] ; then
+        echo "Error: Build LibXslt."
+        exit 1
+fi
+echo "Done"
+
+echo "Compiling OpenSSL ..."
+./utils/build_openssl.sh
+if [ $? != 0 ] ; then
+        echo "Error: Build OpenSSL."
+        exit 1
+fi
+echo "Done"
+
+echo "Compiling Libssh2 ..."
+./utils/build_libssh2.sh
+if [ $? != 0 ] ; then
+        echo "Error: Build Libssh2."
+        exit 1
+fi
+echo "Done"
+
+#echo "Compiling LibNetconf ..."
+#./utils/build_libnetconf.sh
+#if [ $? != 0 ] ; then
+#        echo "Error: Build LibNetconf."
+#        exit 1
+#fi
+#echo "Done"
+
+echo "Compiling PCRE2 ..."
+./utils/build_pcre2.sh
+if [ $? != 0 ] ; then
+        echo "Error: Build PCRE2."
+        exit 1
+fi
+echo "Done"
+
+echo "Compiling LibBSON ..."
+./utils/build_libbson.sh
+if [ $? != 0 ] ; then
+        echo "Error: Build LibBSON."
+        exit 1
+fi
+echo "Done"
+
+echo "Extracting ONLP source code ..."
+cd utils && ./build_onlplib.sh
+if [ $? != 0 ] ; then
+        echo "Error: Extracting ONLP source code error"
+        exit 1
+fi
+cd -
+echo "Done"
+
+echo "Compiling user ..."
+cd ${ACCPROJ}/user
+make distclean
+./start_conf
+make clean
+make uninstall
+make ${ACCMAKEFLAGS} all install
+[ $? = 0 ] && echo "Done"

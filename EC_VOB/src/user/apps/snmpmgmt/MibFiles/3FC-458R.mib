@@ -1,0 +1,742 @@
+-- ************************************************************************
+-- 
+-- Name:	3Com Port Security MIB
+-- 
+-- History  Date        Reason for Change
+-- 
+-- 1.00     1997       	Issued as 3Com RFC0021.
+-- 1.01     25 Jan 99   Added secureViolation4 TRAP
+-- 1.02     29 Oct 99	Added disablePortTemporarily(4) to the
+--                      secureIntrusionAction object.
+-- 1.03     09 Mar 01   Add support for dynamically authorised 
+--                      device addresses (3Com-458).
+-- 1.04     09 Apr 02   Add VLAN membership information to the 
+--                      secureLogon & secureLogoff traps.
+-- 1.05      1 May 03   Corrected name and imports.
+-- 1.06     26 Mar 04   Added MAC-Address Based Network Access (MBNA)
+--                      group.  Added MBNA security modes to securePortMode.
+-- 1.07     05 May 04   Changed MBNA to RALM (RADIUS Authenticated Login 
+--                      using MAC-address)
+-- 1.08     02 Sep 04   Change RALM to RADA (Radius Authenticated Device Access)
+-- **********************************************************************
+-- Copyright (c) 1996 - 2004 3Com Corporation. All Rights Reserved.
+-- **********************************************************************
+
+A3COM0458-PORT-SECURITY DEFINITIONS ::= BEGIN
+
+
+   IMPORTS
+      securePort FROM A3COM0004-GENERIC
+      OBJECT-TYPE FROM RFC-1212
+      TRAP-TYPE FROM RFC-1215
+      DisplayString, RowStatus FROM SNMPv2-TC
+      rptrPortAdminStatus FROM SNMP-REPEATER-MIB
+      dot1xAuthSessionUserName FROM IEEE8021-PAE-MIB 
+      ;
+
+
+securePortTable OBJECT-TYPE
+   SYNTAX   SEQUENCE OF SecurePortEntry
+   ACCESS   not-accessible
+   STATUS   mandatory
+   DESCRIPTION "This table defines the security status of each secure port. 
+   Each port can have a number of authorised MAC addresses, and these are
+   stored in the secureAddressTable."
+
+   ::= {securePort 1}
+
+
+securePortEntry OBJECT-TYPE
+   SYNTAX   SecurePortEntry
+   ACCESS   not-accessible
+   STATUS   mandatory
+   DESCRIPTION "There is a row in this table for each secure port, and 
+   allows repeater ports to be configured for security on a per port basis.
+   It is indexed using the objects secureSlotIndex and securePortIndex."
+   INDEX {secureSlotIndex,securePortIndex}
+
+   ::= {securePortTable 1}
+
+
+SecurePortEntry ::= SEQUENCE {
+      secureSlotIndex               INTEGER,
+      securePortIndex               INTEGER,
+      securePortMode                INTEGER,
+      secureNeedToKnowMode          INTEGER,
+      secureIntrusionAction         INTEGER,
+      secureNumberAddresses         INTEGER,
+      secureNumberAddressesStored   INTEGER,
+      secureMaximumAddresses        INTEGER
+      }
+
+
+secureSlotIndex OBJECT-TYPE
+   SYNTAX   INTEGER (1..1024)
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "The slot or unit number of the secure port. This is the 
+   first index into the securePortTable."
+
+   ::= {securePortEntry 1}
+
+
+securePortIndex OBJECT-TYPE
+   SYNTAX   INTEGER (1..1024)
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "The port number of the secure port. This is the second
+   index into the securePortTable."
+
+   ::= {securePortEntry 2}
+
+
+securePortMode OBJECT-TYPE
+   SYNTAX   INTEGER  {
+      noRestrictions (1),
+      continuousLearning (2),
+      autoLearn (3),
+      secure (4),
+      userLogin (5),
+      userLoginSecure (6),
+      userLoginWithOUI (7),
+      macAddressWithRadius (8),
+      macAddressOrUserLoginSecure (9),
+      macAddressElseUserLoginSecure (10)
+   }
+   ACCESS   read-write
+   STATUS   mandatory
+   DESCRIPTION "Determines the learning and security modes of the port. See 
+   secureNeedToKnowMode and secureIntrusionAction to configure Need To Know
+   and Intrusion Action on each port.
+   (When in a learning mode, secureNumberAddresses determines the maximum
+   number of addresses that can be learned on the port. This is set by the
+   user.)
+
+   noRestrictions(1)    All learning and security are disabled.
+
+   continuousLearning(2)   Addresses are learned continually. If more
+            addresses are learned than are permitted on the
+            port, then one of the older entries will be aged
+            out. Need To Know and Intrusion Action depends on
+            secureNeedToKnowMode and secureIntrusionAction
+            respectively.
+
+   autoLearn(3)      All addresses for this port are deleted, and then
+            addresses are learned up to the number permitted.
+            securePortMode is then set to secure. Need To
+            Know and Intrusion Action depends on
+            secureNeedToKnowMode and secureIntrusionAction
+            respectively.
+
+   secure(4)      Learning is disabled. Need To Know and Intrusion
+            Action depends on secureNeedToKnowMode and
+            secureIntrusionAction respectively.
+
+   userLogin(5)   Access to the port is denied until the port client is
+            authorised (by 802.1X or other authentication mechanism).  
+            Once authorised, traffic will be accepted from any MAC
+            address. The Need To Know and Intrusion Action are ignored.
+
+   userLoginSecure(6) Access to the port is denied until the port client
+            is authorised (by 802.1X or other authentication mechanism).
+            When the client is authorised, the MAC address is added to the
+            Secure Address Table. 
+            The secureMaximumAddresses is set to one automatically when 
+            this mode is entered.  Any existing MAC addresses in the Secure
+            Address Table are deleted.  Need To Know and Intrusion Action
+            depends on secureNeedToKnowMode and secureIntrusionAction
+            respectively.  Learning is disabled.
+
+   userLoginWithOUI(7) This mode is similar to the userLoginSecure mode
+            except that a second MAC address may be placed in the Secure
+            Address Table. This second address is authorised based on the
+            MAC address OUI value. 
+            If a new device with an authorised OUI value is discovered, 
+            the previous entry is deleted.  Traffic from the
+            OUI authorised device will be accepted even if the user has 
+            not been authenticated.  Need To Know and Intrusion Action
+            depends on secureNeedToKnowMode and secureIntrusionAction
+            respectively.
+
+   macAddressWithRadius(8) This selects the RADIUS Authenticated Device
+            Access (RADA) security mode on the port. This feature controls
+            network access of a host based on authenticating its MAC
+            address.  Once authorised, the host is allowed access to the 
+            network. If unauthorised, the port can be configured to deny 
+            access to this MAC address or to allow some access depending 
+            upon the port VLAN and QoS configuration.
+            Where access is allowed, the MAC address is added to the Secure 
+            Address Table.
+
+   macAddressOrUserLoginSecure(9) This selects both the macAddressWithRadius and 
+            userLoginSecure modes together such that either or both are allowed to 
+            authorised access.  Where both authorised access, userLoginSecure takes
+            precedence.
+
+   macAddressElseUserLoginSecure(10) This selects both the macAddressWithRadius and 
+            userLoginSecure modes together such that the MAC address is first 
+            authenticated and only if this fails does the userLoginSecure then attempt 
+            user authorisation.
+  
+   The secureAddressLearned trap is sent whenever a station has been
+   learned. The secureViolation trap is sent whenever a packet is received
+   from an unauthorised station."
+
+   ::= {securePortEntry 3}
+
+
+secureNeedToKnowMode OBJECT-TYPE
+   SYNTAX   INTEGER  {
+      notAvailable (1),
+      disabled (2),
+      needToKnowOnly (3),
+      needToKnowWithBroadcastsAllowed (4),
+      needToKnowWithMulticastsAllowed (5),
+      permanentNeedToKnowOnly (6),
+      permanentNeedToKnowWithBroadcastsAllowed (7),
+      permanentNeedToKnowWithMulticastsAllowed (8)
+   }
+   ACCESS   read-write
+   STATUS   mandatory
+   DESCRIPTION "Attribute to determine which frames are to be forwarded to 
+   this port intact.
+   
+   1 - Need To Know is not available. 
+   2 - All frames. 
+   3 - Frames addressed to the authorised devices only. 
+   4 - Frames addressed to the authorised devices, plus all broadcast
+       frames.
+   5 - Frames addressed to the authorised devices, plus all broadcast 
+       and multicast frames.
+   6 - As 3 and cannot be changed. 
+   7 - As 4 and cannot be changed. 
+   8 - As 5 and cannot be changed.
+
+   If this object returns 1,6,7 or 8, it means that the Need To Know
+   configuration cannot be changed, and any attempt to write to this object
+   will cause an error."
+
+   ::= {securePortEntry 4}
+
+
+secureIntrusionAction OBJECT-TYPE
+   SYNTAX   INTEGER  {
+      notAvailable (1),
+      noAction (2),
+      disablePort (3),
+      disablePortTemporarily (4),
+      allowDefaultAccess (5),
+      blockMacAddress (6)
+   }
+   ACCESS   read-write
+   STATUS   mandatory
+   DESCRIPTION "Attribute to determine the action if an unauthorised device 
+   transmits on this port."
+
+   ::= {securePortEntry 5}
+
+-- 
+-- The following 3 objects are used to allow multiple MAC addresses to be 
+-- assigned to the port.
+
+secureNumberAddresses OBJECT-TYPE
+   SYNTAX   INTEGER 
+   ACCESS   read-write
+   STATUS   mandatory
+   DESCRIPTION "The maximum number of addresses that the port can learn or 
+   store. Reducing this number may cause some addresses to be deleted. 
+   This value is set by the user and cannot be automatically changed by the
+   agent.
+
+   The following relationship must be preserved.
+
+      secureNumberAddressesStored <= secureNumberAddresses <=
+      secureMaximumAddresses
+   "
+
+   ::= {securePortEntry 6}
+
+
+secureNumberAddressesStored OBJECT-TYPE
+   SYNTAX   INTEGER 
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "The number of addresses that are currently in the 
+   AddressTable for this port. If this object has the same value as 
+   secureNumberAddresses, then no more addresses can be authorised on this
+   port.
+   
+   The following relationship must allows be preserved.
+      secureNumberAddressesStored <= secureNumberAddresses <=
+      secureMaximumAddresses
+   "
+
+   ::= {securePortEntry 7}
+
+
+secureMaximumAddresses OBJECT-TYPE
+   SYNTAX   INTEGER 
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "This indicates the maximum value that secureNumberAddresses 
+   can be set to. It is dependent on the resources available so may change,
+   eg. if resources are shared between ports, then this value can both
+   increase and decrease. This object must be read before setting
+   secureNumberAddresses.
+   
+   The following relationship must allows be preserved.
+      secureNumberAddressesStored <= secureNumberAddresses <=
+      secureMaximumAddresses
+   "
+
+   ::= {securePortEntry 8}
+
+-- 
+-- SECURE ADDRESS TABLE
+-- 
+
+secureAddressTable OBJECT-TYPE
+   SYNTAX   SEQUENCE OF SecureAddressEntry
+   ACCESS   not-accessible
+   STATUS   mandatory
+   DESCRIPTION "This table stores the MAC addresses assigned to each 
+   port. This table can be written to by the agent as well as the
+   management station."
+
+   ::= {securePort 2}
+
+
+secureAddressEntry OBJECT-TYPE
+   SYNTAX   SecureAddressEntry
+   ACCESS   not-accessible
+   STATUS   mandatory
+   DESCRIPTION "This table allows multiple addresses to be assigned to each 
+   secure port.  It is indexed using the objects secureAddrSlotIndex, 
+   secureAddrPortIndex and secureAddrMAC."
+   INDEX {secureAddrSlotIndex,secureAddrPortIndex,secureAddrMAC}
+
+   ::= {secureAddressTable 1}
+
+
+SecureAddressEntry ::= SEQUENCE {
+      secureAddrSlotIndex     INTEGER,
+      secureAddrPortIndex     INTEGER,
+      secureAddrMAC     OCTET STRING,
+      secureAddrRowStatus     RowStatus
+      }
+
+
+secureAddrSlotIndex OBJECT-TYPE
+   SYNTAX   INTEGER (1..1024)
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "The slot or unit number of the secure port.  This is the 
+   first index into the secureAddressTable."
+
+   ::= {secureAddressEntry 1}
+
+
+secureAddrPortIndex OBJECT-TYPE
+   SYNTAX   INTEGER (1..1024)
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "The port number of the secure port.  This is the second 
+   index into the secureAddressTable."
+
+   ::= {secureAddressEntry 2}
+
+
+secureAddrMAC OBJECT-TYPE
+   SYNTAX   OCTET STRING  (SIZE(6))
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "The MAC address of a station assigned to this port.  
+   This is the third index into the secureAddressTable."
+
+   ::= {secureAddressEntry 3}
+
+
+secureAddrRowStatus OBJECT-TYPE
+   SYNTAX   RowStatus
+   ACCESS   read-write
+   STATUS   mandatory
+   DESCRIPTION "This manages the creation and deletion or rows, and shows 
+   the current status of the indexed MAC address.  This object has the
+   following values.
+   
+   active(1)        The indexed MAC address is authorised on this port. 
+   notInService(2)  The indexed MAC address is not authorised on this port. 
+   notReady(3)      Not applicable. (This value indicates an incomplete
+                    row.) 
+   createAndGo(4)   Assign a new MAC address to the port and authorise
+                    immediately. 
+   createAndWait(5) Assign a new MAC address to the port, but do not 
+                    authorise until active(1) is written to this object. 
+   destroy(6)       Delete this entry. 
+   
+   When creating a new entry, index a new row and use createAndGo(4) or 
+   createAndWait(5). Some hardware will not allow the address to be
+   unauthorised, and will automatically switch the row to active(1). 
+   When reading this object, only active(1) and notInService(2) will be
+   returned.
+
+   Only the values active(1) and destroy(6) will be allowed for an existing 
+   row, or createAndGo(4) and createAndWait(5) for a new row."
+
+   ::= {secureAddressEntry 4}
+
+
+--- 
+--- SECURITY TABLE 'STOP' OBJECT
+--- 
+
+secureStop OBJECT-TYPE
+   SYNTAX   INTEGER 
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "A MIB object to speed up access to the security tables. 
+   When performing a get-next through the table, this object is accessed as 
+   soon as the table is passed and allows the management to quickly 
+   determine the end of the table."
+
+   ::= {securePort 3}
+
+
+---
+--- SECURITY ACCESS CONTROL OBJECT
+---
+
+securePortSecurityControl OBJECT-TYPE
+   SYNTAX   INTEGER {enabled (1), disabled (2)} 
+   ACCESS   read-write
+   STATUS   mandatory
+   DESCRIPTION "This attribute controls the system wide operation of 
+   network access control. The configured port security options only become 
+   operational when this attribute is set to enabled."
+
+   ::= {securePort 4}
+
+
+-- 
+-- SECURE OUI TABLE
+-- 
+
+secureOUITable OBJECT-TYPE
+   SYNTAX   SEQUENCE OF SecureOUIEntry
+   ACCESS   not-accessible
+   STATUS   mandatory
+   DESCRIPTION "This table stores the OUI values for OUI based
+   authorisation."
+
+   ::= {securePort 5}
+
+
+secureOUIEntry OBJECT-TYPE
+   SYNTAX   SecureOUIEntry
+   ACCESS   not-accessible
+   STATUS   mandatory
+   DESCRIPTION "This is a row in the secureOUITable."
+   INDEX {secureOUISlotIndex,secureOUI}
+
+   ::= {secureOUITable 1}
+
+
+SecureOUIEntry ::= SEQUENCE {
+      secureOUISlotIndex   INTEGER,
+      secureOUI            OCTET STRING,
+      secureOUIRowStatus   RowStatus
+      }
+
+
+secureOUISlotIndex OBJECT-TYPE
+   SYNTAX   INTEGER (1..1024)
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "The slot number.  This is the first index into the
+   secureOUITable."
+
+   ::= {secureOUIEntry 1}
+
+
+secureOUI OBJECT-TYPE
+   SYNTAX   OCTET STRING  (SIZE(3))
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "The OUI value for an authorised device.  This is 
+   the second index into the secureOUITable."
+
+   ::= {secureOUIEntry 2}
+
+
+secureOUIRowStatus OBJECT-TYPE
+   SYNTAX   RowStatus
+   ACCESS   read-write
+   STATUS   mandatory
+   DESCRIPTION "This manages the creation and deletion of rows, and shows 
+   the current status of the entry.
+
+   active(1)        The indexed OUI value is authorised. 
+   notInService(2)  The indexed OUI value is not authorised. 
+   notReady(3)      Not applicable. (This value indicates an incomplete
+                    row.) 
+   createAndGo(4)   Assign a new OUI to the unit and authorise
+                    immediately. 
+   createAndWait(5) Assign a new OUI to the port, but do not 
+                    authorise until active(1) is written to this object. 
+   destroy(6)       Delete this entry. 
+
+   When creating a new entry, index a new row and use createAndGo(4) or 
+   createAndWait(5). Some hardware will not allow the OUI to be
+   unauthorised, and will automatically switch the row to active(1). 
+   When reading this object, only active(1) and notInService(2) will be
+   returned.
+
+   Only the values active(1) and destroy(6) will be allowed for an existing 
+   row, or createAndGo(4) and createAndWait(5) for a new row."
+
+   ::= {secureOUIEntry 3}  
+
+
+--- 
+--- SECURITY TABLE 'VLAN membership list' OBJECT
+--- 
+
+securePortVlanMembershipList OBJECT-TYPE
+   SYNTAX   DisplayString (SIZE(0 .. 255))
+   ACCESS   read-only
+   STATUS   mandatory
+   DESCRIPTION "This is a dummy MIB object referenced by the secureLogon
+   and secureLogoff traps. This object contains a comma separated list of
+   the VLAN identifiers (0-4095) assigned to a port. A tagged VLAN has a 
+   'T' suffix after the VLAN number and an untagged VLAN may have an 
+   optional 'U' suffx.
+   An attempt to read this object directly will return an empty string."
+
+   ::= {securePort 6}
+
+--- 
+--- RADIUS Authenticated Device Access GROUP
+--- 
+
+secureRadaGroup 	      OBJECT IDENTIFIER ::= { securePort 7 }
+
+secureRadaDefaultSessionTime OBJECT-TYPE
+        SYNTAX  INTEGER (1..1000000)
+        ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION "Specifies the default session lifetime in seconds before
+            a forwarding MAC address is re-authenticated.
+            The default time is 1800 seconds."
+
+        ::= { secureRadaGroup 1 }
+
+
+secureRadaHoldoffTime OBJECT-TYPE
+        SYNTAX  INTEGER (1..1000000)
+        ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION "Specifies the time in seconds before
+            a blocked (denied) MAC address can be re-authenticated.
+            The default time is 60 seconds."
+
+        ::= { secureRadaGroup 2 }
+
+
+secureRadaReauthenticate OBJECT-TYPE
+        SYNTAX  OCTET STRING  (SIZE(6))
+        ACCESS  write-only
+        STATUS  mandatory
+        DESCRIPTION "Writing a MAC address to this object causes an
+            immediate RADA re-authentication of this address (can be on 
+            any port). If the MAC address not currently known to RADA,
+            it silently ignores the write."
+
+        ::= { secureRadaGroup 3 }
+
+secureRadaAuthMode OBJECT-TYPE
+   SYNTAX   INTEGER  {
+      papUsernameAsMacAddress (1),
+      papUsernameFixed (2)
+   }
+   ACCESS   read-write
+   STATUS   mandatory
+   DESCRIPTION "This controls how MAC addresses are authenticated.
+
+   papUsernameAsMacAddress(1)  
+                    Authentication uses the RADIUS server by 
+                    sending a PAP request with Username and 
+                    Password both equal to the MAC address being
+                    authenticated. This is the default.
+
+   papUsernameFixed(2)   
+                    Authentication uses the RADIUS server by 
+                    sending a PAP request with Username and 
+                    Password coming from the secureRadaAuthUsername and
+                    secureRadaAuthPassword MIB objects.  In this mode
+                    the RADIUS server would normally take into account 
+                    the request's calling-station-id attribute, which is  
+                    the MAC address of the host being authenticated."
+
+   ::= { secureRadaGroup 4 }
+
+secureRadaAuthUsername OBJECT-TYPE
+   SYNTAX   DisplayString (SIZE(1 .. 10))
+   ACCESS   read-write
+   STATUS   mandatory
+   DESCRIPTION "This is the username used for authentication requests
+                where secureRadaAuthMode is papUsernameFixed.
+                Default shall be 'mac'."
+
+   ::= { secureRadaGroup 5 }
+
+secureRadaAuthPassword OBJECT-TYPE
+   SYNTAX   DisplayString (SIZE(0 .. 10))
+   ACCESS   write-only
+   STATUS   mandatory
+   DESCRIPTION "This is the password used for authentication requests
+                where secureRadaAuthMode is papUsernameFixed.
+                Default shall be a null string."
+
+   ::= { secureRadaGroup 6 }
+
+-- **********************************************************************
+-- Define enterprise repeater traps. Rules for traps are that any
+-- varbind must be from a table in which the first qualifier on the
+-- object id is the service identifier of the 'thing' causing the trap.
+-- **********************************************************************
+
+secureAddressLearned TRAP-TYPE
+   ENTERPRISE  a3Com
+   VARIABLES {secureAddrRowStatus }
+   DESCRIPTION "This trap is sent when a new station has been learned. The 
+   slot and port on which the address was received are in the first and
+   second index of secureAddrRowStatus, and the MAC address of the learned
+   station is in the third index."
+
+   ::= 71
+
+
+secureAddressLearned2 TRAP-TYPE
+	ENTERPRISE      a3Com
+	VARIABLES { secureAddrRowStatus,
+		      a3ComVlanIfGlobalIdentifier }
+	DESCRIPTION
+		"This trap is sent when a new station has been learned.
+		The slot and port on which the address was received are
+		in  the  first and second index of secureAddrRowStatus,
+		and  the MAC  address of the learned station is in  the
+		third index."
+
+	::= 85
+
+
+secureViolation2 TRAP-TYPE
+   ENTERPRISE  a3Com
+   VARIABLES {secureAddrRowStatus, rptrPortAdminStatus }
+   DESCRIPTION "This trap is sent whenever a security violation has occurred. 
+   The slot and port on which the violation occured are in the first and
+   second index of secureAddrRowStatus, and the MAC address of the offending
+   station is in the third index. rptrPortAdminSTATUS indicates if the port
+   has been disabled because of the violation. The implementation may not
+   send violation traps from the same port at intervals of less than 5
+   seconds"
+
+   ::= 78
+
+
+secureViolation3 TRAP-TYPE
+	ENTERPRISE a3Com
+	VARIABLES	{
+				secureAddrRowStatus,
+				ifAdminStatus,
+				a3ComVlanIfGlobalIdentifier
+			}
+	DESCRIPTION	"This trap is sent whenever a security violation has 
+	occured. The slot and port on which the violation occured are in the 
+	first and second index of secureAddrRowStatus, and the MAC address of 
+	the offending station is in the third index. ifAdminStatus indicates
+	if the port has been disabled because of the violation. 
+	The implementation may not send violation traps from the same port
+	at intervals of less than 5 seconds."
+
+	::= 86
+
+
+secureViolation4 TRAP-TYPE
+	ENTERPRISE a3Com
+	VARIABLES	{
+				secureAddrRowStatus,
+				ifAdminStatus
+				}
+	DESCRIPTION	"This trap is sent whenever a security violation has 
+	occurred. The slot and port on which the violation occurred are in the 
+	first and second index of secureAddrRowStatus, and the MAC address of 
+	the offending station is in the third index. ifAdminStatus indicates
+	if the port has been disabled because of the violation. 
+	The implementation may not send violation traps from the same port
+	at intervals of less than 5 seconds."
+
+	::= 88
+
+
+secureLoginFailure TRAP-TYPE
+	ENTERPRISE a3Com
+	VARIABLES	{
+				secureAddrRowStatus,
+				dot1xAuthSessionUserName
+				}
+	DESCRIPTION	"This trap is sent whenever a user network access
+      authorisation has failed. The slot and port on which the failure 
+      occurred are in the first and second index of secureAddrRowStatus,
+      and the MAC address of the offending station is in the third index.
+      The dot1xAuthSessionUserName is the identity supplied during the 
+      user authorisation."
+
+	::= 91
+
+
+secureLogon TRAP-TYPE
+	ENTERPRISE  a3Com
+	VARIABLES	{
+				secureAddrRowStatus, 
+				dot1xAuthSessionUserName, 
+				dot1xAuthSessionAuthenticMethod,
+				securePortVlanMembershipList 
+				}
+	DESCRIPTION "This trap is sent when a new session is started for
+      an authorised port user. The slot and port in use during the session
+      are the first and second indices of the secureAddrRowStatus, and the 
+      MAC address of the users' device is in the third index. 
+      The dot1xAuthSessionUserName is the identity supplied during the user 
+      authorisation. The dot1xAuthSessionAuthenticMethod indicates how the
+      user was authorised. The securePortVlanMembershipList object 
+      identifies the VLAN membership assigned to the port on session 
+      activation." 
+
+	::= 93
+
+        
+secureLogoff TRAP-TYPE
+	ENTERPRISE  a3Com
+	VARIABLES 	{
+				secureAddrRowStatus, 
+				dot1xAuthSessionUserName, 
+				dot1xAuthSessionTerminateCause, 
+				securePortVlanMembershipList 
+				}
+	DESCRIPTION "This trap is sent when a user session is terminated.
+      The slot and port used during the session are the first and second
+      indices of the secureAddrRowStatus, and the MAC address of the users'
+      device is in the third index. 
+      The dot1xAuthSessionUserName is the identity supplied during the user 
+      authorisation. The dot1xAuthSessionTerminateCause indicates the
+      reason why the session was terminated. 
+      The securePortVlanMembershipList object identifies the VLAN 
+      membership assigned to the port on session termination."
+
+	::= 94
+ 
+END
+
+
+

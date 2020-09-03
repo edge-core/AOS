@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="http://www.mibx.com/smi">
+    <name>ECS4510-MIB</name>
+    <organization>Edgecore Networks, Inc.</organization>
+    <contact>Edgecore Networks, Inc.
+        Customer Service
+        Postal: No. 1 Creation Rd. III,
+        Science-based Industrial Park,
+        Hsinchu 300-77, Taiwan, R.O.C.
+        Tel: +886-3-5770270
+        Fax: +886-3-5780764
+        E-mail: brandsupport@edge-core.com
+
+        company website:www.edge-core.com
+        technical support:brandsupport@edge-core.com</contact>
+    <description>The MIB module for ECS4510-Series.</description>
+    <revision>
+        <date>2012-02-15T00:00:00Z</date>
+        <description>Initial version of this MIB.</description>
+    </revision>
+    <identity>ecs4510MIB</identity>
+    <oid>ecs4510MIBSeries 1</oid>
+</module>

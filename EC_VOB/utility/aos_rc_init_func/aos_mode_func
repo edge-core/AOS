@@ -1,0 +1,216 @@
+# Openflow Mode Selection - 1: Legacy Mode, 2: Openflow Mode
+readonly INVALID_MODE=0
+readonly LEGACY_MODE=1
+readonly OF_MODE=2
+readonly DEVELOP_MODE=3
+readonly MAX_MODE_VAL=$OF_MODE
+readonly DEFAULT_MODE=$LEGACY_MODE
+
+declare -a support_mode[MAX_MODE_VAL]
+
+readonly MODE_CONF_FILE=/flash/of_opmode.conf
+
+init_default_mode()
+{
+    # Create of_opmode.conf if file not exist
+    if [ ! -f $MODE_CONF_FILE ]
+    then
+        echo -e "create $MODE_CONF_FILE"
+        echo "$DEFAULT_MODE" > $MODE_CONF_FILE
+    fi    
+}
+
+save_current_mode()
+{
+    local chioce=$1; shift
+
+    echo "$chioce" > $MODE_CONF_FILE
+}
+
+get_current_mode()
+{
+    local current_mode
+
+    # Try to get mode from $MODE_CONF_FILE if $CHOICE
+    # is not defined
+    if [ -r $MODE_CONF_FILE ]
+    then
+        current_mode=$(cat $MODE_CONF_FILE)
+    else
+        current_mode=$DEFAULT_MODE
+    fi
+    echo $current_mode
+}
+
+get_current_mode_str()
+{
+    local current_mode=$(get_current_mode)
+
+    case $current_mode in
+        $LEGACY_MODE)
+            echo "Legacy"
+            ;;
+        $OF_MODE)
+            echo "Hybrid"
+            ;;
+        *)
+            echo "Unknown"
+            ;;
+    esac
+}
+
+get_current_mode_from_license()
+{
+    local current_mode accept_mode license_path
+
+    if [ ! -r ${AOS_PATH}/etc/license_parse.sh ]; then
+        current_mode=$INVALID_MODE
+    else
+        source ${AOS_PATH}/etc/license_parse.sh
+
+        license_path="/flash/license.lic"
+        accept_mode=$(get_license_accept_mode $license_path)
+
+        if [ "${accept_mode,,}" = "legacy" ]
+        then
+            current_mode=$LEGACY_MODE
+        elif [ "${accept_mode,,}" = "hybrid" ]
+        then
+            current_mode=$OF_MODE
+        else
+            current_mode=$INVALID_MODE
+        fi
+    fi
+
+    echo $current_mode
+}
+
+main_menu()
+{
+    local -a support_mode_local=("${!1}")
+    local opt_str
+    local choice
+    local valid_choice=0
+
+    while [ $valid_choice != 1 ];
+    do
+
+        cat << __START__
+
+Select operation mode.  If no selection is made within 5 seconds,
+the mode, $(get_current_mode_str), you used last time will start automatically.....
+__START__
+
+        if [ ${support_mode_local[$LEGACY_MODE]} -eq 1 ]; then
+            echo "$LEGACY_MODE - Legacy mode"
+            opt_str="$LEGACY_MODE"
+        fi
+
+        if [ ${support_mode_local[$OF_MODE]} -eq 1 ]; then
+            echo "$OF_MODE - Hybrid mode"
+            if [ -n "$opt_str" ]; then
+                opt_str="${opt_str}, "
+            fi
+            opt_str="${opt_str}$OF_MODE"
+        fi
+
+        echo -n "Select (${opt_str}): "
+
+        ## Set timeout to wait input, 50 means 5 seconds
+        read -t 5 choice
+        if [ $? -ne 0 ]; then
+            # time-out
+            valid_choice=1
+        else
+            case ${choice} in
+                $LEGACY_MODE)
+                    if [ ${support_mode_local[$LEGACY_MODE]} -eq 1 ]; then
+                        valid_choice=1
+                        save_current_mode $choice
+                    fi
+                    ;;
+                $OF_MODE)
+                    if [ ${support_mode_local[$OF_MODE]} -eq 1 ]; then
+                        valid_choice=1
+                        save_current_mode $choice
+                    fi
+                    ;;
+                *)
+                    echo "Invalid input."
+                    continue
+                    ;;
+            esac
+        fi
+    done
+
+    # display selected mode
+    echo "$(get_current_mode_str) mode is selected"
+}
+
+## $1 - filename
+## return 0 - file not found
+##        1 - ok
+execute_file_rc()
+{
+    tmp_ret=1
+
+    if test -e $1; then
+        . $1
+    else
+        tmp_ret=0
+    fi
+
+    return $tmp_ret
+}
+
+setup_op_mode_env()
+{
+    #echo select mode
+    echo -n "Operation Mode : "
+    if [ "$CURRENT_MODE" = "$LEGACY_MODE" ] || [ "$CURRENT_MODE" = "$DEVELOP_MODE" ]
+    then
+        echo -e "Legacy......"
+        CMD_PFX="${AOS_PATH}/usr"
+    elif [ "$CURRENT_MODE" = "$OF_MODE" ]
+    then
+        echo -e "Hybrid......"
+        CMD_PFX="${AOS_PATH}/usr"
+        LD_LIB_PATH="${AOS_PATH}/usr/lib/of:${LD_LIB_PATH}"
+        [ -r ${AOS_PATH}/usr/rc.soc.of ] && export SOC_BOOT_SCRIPT=${AOS_PATH}/usr/rc.soc.of
+        [ -r ${AOS_PATH}/usr/config.bcm.of ] && export BCM_CONFIG_FILE=${AOS_PATH}/usr/config.bcm.of
+    fi
+
+    if [ ! -z "$AOS_LD_LIBRARY_PATH" ]; then
+        LD_LIB_PATH="${AOS_LD_LIBRARY_PATH}:${LD_LIB_PATH}"
+    fi
+
+    export LD_LIBRARY_PATH="${LD_LIB_PATH}"
+}
+
+do_of_mode_stuff()
+{
+    #Set netopeer related file
+    #
+    if [ "$CURRENT_MODE" = "$OF_MODE" ]; then
+        mkdir -p /flash/netconf
+        mkdir -p /var/run/sshd
+        LD_LIBRARY_PATH="${AOS_PATH}/lib2" ${AOS_PATH}/usr/bin/of/of_config_init /flash/netconf/of_datastore.xml ${AOS_PATH}/etc/aos/of/of-config1.1.1.yin
+
+        ${AOS_PATH}/bin/busybox syslogd >& /dev/null
+    fi
+}
+
+do_rc_local_per_mode_stuff()
+{
+    if [ "$CURRENT_MODE" = "$OF_MODE" ]; then
+        execute_file_rc "/etc/rc.local.hybrid"
+    else
+        execute_file_rc "/etc/rc.local.legacy"
+    fi
+}
+
+do_all_mode_stuff()
+{
+    mkdir -p /tmp/aluc
+    echo "/etc/ip_config.sh" > /proc/umh_ipcfg
+}

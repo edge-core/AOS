@@ -1,0 +1,191 @@
+-- ---------------------------------------------------------------
+-- Copyright (c) 3Com Corporation. All Rights Reserved.
+-- ---------------------------------------------------------------
+A3COM515-SNTP-MIB DEFINITIONS ::= BEGIN 
+ 
+   IMPORTS 
+        a3ComSntpGroup FROM A3COM0004-GENERIC
+        OBJECT-TYPE FROM RFC-1212
+	DisplayString FROM SNMPv2-TC
+       ; 
+
+-- *************************************************************************
+--
+--  3Com Proprietary MIB For RFC2030 SNTP-V3
+--
+-- ************************************************************************* 
+-- a3Com                      OBJECT IDENTIFIER ::= { enterprises 43 } 
+-- generic	              OBJECT IDENTIFIER ::= { a3Com 10 }
+
+-- a3ComSntpGroup 	      OBJECT IDENTIFIER ::= { generic 50 }
+ 
+
+sntpState OBJECT-TYPE
+        SYNTAX   INTEGER {
+                        disable(0),
+		 	enable(1)
+			}
+        ACCESS   read-write
+        STATUS   mandatory
+        DESCRIPTION
+           "This object will enable or disable the SNTP client.
+	    When disabled the client will not set any timers or 
+	    attempt to contact NTP/SNTP servers. When enabled 
+	    the client will attempt to poll at every polling 
+	    interval as long as there are servers defined.  
+	    Information describing attached areas."
+	  DEFVAL     { 0 }
+	  ::= { a3ComSntpGroup 1 }
+
+
+sntpPrimaryServer OBJECT-TYPE
+        SYNTAX   IpAddress
+        ACCESS   read-write
+        STATUS   mandatory
+        DESCRIPTION
+        	"If there are NTP servers listed in memory then 
+		 the client will attempt to connect and receive 
+  		 the server's reply.  If there are no servers 
+  		 defined or if a reply was not received, the 
+		 client will attempt to automatically locate a 
+		 server in the area by sending out a request to a 
+ 	         multicast address."
+       ::= { a3ComSntpGroup 2 }
+
+sntpSecondaryServer OBJECT-TYPE
+        SYNTAX  IpAddress
+        ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+                "The SNTP client will attempt to connect to the 
+		 secondary server if the primary is unreachable."
+        ::= { a3ComSntpGroup 3 } 
+
+sntpActiveServer OBJECT-TYPE
+        SYNTAX  IpAddress
+        ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+                "This is the server that was used to retrieve the
+		 system time.  The value depends on how the SNTP 
+		 server address was obtained"
+        ::= { a3ComSntpGroup 4 }
+
+sntpPollInterval OBJECT-TYPE
+        SYNTAX  Integer32 (64..86400)
+        ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+                "The sntpPollInterval object defines the length of 
+	         time, (in seconds) to wait between requests to the 
+	         server for time."
+	DEFVAL     { 21600 }
+        ::= { a3ComSntpGroup 5 } 
+
+sntpTimeISO OBJECT-TYPE
+        SYNTAX   DisplayString (SIZE(19))
+        ACCESS   read-only
+        STATUS   mandatory
+        DESCRIPTION
+           "This object will provide the current real-time of the 
+	    system and is ISO8601 compliant.
+		chars    contents       range
+ 		-----    ------         -----
+ 		1-4      year           '2000'..'2999'
+ 		5        separator      '-'
+ 		6-7      month          '01'..'12'
+ 		8        separator      '-'
+ 		9-10     day            '01'..'31'
+ 		11       separator      'T'
+ 		12-13    hour           '00'..'23'
+ 		14       separator      ':'
+ 		15-16    minutes        '00'..'59'
+		17       separator      ':'
+		18-19    seconds        '00'..'59'
+	    If the current real-time of the system is undefined,
+	    it will be provided as '0000-00-00T00:00:00'."
+	  ::= { a3ComSntpGroup 6 }
+
+timeZoneOffset OBJECT-TYPE
+        SYNTAX   Integer32 (-720..840)
+        ACCESS   read-write
+        STATUS   mandatory
+        DESCRIPTION
+        	"Offset from GMT that is used to determine 
+		local time (minutes)."
+       ::= { a3ComSntpGroup 7 }
+
+dstState OBJECT-TYPE
+        SYNTAX   INTEGER {
+		 	disable (0),
+			north-america (1),
+ 			europe-parts-of-asia (2),
+ 			australia (3),
+ 			new-zealand (4),
+ 			user-configured (5)
+			}
+        ACCESS   read-write
+        STATUS   mandatory
+        DESCRIPTION
+           "This object will enable or disable daylight saving time.
+		0 - disable 
+		1 - North America
+		2 - Europe, parts of Asia
+		3 - Australia
+		4 - New Zealand
+		5 - User configured "
+	  DEFVAL     { 0 }
+	  ::= { a3ComSntpGroup 8 }
+
+
+dstStartDate OBJECT-TYPE
+        SYNTAX   DisplayString (SIZE(19))
+        ACCESS   read-write
+        STATUS   mandatory
+        DESCRIPTION
+           "This object will provide the start of user 
+	    configured daylight saving time for the current 
+	    year and is ISO8601 compliant.
+		chars    contents       range
+ 		-----    ------         -----
+ 		1-4      year           '2000'..'2999'
+ 		5        separator      '-'
+ 		6-7      month          '01'..'12'
+ 		8        separator      '-'
+ 		9-10     day            '01'..'31'
+ 		11       separator      'T'
+ 		12-13    hour           '00'..'23'
+ 		14       separator      ':'
+ 		15-16    minutes        '00'..'59'
+		17       separator      ':'
+		18-19    seconds        '00'..'59'
+          "
+	  DEFVAL	{ "0000-00-00T00:00:00" } 
+	  ::= { a3ComSntpGroup 9 }
+
+dstEndDate OBJECT-TYPE
+        SYNTAX   DisplayString (SIZE(19))
+        ACCESS   read-write
+        STATUS   mandatory
+        DESCRIPTION
+           "This object will provide the end of user 
+	    configured daylight saving time for the current 
+	    year and is ISO8601 compliant. 
+		chars    contents       range
+ 		-----    ------         -----
+ 		1-4      year           '2000'..'2999'
+ 		5        separator      '-'
+ 		6-7      month          '01'..'12'
+ 		8        separator      '-'
+ 		9-10     day            '01'..'31'
+ 		11       separator      'T'
+ 		12-13    hour           '00'..'23'
+ 		14       separator      ':'
+ 		15-16    minutes        '00'..'59'
+		17       separator      ':'
+		18-19    seconds        '00'..'59'
+          "
+	  DEFVAL	{ "0000-00-00T00:00:00" } 
+	  ::= { a3ComSntpGroup 10 }
+
+END

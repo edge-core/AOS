@@ -1,0 +1,3069 @@
+--	3Com Switching Systems Management Information Base
+--	Version 1.0.0
+--	February 13, 1998
+ 
+--	3Com Corporation
+--	80 Central Street
+--	Boxborough, MA 01719
+--	(508) 264-1400
+ 
+----------------------------------------------------------------------------------------
+--  01/25/01 - hazem    Added Minicore II Card Type to a3ComSysModuleCardInfoFamily.
+--  12/07/00 - hazem    Added the enet1000BaseTJRJ45 to the a3ComSysModuleCardInfoSpecificType
+--  10/28/99 - hazem    Fixed the a3ComSysEthernetPortMonitorMode to match the CLI.
+--  09/28/99 - hmk      Added a3ComSysEthernetPortErrorTable and a3ComSysEthernetPortErrorTrap
+--  08/17/99 - agarg    Appropriate strings for a3ComSysSystemType
+--  06/25/99 - tmeicizn Changed PortMonitor enumarations to start at 1
+--  06/16/99 - hmk      Added a3ComSysEthernetPortMonitorTable and a3ComSysEthernetPortMonitorTrap.
+--  06/25/99 - tem      merge from /main/br_eclipse_dev/4
+--  05/26/99 - bdn      modified descriptions on date time objects
+--  05/20/99 - tmeiczin added objects to support autonegotiation, port mode, pace
+--  05/13/99 - bdn      modified description on a3ComSysModuleCardInfoManufacturingDate mib
+--  04/27/99 - tmeiczin moved a3ComSysSmt into 3cSysSmt.mib file
+--                      moved a3ComAtmPort into 3cSysAtmPort.mib file
+--                      moved a3ComSysBridge into 3cSysBridge.mib file
+--                      moved a3ComSysFt into 3cSysFt.mib file
+--  01/20/99 - dfa      Adding a3ComSysAtmPort. 
+--  01/20/99 - bdn      added a3ComSysSystemDateTimeISO object, deprecated a3ComSysSystemDateTime object
+--  10/07/98 - tjm      changed defval of a3ComSysFtLocalResourceMask from to 00000080'h
+--			            moved location and formatted.
+--  10/02/98 - rgd      added a3ComSysAgentRmonEStats
+--  09/29/98 - rgd      Added support for fddi sas(m-s)/das and physical connector id.
+--  09/22/98 - dld      Changed default value of a3ComSysFtLocalResourceMask from 128 to 1.
+--  07/24/98 - hmk      Added a3ComSysBridgeVlanPortAddressTable
+--  06/05/98 - lam	    Added a3ComSysIpInterfaceProxyArp,
+--                      a3ComSysIpInterfaceDefaultRoute,
+--		                a3ComSysIpInterfaceRedirectSupport
+--  6/03/98 - dld       Added a3ComSysFtProtocol to a3ComSysFtGroup.
+--  3/09/98 - bbm       Added swSysBridgePortReceiveMulticastLimitMultiplier.
+--	03/09/98 - rgd		Relabel
+--  02/26/98 - eah      Added port1000BaseNotPresent.
+--  02/13/98 - iwolf    Originally created
+--
+----------------------------------------------------------------------------------------
+ 
+A3COM-SWITCHING-SYSTEMS-MIB DEFINITIONS ::= BEGIN
+ 
+IMPORTS
+	enterprises, Counter, IpAddress
+		 FROM RFC1155-SMI
+	DisplayString
+                 FROM RFC1213-MIB
+	OBJECT-TYPE
+                 FROM RFC-1212
+	TRAP-TYPE
+                 FROM RFC-1215;
+--        RowStatus
+--                 FROM SNMPv2-TC;
+ 
+                RowStatus ::= INTEGER {
+
+                -- the following two values are states:
+                -- these values may be read or written
+                active(1),
+                notInService(2),
+
+                -- the following value is a state:
+                -- this value may be read, but not written
+                notReady(3),
+
+                -- the following three values are
+                -- actions: these values may be written,
+                --   but are never read
+                createAndGo(4),
+                createAndWait(5),
+                destroy(6)
+}
+
+
+IpxNetworkNumber ::= OCTET STRING (SIZE(4)) 
+ 
+ATNetworkNumber ::= 
+	-- 2 octets of net number 
+	-- in network byte order 
+	OCTET STRING (SIZE (2)) 
+ 
+ATName ::= 
+	-- 0 to 32 octets of AppleTalk 
+	-- ASCII [Inside AppleTalk] 
+	OCTET STRING (SIZE (0..32)) 
+ 
+DdpNodeAddress ::=  
+    -- 2 octets of net number 
+    -- in network byte order, 
+    -- 1 octet of node number 
+	OCTET STRING (SIZE (3)) 
+ 
+MacAddress ::= 
+	-- a 6 octet address in 
+	-- the "canonical" order 
+	-- defined by IEEE 802.1a, i.e., as if it were transmitted least 
+	-- significant bit first 
+	OCTET STRING (SIZE (6)) 
+ 
+ 
+-- 
+-- Object identifiers 
+-- 
+ 
+a3Com                               OBJECT IDENTIFIER ::= { enterprises 43 } 
+switchingSystemsMibs                OBJECT IDENTIFIER ::= { a3Com 29 } 
+a3ComSwitchingSystemsMib            OBJECT IDENTIFIER ::= { switchingSystemsMibs 4 } 
+a3ComSwitchingSystemsFddiMib        OBJECT IDENTIFIER ::= { switchingSystemsMibs 10 } 
+ 
+-- a3ComSwitchingSystemsMib groups. 
+  
+a3ComSysSystem                      OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 1 } 
+a3ComSysSlot                        OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 2 } 
+a3ComSysControlPanel                OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 3 } 
+a3ComSysPowerSupply                 OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 4 } 
+a3ComSysSnmp                        OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 5 } 
+a3ComSysAgent                       OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 6 } 
+a3ComSysInterface                   OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 7 } 
+a3ComSysEthernetPort                OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 8 } 
+-- a3ComSysSmt is located in 3cSysSmt.mib --
+a3ComSysSmt                         OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 9 } 
+-- a3ComSysBridge is located in 3cSysBridge.mib --
+a3ComSysBridge                      OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 10 } 
+a3ComSysIpRouter                    OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 11 } 
+a3ComSysNetworkMonitor              OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 12 } 
+-- a3ComSysTokenRing is located in 3cSysTokenRing.mib --
+a3ComSysTokenRingPort               OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 13 } 
+-- a3ComSysFtGroup is located in 3cSysFt.mib --
+a3ComSysFtGroup                     OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 14 } 
+a3ComSysIpGroup                     OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 15 } 
+a3ComSysIpxGroup                    OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 16 } 
+a3ComSysAppleTalkGroup              OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 17 } 
+a3ComSysModuleCardGroup             OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 18 } 
+a3ComSysDiagnosticsGroup            OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 19 } 
+-- instances 20 through 24 can found found in other 3cMibs.
+-- a3ComSysAtmPort is located in 3cSysAtmPort.mib --
+a3ComSysAtmPort                	    OBJECT IDENTIFIER ::= { a3ComSwitchingSystemsMib 25 } 
+ 
+-- The Switching Systems MIB system group.  Implementation of this 
+-- group is mandatory for agents which manage system resources. 
+ 
+a3ComSysSystemId  OBJECT-TYPE 
+    SYNTAX  INTEGER  
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The unique identifier assigned to this system during 
+            manufacturing." 
+::= { a3ComSysSystem 1 } 
+ 
+a3ComSysSystemType  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              other(1), 
+              lanplex6000(2), 
+              lanplex2000(3), 
+              coreBuilder3500(4), 
+              coreBuilder9400(5), 
+              superStack3900(6), 
+              superStack9300(7),
+              hinet6200(8),
+              coreBuilder9000-layer2-switch-fabric-or-IO-module(9),
+              coreBuilder9000-layer2-IO-module(10),
+              coreBuilder9000-layer3-IO-module(11),
+              coreBuilder9000-layer2-bridge-repeater-IO-module(12)
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The type of system." 
+::= { a3ComSysSystem 2 } 
+ 
+a3ComSysSystemName  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE (0..31)) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The text string describing this system." 
+::= { a3ComSysSystem 3 } 
+ 
+a3ComSysSystemManufacturer  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE (0..127)) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The text string describing the manufacturer of this 
+            system." 
+::= { a3ComSysSystem 4 } 
+ 
+a3ComSysSystemHardwareRevision  OBJECT-TYPE 
+    SYNTAX  OCTET STRING (SIZE (2))  
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The revision level of the system, contained in two 
+            octets.  The first octet indicates the artwork revision, 
+            and the second octet indicates the rework level." 
+::= { a3ComSysSystem 5 } 
+ 
+a3ComSysSystemMemorySize  OBJECT-TYPE 
+    SYNTAX  INTEGER  
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The amount of memory (RAM), in bytes, present on the 
+            system processor board."  
+::= { a3ComSysSystem 6 } 
+ 
+a3ComSysSystemFlashMemorySize  OBJECT-TYPE 
+    SYNTAX  INTEGER  
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The amount of flash memory, in bytes, present on the 
+            system processor board." 
+::= { a3ComSysSystem 7 } 
+ 
+a3ComSysSystemNvMemorySize  OBJECT-TYPE 
+    SYNTAX  INTEGER  
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The amount of non-volatile memory, in bytes, present 
+            on the system processor board."  
+::= { a3ComSysSystem 8 } 
+ 
+a3ComSysSystemSoftwareRevision  OBJECT-TYPE 
+    SYNTAX  OCTET STRING (SIZE (4))  
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The revision number of the Switching Systems software. 
+            Each byte indicates the following: 
+            byte 0: major release number. 
+            byte 1: minor release number. 
+            byte 2: update number. 
+            byte 3: 
+            bits 7-6: release type. 
+            bits 5-0: supplemental identifier." 
+::= { a3ComSysSystem 9 } 
+ 
+a3ComSysSystemBuildTime  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE (0..127)) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The build time of the system software." 
+::= { a3ComSysSystem 10 } 
+ 
+a3ComSysSystemSnmpRevision  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The revision number of the SNMP agent implementation." 
+::= { a3ComSysSystem 11 } 
+ 
+a3ComSysSystemRequestedSnmpMode  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              singleAgentMode(1), 
+              multiAgentMode(2) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object describes the requested SNMP mode for the 
+            system.  The value of this object indicates the mode that 
+            will become effective following a reboot of the system. 
+            Note that only a subset of the above values may be valid 
+            for some systems." 
+::= { a3ComSysSystem 12 } 
+ 
+a3ComSysSystemCurrentSnmpMode  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              singleAgentMode(1), 
+              multiAgentMode(2) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object describes the currently active SNMP mode for 
+            the system.  Note that only a subset of the above values 
+            may be valid for some systems." 
+::= { a3ComSysSystem 13 } 
+ 
+a3ComSysSystemAction  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              other(1), 
+              reset(2), 
+              nvReset(3) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object, when read, always returns the value other(1).  
+ 
+            Setting this object to the value reset(2) causes a reset  
+            of the system.   
+ 
+            Setting this object to the value nvReset(3) causes the 
+            system's non-volatile configuration to be reset to the  
+            default values. 
+ 
+            The value other(1) is not a vaild value for set operations." 
+::= { a3ComSysSystem 14 } 
+ 
+a3ComSysSystemOvertemperature  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              true(1), 
+              false(2), 
+              notSupported(3) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object indicates the current overtemperature 
+            status for the system.  If the system does not support 
+            overtemperature detection, this object returns 
+            notSupported." 
+::= { a3ComSysSystem 15 } 
+ 
+a3ComSysSystemFanFailure  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              true(1), 
+              false(2), 
+              notSupported(3) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object indicates the current fan status for the 
+            system.  If the system does not support fan failure 
+            detection, this object returns notSupported." 
+::= { a3ComSysSystem 16 } 
+ 
+a3ComSysSystemProtocolMask  OBJECT-TYPE 
+    SYNTAX  INTEGER  
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object is a bit mask that indicates which protocols 
+            exist in the software image currently loaded in memory.   
+            The value of this OBJECT is a sum.  It initially takes 
+            on the value 0, then for each protocol bit as defined 
+            below, 2 raised to the value of the (bit position - 1) 
+            is added to the sum. 
+ 
+            The following bits are defined: 
+ 
+            IP_ROUTING  0x00000001 
+            IPX_ROUTING 0x00000002 
+            DDP_ROUTING 0x00000004 
+ 
+            A value of 0x00000000 indicates the 
+            standard switching software." 
+::= { a3ComSysSystem 17 } 
+ 
+a3ComSysSystemConsoleAccess  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              enabled  (1),	--  Console Access is permitted (unlocked)    
+              disabled (2)	--  Console Access is prohibited  (locked) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object determines whether another device 
+            can remotely access the system console via Telnet, 
+            Rlogin, or modem port. 
+ 
+            An existing remote session will not be terminated 
+            when this value is modified." 
+::= { a3ComSysSystem 18 } 
+ 
+a3ComSysSystemConsoleReadPwd  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE (0..31))  
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object is the console read-access password." 
+::= { a3ComSysSystem 19 } 
+ 
+a3ComSysSystemConsoleWritePwd  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE (0..31))  
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object is the console write-access password. The 
+            read-write community string is required for access to this 
+            object." 
+::= { a3ComSysSystem 20 } 
+ 
+a3ComSysSystemConsoleAdminPwd  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE (0..31))  
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object is the console admin-access password. The 
+            read-write community string is required for access to this 
+            object." 
+::= { a3ComSysSystem 21 } 
+ 
+ 
+a3ComSysSystemDateTime  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-write 
+    STATUS  deprecated
+    DESCRIPTION   
+            "The current date and Time as reflected by the  
+            system clock in the format mm/dd/yy hh:mm:ss xM." 
+::= { a3ComSysSystem 22 } 
+ 
+a3ComSysSystemDSTime  OBJECT-TYPE 
+    SYNTAX  INTEGER (-120..120) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This parameter specifies the displacement, in 
+            minutes, from non-daylight savings time.  The 
+            a3ComSysDSTime object, along with the a3ComSysTimeZone 
+            object, allows the system to support Universal 
+            time for network communications spanning different 
+            time zones." 
+::= { a3ComSysSystem 23 } 
+ 
+a3ComSysSystemTimeZone  OBJECT-TYPE 
+    SYNTAX  INTEGER (-720..720) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This parameter specifies, in minutes, 
+            displacement of the system west of Greenwich. 
+            A negative number for this parameter indicates how 
+            many minutes displacement east of Greenwich 
+            the site is located.  A positive number 
+            indicates the number of minutes west of Greenwich." 
+::= { a3ComSysSystem 24 } 
+ 
+a3ComSysSystemCurrentFddiStationMode  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              singleStationMode(1), 
+              multiStationMode(2) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object describes the current FDDI station  
+            mode for systems that support multi-station mode." 
+::= { a3ComSysSystem 25 } 
+ 
+a3ComSysSystemRequestedFddiStationMode  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              singleStationMode(1), 
+              multiStationMode(2) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object describes the requested FDDI station  
+            mode for systems that support multi-station mode. 
+            The requested mode will become current during 
+            the next system reboot." 
+::= { a3ComSysSystem 26 } 
+
+
+a3ComSysSystemLog                   OBJECT IDENTIFIER ::= { a3ComSysSystem 27 } 
+ 
+a3ComSysSystemLogEntryCurrentCount  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The number of entries currently recorded in the system log." 
+::= { a3ComSysSystemLog 1 } 
+
+a3ComSysSystemLogMaxSize  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The maximum number of events that can be recorded in the system log." 
+::= { a3ComSysSystemLog 2 } 
+ 
+a3ComSysSystemLogSeverityThreshold  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+	{	informational(1), 
+		warning(2), 
+		error(3), 
+		fatal(4) 
+	} 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object determines the miminum serverety level of events recorded in the 
+            system log.  For example, if the a3ComSysSysteLogSeverityThreshold is set to errors(3) 
+            than only events which have serverity levels of error(3) or higher will 
+            be recorded." 
+::= { a3ComSysSystemLog 3 } 
+ 
+a3ComSysSystemLogTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysSystemLogEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This table provides information on recorded system events." 
+::= { a3ComSysSystemLog 4 } 
+ 
+a3ComSysSystemLogEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysSystemLogEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A system log entry." 
+    INDEX  { a3ComSysSystemLogIndex } 
+::= { a3ComSysSystemLogTable 1 } 
+ 
+A3ComSysSystemLogEntry ::=  
+    SEQUENCE { 
+	a3ComSysSystemLogIndex 		INTEGER, 
+	a3ComSysSystemLogSeverityLevel 	INTEGER, 
+	a3ComSysSystemLogDateTime 		DisplayString, 
+	a3ComSysSystemLogFacility 		INTEGER, 
+	a3ComSysSystemLogMessage 		DisplayString  
+} 
+ 
+a3ComSysSystemLogIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the log entry relative to this entry." 
+::= { a3ComSysSystemLogEntry 1 } 
+ 
+a3ComSysSystemLogSeverityLevel  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              information(1), 
+              warning(2), 
+              error(3), 
+              fatal(4) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Indicates the severity level of the log entry." 
+::= { a3ComSysSystemLogEntry 2 } 
+ 
+a3ComSysSystemLogDateTime  OBJECT-TYPE 
+    SYNTAX  DisplayString  
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Indicates the date and time of the log event and is formatted 
+            in the ISO 8601 format: CCYY-MM-DDThh:mm:ss." 
+::= { a3ComSysSystemLogEntry 3 } 
+ 
+ 
+a3ComSysSystemLogFacility  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+	{ 
+		exception(1), 
+		operatingSystem(2), 
+		assertion(3), 
+		spanningTree(4), 
+		fcmlmm(5), 
+		lmmfddi(6), 
+		lmmboard(7), 
+		esm(8), 
+		trsm(9), 
+		efsm(10), 
+		fsm(11), 
+		hsi(12) 
+	} 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The facility which entered the event in the log.  fcmlmm(6) represents 
+            those events which may be common to the Lanplex Management Module 
+            (LMM) and the FDDI Concentrator Module (FCM).  lmmfddi(6) represents 
+            those events specific to the FDDI portion of the LMM and lmmboard  
+            represents general events logged by the LMM."  
+::= { a3ComSysSystemLogEntry 4 } 
+ 
+a3ComSysSystemLogMessage  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The recorded log message." 
+::= { a3ComSysSystemLogEntry 5 } 
+ 
+a3ComSysSystemBaseMACAddress  OBJECT-TYPE 
+    SYNTAX  MacAddress 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The base MAC address for the system." 
+::= { a3ComSysSystem 28 } 
+ 
+a3ComSysSystemMACAddressCount  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The number of MAC addresses allocated to this system." 
+::= { a3ComSysSystem 29 } 
+ 
+a3ComSysSystemChassisSerialNumber  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE(8..20)) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The serial number of the chassis." 
+::= { a3ComSysSystem 30 } 
+ 
+a3ComSysSystemFPMemorySize  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The amount of frame processor memory (RAM), in bytes." 
+::= { a3ComSysSystem 31 } 
+ 
+a3ComSysSystemBufferSize  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The amount of buffer memory, in bytes." 
+::= { a3ComSysSystem 32 } 
+ 
+a3ComSysSystemDateTimeISO  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The current date and time as reflected by the  
+            system clock in the format CCYY-MM-DDThh:mm:ss." 
+::= { a3ComSysSystem 33 } 
+
+
+ 
+-- The Switching Systems MIB slot group.  Implementation of this 
+-- group is mandatory for agents which manage system resources 
+-- for systems with independently manageable slots. 
+-- Currently reserved for future use under a3Com 03/09/1998 
+ 
+ 
+-- The LANplex Systems MIB control panel group.  Implementation of 
+-- this group is mandatory for agents which manage system resources 
+-- for systems which are equipped with manageable control panels. 
+-- NOTE:Currently reserved for future use under a3Com 03/09/1998 
+ 
+ 
+ 
+-- The Switching Systems MIB power supply group.  Implementation of this 
+-- group is mandatory for agents which manage system resources for 
+-- systems which are equipped with managable power supplies. 
+ 
+a3ComSysPowerSupplyCount  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The count of power supplies in the system." 
+::= { a3ComSysPowerSupply 1 } 
+ 
+-- The Switching Systems MIB power supply status table. 
+ 
+a3ComSysPowerSupplyStatusTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysPowerSupplyStatusEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of power supply status entries." 
+::= { a3ComSysPowerSupply 2 } 
+ 
+a3ComSysPowerSupplyStatusEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysPowerSupplyStatusEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A power supply status entry contains information about a  
+            particular power supply." 
+    INDEX  { a3ComSysPowerSupplyStatusIndex } 
+::= { a3ComSysPowerSupplyStatusTable 1 } 
+ 
+A3ComSysPowerSupplyStatusEntry ::= 
+    SEQUENCE { 
+		a3ComSysPowerSupplyStatusIndex 
+			INTEGER, 
+		a3ComSysPowerSupplyStatus 
+			INTEGER, 
+		a3ComSysPowerSupplyStatusSupported 
+			INTEGER 
+	} 
+ 
+a3ComSysPowerSupplyStatusIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The unique index of the power supply identified by this 
+            entry." 
+::= { a3ComSysPowerSupplyStatusEntry 1 } 
+ 
+a3ComSysPowerSupplyStatus  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object represents the power supply status.  The 
+            value is a sum. It initially takes on the value 0, then 
+            for each type which is active, 2 raised to a power is 
+            added to the sum.  The powers are according to the 
+            following table. 
+            For the 6000 Backbone Aggregator an over temp for power 
+            supply 1 and power supply 2 will be reported as a power 
+            supply 1 Over Temperature Failure, and a fan failure will 
+            be reported as a power supply 2 Over Temperature Failure. 
+ 
+            Failure Type		      Power 
+            AC Failure			0 
+            Plus 5 Failure			1 
+            Plus 12 Failure			2 
+            Over Temperature Failure  	3 
+            Power Supply Inserted		4 
+            Power Supply Extracted		5" 
+::= { a3ComSysPowerSupplyStatusEntry 2 } 
+ 
+a3ComSysPowerSupplyStatusSupported  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object represents the various power supply status  
+            types which are supported.  The value is a sum.  It 
+            initially takes on the value 0, then for each type 
+            which is supported, 2 raised to a power is added to the 
+            sum.  The powers are according to the following table: 
+ 
+            Failure Type		      Power 
+            AC Failure			0 
+            Plus 5 Failure			1 
+            Plus 12 Failure			2 
+            Over Temperature Failure	3 
+            Power Supply Inserted		4 
+            Power Supply Extracted		5 
+ 
+            This object used in conjunction with the 
+            a3ComSysPowerSupplyStatus object for a given power supply 
+            provide a complete picture of the status of the power 
+            supply." 
+::= { a3ComSysPowerSupplyStatusEntry 3 } 
+ 
+ 
+-- The LANplex Systems MIB SNMP group.  Implementation of this group 
+-- is mandatory for agents in systems which contain multiple 
+-- independently manageable devices and which support a multiple agent 
+-- mode.  Note that this group is only available in the multiple agent 
+-- mode for those systems that support it. 
+-- NOTE:Currently reserved for future use under a3Com 03/09/1998 
+ 
+ 
+-- The Switching Systems MIB agent group.  Implementation of this group 
+-- is mandatory for all agents. 
+ 
+a3ComSysAgentRequestMaxAge  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..255) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The maximum time, in seconds, a local SNMP request will 
+            remain queued waiting for a response before being 
+            discarded." 
+::= { a3ComSysAgent 1 } 
+ 
+a3ComSysAgentProxyRemoteSmtRequests  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              true(1), 
+              false(2) 
+            } 
+    ACCESS  read-write 
+    STATUS  deprecated 
+    DESCRIPTION   
+            "This object determines if this agent will proxy SMT 
+            requests to other FDDI stations.  If the value of this 
+            object is true(1), this agent will proxy SMT requests to 
+            other stations.  Note that only a subset of the above 
+            values may be valid for some systems." 
+::= { a3ComSysAgent 2 } 
+ 
+a3ComSysAgentRemoteSmtProxyRequestMaxAge  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..255) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The maximum time, in seconds, an SMT proxy request will 
+            remain queued waiting for a response before being 
+            discarded.  Note that when the value of 
+            a3ComSysAgentProxyRemoteSmtRequests is false(2), the value of 
+            this object is ignored." 
+::= { a3ComSysAgent 3 } 
+ 
+a3ComSysAgentProxyRemoteSmtEvents  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              true(1), 
+              false(2) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object determines if this agent will generate traps 
+            for SMT events occuring at other stations.  If the value 
+            of this object is true(1), this agent will generate traps 
+            for all SMT events, those which occur locally, and those 
+            which occur at other stations.  If the value of this 
+            object is false(2), this agent will only generate traps 
+            for events which occur locally.  Note that only a subset 
+            of the above values may be valid for some systems." 
+::= { a3ComSysAgent 4 } 
+ 
+-- The Switching Systems MIB agent trap description table. 
+ 
+a3ComSysAgentTrapDescriptionTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysAgentTrapDescriptionTableEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This table contains a listing of trap descriptions for 
+            each trap supported by this agent.  This  
+            provides a relationship between a trap index, and the trap 
+            enterprise oid and trap number for a given trap.  In all 
+            cases except for the MIB-2 generic traps, the enterprise 
+            under which a trap is defined is the same as that 
+    ENTERPRISE  portion of the trap." 
+::= { a3ComSysAgent 5 } 
+ 
+a3ComSysAgentTrapDescriptionTableEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysAgentTrapDescriptionTableEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Information relating a trap index to a specific trap 
+            enterprise oid and trap number." 
+    INDEX  { a3ComSysAgentTrapDescriptionIndex } 
+::= { a3ComSysAgentTrapDescriptionTable 1 } 
+ 
+A3ComSysAgentTrapDescriptionTableEntry ::= 
+    SEQUENCE { 
+		a3ComSysAgentTrapDescriptionIndex 
+			INTEGER, 
+		a3ComSysAgentTrapEnterprise 
+			OBJECT IDENTIFIER, 
+		a3ComSysAgentTrapNumber 
+			INTEGER 
+	} 
+ 
+a3ComSysAgentTrapDescriptionIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A unique index corresponding to the trap described by 
+            this entry.  This value of this object corresponding to 
+            a particular trap will remain constant accross system 
+            resets." 
+::= { a3ComSysAgentTrapDescriptionTableEntry 1 } 
+ 
+a3ComSysAgentTrapEnterprise  OBJECT-TYPE 
+    SYNTAX  OBJECT IDENTIFIER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The enterpise under which the trap identified by this 
+            entry is defined." 
+::= { a3ComSysAgentTrapDescriptionTableEntry 2 } 
+ 
+a3ComSysAgentTrapNumber  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The number of the trap identified by this entry, within 
+            the enterprise where it is defined." 
+::= { a3ComSysAgentTrapDescriptionTableEntry 3 } 
+ 
+-- The Switching Systems MIB agent trap destination table. 
+ 
+a3ComSysAgentTrapDestinationTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysAgentTrapDestinationTableEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This table contains information specifying which traps 
+            will be transmitted to a given destination address.  The 
+            table is indexed by the destination address type and 
+            destination address.  Each entry in the table with a 
+            status of valid identifies a set of traps which, when 
+            generated, will be transmitted to the corresponding 
+            destination address listed in that entry." 
+::= { a3ComSysAgent 6 } 
+ 
+a3ComSysAgentTrapDestinationTableEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysAgentTrapDestinationTableEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Information relating a set of traps and a destination 
+            address to which each trap in ths set will be transmitted 
+            when it is generated.  To create a new entry, set a 
+            non-existent instance of a3ComSysAgentTrapDestinationTrapMask 
+            to a valid value.  To remove an entry, set the instance of 
+            a3ComSysAgentTrapDestinationEntryStatus for the entry to 
+            invalid(2)." 
+    INDEX  { a3ComSysAgentTrapDestinationAddressType, 
+            a3ComSysAgentTrapDestinationAddress } 
+::= { a3ComSysAgentTrapDestinationTable 1 } 
+ 
+A3ComSysAgentTrapDestinationTableEntry ::= 
+    SEQUENCE { 
+		a3ComSysAgentTrapDestinationAddressType 
+			INTEGER, 
+		a3ComSysAgentTrapDestinationAddress 
+			OCTET STRING, 
+		a3ComSysAgentTrapDestinationTrapMask 
+			OCTET STRING, 
+		a3ComSysAgentTrapDestinationEntryStatus 
+			INTEGER 
+	} 
+ 
+a3ComSysAgentTrapDestinationAddressType  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              ip(1) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The type of address identified by this entry." 
+::= { a3ComSysAgentTrapDestinationTableEntry 1 } 
+ 
+a3ComSysAgentTrapDestinationAddress  OBJECT-TYPE 
+    SYNTAX  OCTET STRING 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The address, of the type specified by the corresponding 
+            value of a3ComSysAgentTrapDestinationAddressType, to which the 
+            set of traps identified by this entry are to be 
+            transmitted." 
+::= { a3ComSysAgentTrapDestinationTableEntry 2 } 
+ 
+a3ComSysAgentTrapDestinationTrapMask  OBJECT-TYPE 
+    SYNTAX  OCTET STRING (SIZE (8)) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This value is a bit string that indicates which traps 
+            are enabled for the address identified by this entry. 
+            The octet string value is treated as a 64-bit value.  The 
+            value is a sum.  It initially takes on the value 0, then 
+            for each trap which is enabled, 2 raised to the value of 
+            (a3ComSysAgentTrapDescriptionIndex - 1) for that trap is 
+            added to the sum.  A new entry in the table is created by 
+            setting the value of this object for a new destination 
+            address type and destination address.  Note that an octet 
+            string of all zeros is not a valid value for this object." 
+::= { a3ComSysAgentTrapDestinationTableEntry 3 } 
+ 
+a3ComSysAgentTrapDestinationEntryStatus  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              valid(1), 
+              invalid(2) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The status of the trap destination table entry.  Setting 
+            this object to invalid(1) has the effect of removing the 
+            corresponding entry from the table." 
+::= { a3ComSysAgentTrapDestinationTableEntry 4 } 
+ 
+a3ComSysAgentReadCommunity  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE (0..48))  
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object is the read community string when access is 
+            made via SNMP, see RFC1157."	 
+::= { a3ComSysAgent 7 } 
+ 
+a3ComSysAgentReadWriteCommunity  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE (0..48))  
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object is the read-write community string when access is 
+            made via SNMP, see RFC1157.  The read-write community string 
+            is required to access this object." 
+::= { a3ComSysAgent 8 }
+
+a3ComSysAgentRmonStatsConfig OBJECT-TYPE
+	SYNTAX  INTEGER {
+			receive(1),
+			transmitAndReceive(2)
+			}
+	ACCESS  read-write
+	STATUS  mandatory
+	DESCRIPTION
+        "This object allows the configuration of rmon etherStats (RFC1757) 
+         to attain either received, or tranmitted and received frames.
+         The default value for S2 devices is received."
+::= { a3ComSysAgent 9 } 
+ 
+-- The Switching Systems MIB interface group.  Implementation of this 
+-- group is mandatory for all agents. 
+ 
+-- The Switching Systems MIB interface location table. 
+ 
+a3ComSysInterfaceLocationTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysInterfaceLocationEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of interface location entries.  A single entry 
+            exists in this list for each interface managed by this 
+            agent." 
+::= { a3ComSysInterface 1 } 
+ 
+a3ComSysInterfaceLocationEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysInterfaceLocationEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "An interface location entry describes the location of 
+            a particular interface managed by this agent." 
+    INDEX  { a3ComSysInterfaceLocationIfIndex } 
+::= { a3ComSysInterfaceLocationTable 1 } 
+ 
+A3ComSysInterfaceLocationEntry ::= 
+    SEQUENCE { 
+		a3ComSysInterfaceLocationIfIndex 
+			INTEGER, 
+		a3ComSysInterfaceLocationInterfaceType 
+			INTEGER, 
+		a3ComSysInterfaceLocationType 
+			INTEGER, 
+		a3ComSysInterfaceLocationTypeIndex 
+			INTEGER, 
+		a3ComSysInterfaceLocationLocalIndex 
+			INTEGER, 
+		a3ComSysInterfaceLocationSystemModuleIndex 
+			INTEGER 
+	} 
+ 
+a3ComSysInterfaceLocationIfIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The value of the MIB-II ifIndex corresponding to the 
+            interface identified by this entry." 
+::= { a3ComSysInterfaceLocationEntry 1 } 
+ 
+ 
+a3ComSysInterfaceLocationInterfaceType  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              other(1), 
+              ethernetPort(2), 
+              fddiMac(3), 
+              tokenringPort(4), 
+              atmPort(5) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The type of the physical implementation of the interface 
+            identified by this entry." 
+::= { a3ComSysInterfaceLocationEntry 2 } 
+ 
+a3ComSysInterfaceLocationType  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              other(1), 
+              modularSlot(2), 
+              chassis(3), 
+              modularCard(4) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The type of location where the interface identified 
+            by this entry is physically located." 
+::= { a3ComSysInterfaceLocationEntry 3 } 
+ 
+a3ComSysInterfaceLocationTypeIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the location identified by the corresponding 
+            instance of a3ComSysInterfaceLocationType where the interface 
+            identified by this entry is physically located." 
+::= { a3ComSysInterfaceLocationEntry 4 } 
+ 
+a3ComSysInterfaceLocationLocalIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The local index of the interface identified by 
+            this entry relative to its type specified by the 
+            corresponding value of a3ComSysInterfaceLocationInterfaceType, 
+            and the location specified by the corresponding values 
+            of a3ComSysInterfaceLocationType and a3ComSysInterfaceLocationTypeIndex." 
+::= { a3ComSysInterfaceLocationEntry 5 } 
+ 
+a3ComSysInterfaceLocationSystemModuleIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The system module index of the interface idnetified by 
+            this entry.  Ths index can be used to acquire the module 
+            information from the s2SysModuleCardGroup and the 
+            a3ComSysDiagnosticsGroup groups." 
+::= { a3ComSysInterfaceLocationEntry 6 } 
+-- The Switching Systems MIB ethernet port group.  Implementation of 
+-- this group is mandatory for agents which manage ethernet port 
+-- resources. 
+ 
+a3ComSysEthernetPortCount  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The count of ethernet ports managed by this agent." 
+::= { a3ComSysEthernetPort 1 } 
+ 
+-- The Switching Systems MIB ethernet port table. 
+ 
+a3ComSysEthernetPortTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysEthernetPortEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of ethernet port entries.  A single entry exists 
+            in this list for each ethernet port managed by this agent." 
+::= { a3ComSysEthernetPort 2 } 
+ 
+a3ComSysEthernetPortEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysEthernetPortEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "An ethernet port entry contains information about a 
+            particular ethernet port managed by this agent." 
+    INDEX  { a3ComSysEthernetPortIndex } 
+::= { a3ComSysEthernetPortTable 1 } 
+ 
+A3ComSysEthernetPortEntry ::= 
+    SEQUENCE { 
+		a3ComSysEthernetPortIndex 
+			INTEGER, 
+		a3ComSysEthernetPortIfIndex 
+			INTEGER, 
+		a3ComSysEthernetPortLabel 
+			DisplayString, 
+		a3ComSysEthernetPortLinkStatus 
+			INTEGER, 
+		a3ComSysEthernetPortType 
+			INTEGER,
+        a3ComSysEthernetPortAutoNegotiationEnable
+            INTEGER,
+        a3ComSysEthernetPortAutoNegotiationState
+            INTEGER,
+        a3ComSysEthernetPortRequestedPortMode
+            INTEGER,
+        a3ComSysEthernetPortActualPortMode
+            INTEGER,
+        a3ComSysEthernetPortPaceAccessEnable
+            INTEGER,
+        a3ComSysEthernetPortFlowControlRequestedMode
+            INTEGER,
+        a3ComSysEthernetPortFlowControlActualMode
+            INTEGER
+} 
+ 
+a3ComSysEthernetPortIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the ethernet port identified by this entry, 
+            relative to this agent." 
+::= { a3ComSysEthernetPortEntry 1 } 
+ 
+a3ComSysEthernetPortIfIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The value of the MIB-II ifIndex corresponding to the 
+            ethernet port identified by this entry." 
+::= { a3ComSysEthernetPortEntry 2 } 
+ 
+a3ComSysEthernetPortLabel  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE (0..31)) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "An ASCII text string describing the ethernet port 
+            identified by this entry." 
+::= { a3ComSysEthernetPortEntry 3 } 
+ 
+a3ComSysEthernetPortLinkStatus  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              active(1), 
+              inActive(2) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The current value of the link status for the ethernet port 
+            identified by this entry." 
+::= { a3ComSysEthernetPortEntry 4 } 
+ 
+a3ComSysEthernetPortType  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              rj2110BaseT(1), 
+              rj4510BaseT(2), 
+              st10BaseFL(3), 
+              aui(4), 
+              bnc10Base2(5), 
+              other(6), 
+              rj45100BaseT(7), 
+              sc100BaseFx(8), 
+              untermBnc10Base2(9), 
+              sc1000BaseLxSm(10), 
+              sc1000BaseLxMm(11), 
+              sc1000BaseLxSmMm(12), 
+              sc1000BaseLx10km(13), 
+              sc1000BaseSx(14), 
+              hssdc1000BaseCx(15), 
+              db91000BaseCx(16), 
+              gbicNotPresent(17), 
+              gbic1000BaseCxDb9(18), 
+              gbic1000BaseCxHssdc(19), 
+              gbic1000BaseLx10Km(20), 
+              gbic1000BaseLx(21), 
+              gbic1000BaseSx(22), 
+              rj451000BaseT(23), 
+              port1000BaseNotPresent(24),
+              gbicNotQualified(25)
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Specific port type description for the ethernet port 
+            identified by this entry." 
+::= { a3ComSysEthernetPortEntry 5 } 
+ 
+a3ComSysEthernetPortAutoNegotiationEnable  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                    enabled(1),
+                    disabled(2)
+            }
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+            "Setting this object to enabled(1) will allow
+             the ethernet port to autonegotiate to the best
+             possible ethernet speed.  Setting it to disabled(2)
+             requires the the port mode to be set manually.
+             This may cause an invalid configuration, if the
+             object a3ComSysEthernetPortRequestedPortMode is
+             not set properly."
+::= { a3ComSysEthernetPortEntry 6 } 
+
+a3ComSysEthernetPortAutoNegotiationState  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                    configuring(1),
+                    completed(2),
+                    disabled(3),
+                    failed(4)
+            }
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "This object returns the state of autonegotiation on a port."
+::= { a3ComSysEthernetPortEntry 7 } 
+
+a3ComSysEthernetPortRequestedPortMode  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                    mode10half(1),
+                    mode10full(2),
+                    mode100half(3),
+                    mode100full(4),
+                    mode1000half(5),
+                    mode1000full(6)
+            }
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+            "This set the mode of a given port. It is only
+             used if a3ComSysEthernetPortAutonegotiationEnabled
+             is set to disabled." 
+::= { a3ComSysEthernetPortEntry 8 } 
+
+a3ComSysEthernetPortActualPortMode  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                    mode10half(1),
+                    mode10full(2),
+                    mode100half(3),
+                    mode100full(4),
+                    mode1000half(5),
+                    mode1000full(6)
+            }
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "This object returns the actual mode of a
+             given port.  It may not return the value set in
+             a3ComSysEthernetPortRequestedPortMode, if 
+             autonegotiation is enabled.  If a port is not online
+             modeNA will be returned."
+::= { a3ComSysEthernetPortEntry 9 } 
+
+a3ComSysEthernetPortPaceAccessEnable  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                    enabled(1),
+                    disabled(2)
+            }
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+            "This object enables/disabled PACE."
+::= { a3ComSysEthernetPortEntry 10 } 
+
+a3ComSysEthernetPortFlowControlRequestedMode  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                    rxOnTxOn(1),
+                    rxOffTxOff(2),
+                    rxOnTxOff(3),
+                    rxOffTxOn(4)
+            }
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+            "This object is used to set the flow control paramaters.  If rxOn is set
+             the device will send pause frames to slow down the incoming stream of data.
+             If txOn is set, then the device will obey and pause frames it receives."
+::= { a3ComSysEthernetPortEntry 11 }
+
+a3ComSysEthernetPortFlowControlActualMode OBJECT-TYPE
+    SYNTAX  INTEGER {
+                    rxOnTxOn(1),
+                    rxOffTxOff(2),
+                    rxOnTxOff(3),
+                    rxOffTxOn(4)
+            }
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "This object returns the actual settings of flow control.  These may be
+             different from the value request, depending on the best settings
+             between the two devices."
+::= { a3ComSysEthernetPortEntry 12 }
+
+-- The Switching Systems MIB ethernet port rate table. 
+ 
+a3ComSysEthernetPortRateTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysEthernetPortRateEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of ethernet port rate entries.  A single entry 
+            exists in this list for each ethernet port, managed by 
+            this agent, which supports rate information." 
+::= { a3ComSysEthernetPort 3 } 
+ 
+a3ComSysEthernetPortRateEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysEthernetPortRateEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "An ethernet port rate entry contains rate statistics for a 
+            particular ethernet port managed by this agent.  Rate 
+            statistics are calculated based on a one second sampling 
+            interval." 
+    INDEX  { a3ComSysEthernetPortRateIndex } 
+::= { a3ComSysEthernetPortRateTable 1 } 
+ 
+A3ComSysEthernetPortRateEntry ::= 
+    SEQUENCE { 
+		a3ComSysEthernetPortRateIndex 
+			INTEGER, 
+		a3ComSysEthernetPortRateByteReceiveRate 
+			INTEGER, 
+		a3ComSysEthernetPortRatePeakByteReceiveRate 
+			INTEGER, 
+		a3ComSysEthernetPortRateFrameReceiveRate 
+			INTEGER, 
+		a3ComSysEthernetPortRatePeakFrameReceiveRate 
+			INTEGER, 
+		a3ComSysEthernetPortRateByteTransmitRate 
+			INTEGER, 
+		a3ComSysEthernetPortRatePeakByteTransmitRate 
+			INTEGER, 
+		a3ComSysEthernetPortRateFrameTransmitRate 
+			INTEGER, 
+		a3ComSysEthernetPortRatePeakFrameTransmitRate 
+			INTEGER 
+} 
+ 
+a3ComSysEthernetPortRateIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the ethernet port identified by this entry, 
+            relative to this agent." 
+::= { a3ComSysEthernetPortRateEntry 1 } 
+ 
+a3ComSysEthernetPortRateByteReceiveRate  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The average number of bytes received per second by the 
+            ethernet port identified by this entry during the most 
+            recent sampling period." 
+::= { a3ComSysEthernetPortRateEntry 2 } 
+ 
+a3ComSysEthernetPortRatePeakByteReceiveRate  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The peak value of a3ComSysEthernetPortRateByteReceiveRate 
+            since the system was last initialized for the ethernet 
+            port identified by this entry." 
+::= { a3ComSysEthernetPortRateEntry 3 } 
+ 
+a3ComSysEthernetPortRateFrameReceiveRate  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The average number of frames received per second by the 
+            ethernet port identified by this entry during the most 
+            recent sampling period." 
+::= { a3ComSysEthernetPortRateEntry 4 } 
+ 
+a3ComSysEthernetPortRatePeakFrameReceiveRate  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The peak value of a3ComSysEthernetPortRateFrameReceiveRate 
+            since the system was last initialized for the ethernet 
+            port identified by this entry." 
+::= { a3ComSysEthernetPortRateEntry 5 } 
+ 
+a3ComSysEthernetPortRateByteTransmitRate  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The average number of bytes transmitted per second by the 
+            ethernet port identified by this entry during the most 
+            recent sampling period." 
+::= { a3ComSysEthernetPortRateEntry 6 } 
+ 
+a3ComSysEthernetPortRatePeakByteTransmitRate  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The peak value of a3ComSysEthernetPortRateByteTransmitRate 
+            since the system was last initialized for the ethernet 
+            port identified by this entry." 
+::= { a3ComSysEthernetPortRateEntry 7 } 
+ 
+a3ComSysEthernetPortRateFrameTransmitRate  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The average number of frames transmitted per second by the 
+            ethernet port identified by this entry during the most 
+            recent sampling period." 
+::= { a3ComSysEthernetPortRateEntry 8 } 
+ 
+a3ComSysEthernetPortRatePeakFrameTransmitRate  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The peak value of a3ComSysEthernetPortRateFrameTransmitRate 
+            since the system was last initialized for the ethernet 
+            port identified by this entry." 
+::= { a3ComSysEthernetPortRateEntry 9 } 
+ 
+-- EthernetPortMonitorTable
+-- This is used to monitor port status
+-- on the SuperStack II 3900.
+
+a3ComSysEthernetPortMonitorTable  OBJECT-TYPE
+    SYNTAX  SEQUENCE OF A3ComSysEthernetPortMonitorTableEntry
+    ACCESS  not-accessible
+    STATUS  mandatory
+    DESCRIPTION
+            "A list of ethernet port entries.  A single entry exists
+            in this list for each ethernet port monitor managed by
+            this agent."
+::= { a3ComSysEthernetPort 4 }
+
+a3ComSysEthernetPortMonitorTableEntry  OBJECT-TYPE
+    SYNTAX  A3ComSysEthernetPortMonitorTableEntry
+    ACCESS  not-accessible
+    STATUS  mandatory
+    DESCRIPTION
+            "An ethernet port entry contains information about a
+            particular ethernet port monitor managed by this agent."
+    INDEX  { a3ComSysEthernetPortMonitorIndex }
+::= { a3ComSysEthernetPortMonitorTable 1 }
+
+A3ComSysEthernetPortMonitorTableEntry ::=
+    SEQUENCE {
+        a3ComSysEthernetPortMonitorIndex
+            INTEGER,
+        a3ComSysEthernetPortMonitorLastError
+            OCTET STRING,
+        a3ComSysEthernetPortMonitorStatus
+            INTEGER,
+        a3ComSysEthernetPortMonitorErrorCount
+            INTEGER,
+        a3ComSysEthernetPortMonitorMode
+            INTEGER
+}
+
+a3ComSysEthernetPortMonitorIndex  OBJECT-TYPE
+    SYNTAX  INTEGER (1..65535)
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "The index of the ethernet port identified by this entry,
+            relative to this agent."
+::= { a3ComSysEthernetPortMonitorTableEntry 1 }
+
+a3ComSysEthernetPortMonitorLastError  OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "This object indicates the last error(s) occured on this ethernet port.
+             It is a bit mask variable and if a bit is set then that error was
+             encountered.  The bit values are as follows:
+ 
+             Bit 1: MultipleCollision
+             Bit 2: ExcessiveCollision
+             Bit 3: LateCollision
+             Bit 4: Runts
+             Bit 5: FCSErrors
+
+            Example: value of 00:00:00:05 = MultipleCollision and LateCollision."
+::= { a3ComSysEthernetPortMonitorTableEntry 2 }
+
+a3ComSysEthernetPortMonitorStatus  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                      normal(1),
+                      partitioned(2)
+                    }
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "This object indicates the status of the port:
+             1 = Normal, and 2 = Partitioned."
+::= { a3ComSysEthernetPortMonitorTableEntry 3 }
+
+a3ComSysEthernetPortMonitorErrorCount  OBJECT-TYPE
+    SYNTAX  INTEGER (1..65535)
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "This object indicates the number of partitioning accured
+             for a port since power-up."
+::= { a3ComSysEthernetPortMonitorTableEntry 4 }
+
+a3ComSysEthernetPortMonitorMode  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                      disabled(1),
+                      enabled(2)
+                    }
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+            "This object indicates whether this port monitoring is enable
+             or disabled for the device: 1 = disabled, and 2 = enabled."
+::= { a3ComSysEthernetPortMonitorTableEntry 5 }
+
+-- EthernetPortErrorTable
+-- This is used to report port txUnderRun and rxOverRun
+-- on the CA and GA blades and boxes
+
+a3ComSysEthernetPortErrorTable  OBJECT-TYPE
+    SYNTAX  SEQUENCE OF A3ComSysEthernetPortErrorTableEntry
+    ACCESS  not-accessible
+    STATUS  mandatory
+    DESCRIPTION
+            "A list of ethernet port entries.  A single entry exists
+            in this list for each ethernet port that a txUnderRun
+            or rxOverRun error state resulted a trap condition, and 
+            it is managed by this agent."
+::= { a3ComSysEthernetPort 5 }
+
+a3ComSysEthernetPortErrorTableEntry  OBJECT-TYPE
+    SYNTAX  A3ComSysEthernetPortErrorTableEntry
+    ACCESS  not-accessible
+    STATUS  mandatory
+    DESCRIPTION
+            "An ethernet port entry contains information about a
+            particular ethernet port in txUnderRun or rxOverRun 
+            error state and managed by this agent."
+    INDEX  { a3ComSysEthernetPortErrorIndex }
+::= { a3ComSysEthernetPortErrorTable 1 }
+
+A3ComSysEthernetPortErrorTableEntry ::=
+    SEQUENCE {
+        a3ComSysEthernetPortErrorIndex
+            INTEGER,
+        a3ComSysEthernetPortAsicType
+            INTEGER,
+        a3ComSysEthernetPortErrorType
+            INTEGER,
+        a3ComSysEthernetPortAssert
+            INTEGER
+}
+
+a3ComSysEthernetPortErrorIndex  OBJECT-TYPE
+    SYNTAX  INTEGER (1..65535)
+    ACCESS  not-accessible
+    STATUS  mandatory
+    DESCRIPTION
+            "The index of the ethernet port identified by this entry,
+            relative to this agent."
+::= { a3ComSysEthernetPortErrorTableEntry 1 }
+
+a3ComSysEthernetPortAsicType  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                        fen(1),
+                        gen(2)
+    }
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "This object indicates whether the ethernet port is part of 
+             Fen(1) or Gen(2) Asic."
+::= { a3ComSysEthernetPortErrorTableEntry 2 }
+
+a3ComSysEthernetPortErrorType  OBJECT-TYPE
+    SYNTAX  INTEGER {
+                        txUnderRun(1),
+                        rxOverRun(2)
+    }
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "This object indicates whether the ethernet port is in
+             txUnderRun(1) or rxOverRun(2) error."
+::= { a3ComSysEthernetPortErrorTableEntry 3 }
+
+a3ComSysEthernetPortAssert  OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+            "This object indicates whether the ethernet port error will 
+             cause the system to assert (value = true) after a trap is 
+             generated."
+::= { a3ComSysEthernetPortErrorTableEntry 4 }
+
+
+-- The Switching Systems MIB IP router group.  Implementation of this 
+-- group is mandatory for agents which manage IP router resources. 
+-- This group is reserved for future use. 
+ 
+-- The Switching Systems MIB networking monitoring group.  Implementation 
+-- of this group is manadatory for all agents which manage bridge 
+-- resources that support network monitoring. 
+ 
+-- The Switching Systems MIB network analyzer table. 
+ 
+a3ComSysNetworkAnalyzerTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysNetworkAnalyzerTableEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of analyzer entries.  A single entry exists in this 
+            list for each bridge port configured for an analyzer." 
+::= { a3ComSysNetworkMonitor 1 } 
+ 
+a3ComSysNetworkAnalyzerTableEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysNetworkAnalyzerTableEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "An analyzer table entry contains information relating an 
+            analyzer port address to the bridge and port index for that 
+            analyzer. 
+ 
+            The effect of creating an entry for a particular port is 
+            to configure that port for monitoring.  A port which is 
+            configured for monitoring is no longer available for 
+            switching.  To create an entry, set the value of the 
+            a3ComSysNetworkAnalyzerStatus object for a non-existent instance 
+            to valid(1).  The value of the a3ComSysNetworkAnalyzerPhysicalAddress 
+            object for the new entry is filled in as a result of the 
+            creation. 
+ 
+            The effect of removing an entry for a particular port is to 
+            disable the port for monitoring.  The port is then available 
+            for switching.  To remove an entry, set the value of the 
+            corresponding instance of the a3ComSysNetworkAnalyzerStatus object 
+            to invalid(2)." 
+    INDEX  { a3ComSysNetworkAnalyzerBridgeIndex, 
+            a3ComSysNetworkAnalyzerBridgePortIndex} 
+::= { a3ComSysNetworkAnalyzerTable 1 } 
+ 
+A3ComSysNetworkAnalyzerTableEntry ::= 
+    SEQUENCE { 
+		a3ComSysNetworkAnalyzerBridgeIndex 
+			INTEGER, 
+		a3ComSysNetworkAnalyzerBridgePortIndex 
+			INTEGER, 
+		a3ComSysNetworkAnalyzerPhysicalAddress 
+			OCTET STRING, 
+		a3ComSysNetworkAnalyzerStatus 
+			INTEGER 
+	} 
+ 
+a3ComSysNetworkAnalyzerBridgeIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the bridge relative to this agent where the 
+            analyzer identified by this entry is configured." 
+::= { a3ComSysNetworkAnalyzerTableEntry 1 } 
+ 
+a3ComSysNetworkAnalyzerBridgePortIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the port relative to the bridge identified by 
+            this entry where the analyzer identified by this entry is 
+            configured." 
+::= { a3ComSysNetworkAnalyzerTableEntry 2 } 
+ 
+a3ComSysNetworkAnalyzerPhysicalAddress  OBJECT-TYPE 
+	SYNTAX	OCTET STRING (SIZE (6)) -- 6 octet address in "canonical" order 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The physical address of the bridge port identified by the 
+            corresponding values of a3ComSysNetworkAnalyzerBridgeIndex and 
+            a3ComSysNetworkAnayzerBridgePortIndex." 
+::= { a3ComSysNetworkAnalyzerTableEntry 3 } 
+ 
+a3ComSysNetworkAnalyzerStatus  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              valid(1), 
+              invalid(2) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The status of the entry.  Setting the value of a non-existent 
+            instance of this object to valid(1) attempts to add the 
+            corresponding entry to the table.  The effect of adding an 
+            entry to the table is to configure the port for monitoring and 
+            to disable it for switching.  Setting an existing instance of 
+            this object to invalid(2) attempts to remove the corresponding 
+            entry from the table.  The effect of removing an entry from 
+            the table is to disable the port for monitoring and to make 
+            available for switching." 
+::= { a3ComSysNetworkAnalyzerTableEntry 4 } 
+ 
+-- The Switching Systems MIB network port monitor table. 
+ 
+a3ComSysNetworkPortMonitorTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysNetworkPortMonitorTableEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of monitor port entries.  A single entry exists in 
+            this for each bridge port being monitored." 
+::= { a3ComSysNetworkMonitor 2 } 
+ 
+a3ComSysNetworkPortMonitorTableEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysNetworkPortMonitorTableEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A port monitor table entry contains information relating a 
+            bridge port being monitored with the address of the analyzer 
+            which is being used to monitor the port. 
+ 
+            The effect of creating an entry for a particular port is to 
+            enable monitoring of that port by the analyzer specified.  To 
+            create an entry, set the value of the 
+            a3ComSysNetworkPortMonitorAnalyzerAddress object to the address of 
+            the network analyzer port.  This value should be the same as 
+            the value of the a3ComSysNetworkAnalyzerPhysicalAddress object for 
+            the analyzer. 
+ 
+            The effect of removing an entry for a particular port is to 
+            disable monitoring of that port.  To remove an entry, set the 
+            value of the corresponding instance of the 
+            a3ComSysNetworkPortMonitorStatus object to invalid(2)." 
+    INDEX  { a3ComSysNetworkPortMonitorBridgeIndex, 
+            a3ComSysNetworkPortMonitorBridgePortIndex } 
+::= { a3ComSysNetworkPortMonitorTable 1 } 
+ 
+A3ComSysNetworkPortMonitorTableEntry ::= 
+    SEQUENCE { 
+		a3ComSysNetworkPortMonitorBridgeIndex 
+			INTEGER, 
+		a3ComSysNetworkPortMonitorBridgePortIndex 
+			INTEGER, 
+		a3ComSysNetworkPortMonitorAnalyzerAddress 
+			OCTET STRING, 
+		a3ComSysNetworkPortMonitorStatus 
+			INTEGER 
+	} 
+ 
+a3ComSysNetworkPortMonitorBridgeIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the bridge relative to this agent where the 
+            monitored port identified by this entry is located." 
+::= { a3ComSysNetworkPortMonitorTableEntry 1 } 
+ 
+a3ComSysNetworkPortMonitorBridgePortIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the port which is being monitored relative to 
+            the bridge identified by this entry." 
+::= { a3ComSysNetworkPortMonitorTableEntry 2 } 
+ 
+a3ComSysNetworkPortMonitorAnalyzerAddress  OBJECT-TYPE 
+	SYNTAX	OCTET STRING (SIZE (6)) -- 6 octet address in "canonical" order 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The physical address of the port where the analyzer, 
+            which is monitoring the port identified by this entry, is 
+            located.  Setting the value of a non-existent instance of 
+            this object attempts to add an entry to the table.  The effect 
+            of adding an entry to the table is to enable monitoring of the 
+            port by the analyzer specified.  Setting the value of an 
+            existing instance of this object will switch the monitored 
+            port to the new analyzer address." 
+::= { a3ComSysNetworkPortMonitorTableEntry 3 } 
+ 
+a3ComSysNetworkPortMonitorStatus  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              valid(1), 
+              invalid(2) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The status of the entry.  Setting an existing instance 
+            of this object to invalid(2) attempts to remove the 
+            corresponding entry from the table.  The effect of removing 
+            an entry from the table is to disable monitoring of the 
+            port." 
+::= { a3ComSysNetworkPortMonitorTableEntry 4 } 
+ 
+-- 
+-- IP Group 
+-- 
+ 
+-- The a3ComSysIpBaseGroup is resreved for future use 
+ 
+a3ComSysIpBaseGroup                 OBJECT IDENTIFIER ::= { a3ComSysIpGroup 1 } 
+a3ComSysIpInterfaceGroup            OBJECT IDENTIFIER ::= { a3ComSysIpGroup 2 } 
+ 
+a3ComSysIpInterfaceCount  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A count of the total number of IP interfaces configured." 
+::= { a3ComSysIpInterfaceGroup 1 } 
+ 
+a3ComSysIpInterfaceTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysIpInterfaceEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of configured IP interfaces." 
+::= { a3ComSysIpInterfaceGroup 2 } 
+ 
+a3ComSysIpInterfaceEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysIpInterfaceEntry 
+    ACCESS  not-accessible	 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "An individual IP interface." 
+    INDEX  { a3ComSysIpInterfaceIpStackIndex, a3ComSysIpInterfaceAddr, a3ComSysIpInterfaceNetMask } 
+::= { a3ComSysIpInterfaceTable 1 } 
+ 
+A3ComSysIpInterfaceEntry ::=  
+    SEQUENCE { 
+	a3ComSysIpInterfaceIpStackIndex  INTEGER, 
+	a3ComSysIpInterfaceAddr		  IpAddress, 
+	a3ComSysIpInterfaceNetMask		  IpAddress, 
+	a3ComSysIpInterfaceIndex		  INTEGER, 
+	a3ComSysIpInterfaceBcastAddr	  INTEGER, 
+	a3ComSysIpInterfaceCost		  INTEGER, 
+	a3ComSysIpInterfaceProxyArp		 INTEGER, 
+	a3ComSysIpInterfaceDefaultRoute	 IpAddress, 
+	a3ComSysIpInterfaceIcmpRedirect  INTEGER, 
+	a3ComSysIpInterfaceStatus        RowStatus,
+	a3ComSysIpInterfaceIpIfIndex     INTEGER,
+	a3ComSysIpInterfaceAddrType      INTEGER  
+} 
+ 
+a3ComSysIpInterfaceIpStackIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the IP stack identified by this entry 
+            relative to this agent." 
+::= { a3ComSysIpInterfaceEntry 1 } 
+ 
+a3ComSysIpInterfaceAddr  OBJECT-TYPE 
+    SYNTAX  IpAddress	 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The IP address of this entry within the IP stack identified 
+            within this entry." 
+::= { a3ComSysIpInterfaceEntry 2 } 
+ 
+a3ComSysIpInterfaceNetMask  OBJECT-TYPE 
+    SYNTAX  IpAddress 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The subnet mask associated with this IP interface.  The value of the mask  
+            is an IP address with all the network bits set to 1 and all the host bits 
+            set to 0." 
+::= { a3ComSysIpInterfaceEntry 3 } 
+ 
+a3ComSysIpInterfaceIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER	(1..65535) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index value which uniquely identifies the interface 
+            to which this entry is applicable.  lspIPInterfaceIndex maps to 
+            the same interface as identified by ifIndex in the ifTable.  Currently, 
+            this object can not be modified after creation." 
+::= { a3ComSysIpInterfaceEntry 4 } 
+ 
+a3ComSysIpInterfaceBcastAddr  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "This object represents the value of the least significant 
+            bit of this entry's direct broadcast address.  For example, 
+            a value of one signifies that the host portion of the broadcast 
+            address is set to all ones." 
+    DEFVAL  { 1 } 
+::= { a3ComSysIpInterfaceEntry 5 } 
+ 
+a3ComSysIpInterfaceCost  OBJECT-TYPE 
+    SYNTAX  INTEGER ( 1..15 ) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The route cost metric used for this entry." 
+    DEFVAL  { 1 } 
+::= { a3ComSysIpInterfaceEntry 6 } 
+ 
+a3ComSysIpInterfaceProxyArp  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              proxyArpDisable(1), 
+              proxyArpEnable(2) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The state of proxy ARP used for this entry." 
+::= { a3ComSysIpInterfaceEntry 7 } 
+ 
+a3ComSysIpInterfaceDefaultRoute  OBJECT-TYPE 
+    SYNTAX  IpAddress	 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The IP address of default route of this entry." 
+::= { a3ComSysIpInterfaceEntry 8 } 
+ 
+a3ComSysIpInterfaceIcmpRedirect  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              icmpRedirectDisable(1), 
+              icmpRedirectEnable(2) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            " The state of ICMP redirect used for this entry." 
+::= { a3ComSysIpInterfaceEntry 9 } 
+ 
+ 
+a3ComSysIpInterfaceStatus  OBJECT-TYPE 
+    SYNTAX  RowStatus	 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The status column for this IP interface.  This object can be set to: 
+            createAndGo(4) 
+            destroy(6) 
+ 
+            The following value may be read: 
+            active(1) 
+ 
+            Setting this object to createAndGo(4) causes the agent to 
+            attempt to create and commit the row based on the contents 
+            of the object in the row.  If all necessary information is 
+            present in the row and the values are acceptable to the 
+            agent, the agent will change the status to active(1).  If any 
+            of the necessary objects are not available the agent 
+            will reject the request. 
+ 
+            Other objects in this row entry can be individually modified 
+            while the row status is active(1). 
+ 
+            Setting this object to destroy(6) will remove this entry." 
+::= { a3ComSysIpInterfaceEntry 10 }
+
+a3ComSysIpInterfaceIpIfIndex   OBJECT-TYPE    
+	SYNTAX  INTEGER
+    	ACCESS  read-only    
+	STATUS  mandatory    
+	DESCRIPTION
+            "The ifIndex of the IP Interface that this entry corresponds to.
+             This entry is set by the system when the interface is created by
+             setting Status to active(1)."
+::= { a3ComSysIpInterfaceEntry 11 }
+
+a3ComSysIpInterfaceAddrType    OBJECT-TYPE    
+	SYNTAX  INTEGER  {
+            primary(1),            
+		secondary(2),            
+		slip(3)            
+		}
+    	ACCESS  read-write     
+	STATUS  mandatory     
+	DESCRIPTION
+           "This field indicates what type of interface this entry
+            corresponds to.  Primary(1) indicates the primary IP interface
+            associated with a VLAN.  Secondary(2) inicates a secondary IP
+            interface.  Slip(3) indicates a serial Slip interface.
+            There may be at most one primary interface.  There may be zero
+            or more secondary interfaces.  There is exactly one Slip inter-
+            face in the system, and it is associated with the default VLAN.
+            It is legal to change this object from Primary(1) to Secondary(2),
+            or from Secondary(2) to Primary(1).  It is not legal to change this
+            object to Slip(3), or from Slip(3) to Primary(1) or Secondary(2)."
+::= { a3ComSysIpInterfaceEntry 12 } 
+
+
+--  
+-- The IPX Group 
+-- 
+ 
+a3ComSysIpxBaseGroup                OBJECT IDENTIFIER ::= { a3ComSysIpxGroup 1 } 
+a3ComSysIpxInterfaceGroup           OBJECT IDENTIFIER ::= { a3ComSysIpxGroup 2 } 
+ 
+a3ComSysIpxInterfaceCount  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A count of the total number of IPX interfaces configured." 
+::= { a3ComSysIpxInterfaceGroup 1 } 
+ 
+a3ComSysIpxInterfaceTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysIpxInterfaceEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of configured IPX interfaces." 
+::= { a3ComSysIpxInterfaceGroup 2 } 
+ 
+a3ComSysIpxInterfaceEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysIpxInterfaceEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "An individual IPX interface." 
+    INDEX  { a3ComSysIpxInterfaceIpxStackIndex, a3ComSysIpxInterfaceNetNumber } 
+::= { a3ComSysIpxInterfaceTable 1 } 
+ 
+A3ComSysIpxInterfaceEntry ::=  
+    SEQUENCE { 
+	a3ComSysIpxInterfaceIpxStackIndex  INTEGER, 
+	a3ComSysIpxInterfaceNetNumber	    IpxNetworkNumber, 
+	a3ComSysIpxInterfaceIfIndex		INTEGER, 
+	a3ComSysIpxInterfaceCost		    INTEGER, 
+	a3ComSysIpxInterfaceFrameType	    INTEGER, 
+	a3ComSysIpxInterfaceStatus		    RowStatus 
+} 
+ 
+a3ComSysIpxInterfaceIpxStackIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the IPX stack identified by this entry 
+            relative to this agent." 
+::= { a3ComSysIpxInterfaceEntry 1 } 
+ 
+a3ComSysIpxInterfaceNetNumber  OBJECT-TYPE 
+    SYNTAX  IpxNetworkNumber 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The IPX Network Number of this entry." 
+::= { a3ComSysIpxInterfaceEntry 2 } 
+ 
+a3ComSysIpxInterfaceIfIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The ifIndex of the virtual interface that this IPX interface is 
+            is configured over.  The a3ComSysIpxInterfaceIfIndex identifies a 
+            virtual interface, for example a VLAN, that this local address  
+            is associated with for purposes of routing or network management."  
+::= { a3ComSysIpxInterfaceEntry 3 } 
+ 
+a3ComSysIpxInterfaceCost  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The cost associated with the IPX address of this entry." 
+    DEFVAL  { 1 } 
+::= { a3ComSysIpxInterfaceEntry 4 } 
+ 
+a3ComSysIpxInterfaceFrameType  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              frame-ethernetII(1), 
+              frame-802-2(2), 
+              frame-802-3-Raw(3), 
+              frame-SNAP(4) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The frame format used for routing frames on this IPX interface.  The framing 
+            formats are for ethernet ports.  There are two frame formats for FDDI ports: 
+            802.2 and FDDI SNAP.  The correct FDDI format is automatically chosen if  
+            this interface is associated with a VLAN interface that contains both ethernet 
+            and FDDI ports.  If the VLAN interface is an FDDI port, than the only 
+            values that can be written to this object are: frame-802-2(2) and 
+            frame-SNAP(4).  Some devices support IPX 802.3-FDDI SNAP translation
+            and in this case frame-802-3-Raw(3) is supported."  
+::= { a3ComSysIpxInterfaceEntry 5 } 
+ 
+a3ComSysIpxInterfaceStatus  OBJECT-TYPE 
+    SYNTAX  RowStatus	 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The status column for this IPX interface.  This OBJECT can be set to: 
+            createAndGo(4) 
+            destroy(6) 
+ 
+            The following value may be read: 
+            active(1) 
+ 
+            Setting this object ot createAndGo(4) causes the agent to 
+            attempt to create and commit the row based on the contents 
+            of the object in the row.  If all necessary information is 
+            present in the row and the values are acceptable to the 
+            agent, the agent will change the status to active(1).  If any 
+            of the necessary objects are not available the agent 
+            will reject the request. 
+ 
+            Other objects in this row entry can be individually modified 
+            while the row status is active(1). 
+ 
+            Setting this object to destroy(6) will remove this entry." 
+::= { a3ComSysIpxInterfaceEntry 6 } 
+ 
+-- 
+-- The Apple Talk Group 
+-- 
+ 
+a3ComSysAppleTalkBaseGroup          OBJECT IDENTIFIER ::= { a3ComSysAppleTalkGroup 1 } 
+a3ComSysAppleTalkInterfaceGroup     OBJECT IDENTIFIER ::= { a3ComSysAppleTalkGroup 2 } 
+ 
+-- The AppleTalkInterace Group 
+-- 
+-- Implementation of this group is mandatory for all entities 
+-- that implement AppleTalk ports 
+ 
+a3ComSysAtInterfaceCount  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A count of the total number of AppleTalk interfaces configured." 
+::= { a3ComSysAppleTalkInterfaceGroup 1 } 
+ 
+a3ComSysAtInterfaceTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysAtInterfaceEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of AppleTalk ports for this entity." 
+::= { a3ComSysAppleTalkInterfaceGroup 2 } 
+ 
+a3ComSysAtInterfaceEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysAtInterfaceEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "An individual appletalk interface entry. 
+            Appletalk entries with row status of active(1) 
+            cannot be modified but must set to destroy(6) 
+            and recreated." 
+    INDEX  { a3ComSysAtInterfaceAtStackIndex, a3ComSysAtInterfaceIfIndex } 
+::= { a3ComSysAtInterfaceTable 1 } 
+ 
+A3ComSysAtInterfaceEntry ::=  
+    SEQUENCE { 
+		a3ComSysAtInterfaceAtStackIndex       	INTEGER, 
+		a3ComSysAtInterfaceNetAddress         	DdpNodeAddress, 
+		a3ComSysAtInterfaceType               	INTEGER, 
+		a3ComSysAtInterfaceNetStart           	ATNetworkNumber, 
+		a3ComSysAtInterfaceNetEnd             	ATNetworkNumber, 
+		a3ComSysAtInterfaceZoneDefault  	    ATName, 
+		a3ComSysAtInterfaceZone1               ATName, 
+		a3ComSysAtInterfaceZone2               ATName, 
+		a3ComSysAtInterfaceZone3               ATName, 
+		a3ComSysAtInterfaceZone4               ATName, 
+		a3ComSysAtInterfaceZone5               ATName, 
+		a3ComSysAtInterfaceZone6               ATName, 
+		a3ComSysAtInterfaceZone7               ATName, 
+		a3ComSysAtInterfaceZone8               ATName, 
+		a3ComSysAtInterfaceZone9               ATName, 
+		a3ComSysAtInterfaceZone10              ATName, 
+		a3ComSysAtInterfaceZone11              ATName, 
+		a3ComSysAtInterfaceZone12              ATName, 
+		a3ComSysAtInterfaceZone13              ATName, 
+		a3ComSysAtInterfaceZone14              ATName, 
+		a3ComSysAtInterfaceZone15              ATName, 
+		a3ComSysAtInterfaceIfIndex		        INTEGER,   
+		a3ComSysAtInterfaceState              	INTEGER, 
+		a3ComSysAtInterfaceStatus            	RowStatus 
+} 
+ 
+a3ComSysAtInterfaceAtStackIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the Appletalk stack identified by this entry 
+            relative to this agent. 
+ 
+            Setting of this object is required for all interface creations." 
+::= { a3ComSysAtInterfaceEntry 1 } 
+ 
+a3ComSysAtInterfaceNetAddress  OBJECT-TYPE 
+    SYNTAX  DdpNodeAddress 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The AppleTalk network address configured for this 
+            port." 
+::= { a3ComSysAtInterfaceEntry 2 } 
+ 
+a3ComSysAtInterfaceType  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              seedInterface(1),  
+              nonseedInterface(2) 
+            } 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The type of interface that is configured for this port. 
+            Setting of this object is required for all interface creations." 
+::= { a3ComSysAtInterfaceEntry 3 } 
+ 
+a3ComSysAtInterfaceNetStart  OBJECT-TYPE 
+    SYNTAX  ATNetworkNumber 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The first AppleTalk network address in the range 
+            configured for this port.  If this port is not a 
+            native AppleTalk port, this object shall have the 
+            value of two octets of zero. 
+            Setting of this object is mandatory only for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 4 } 
+ 
+a3ComSysAtInterfaceNetEnd  OBJECT-TYPE 
+    SYNTAX  ATNetworkNumber 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The last AppleTalk network address in the range 
+            configured for this port.  If the network to which 
+            this AppleTalk port is connected is a non-extended 
+            network, or if it is not a native AppleTalk port, 
+            the value for a3ComSysAtInterfaceNetEnd shall be two octets of 
+            zero. 
+ 
+            Setting of this object is mandatory only for 
+            interfaces with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 5 } 
+ 
+ 
+a3ComSysAtInterfaceZoneDefault  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The name of the default zone for this port.  If 
+            this port only has one zone, that zone is 
+            represented here. 
+ 
+            Setting of this object is mandatory for 
+            interfaces with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 6 } 
+ 
+a3ComSysAtInterfaceZone1  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 7 } 
+ 
+a3ComSysAtInterfaceZone2  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 8 } 
+ 
+a3ComSysAtInterfaceZone3  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 9 } 
+ 
+a3ComSysAtInterfaceZone4  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 10 } 
+ 
+a3ComSysAtInterfaceZone5  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 11 } 
+ 
+a3ComSysAtInterfaceZone6  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 12 } 
+ 
+a3ComSysAtInterfaceZone7  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 13 } 
+ 
+a3ComSysAtInterfaceZone8  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 14 } 
+ 
+a3ComSysAtInterfaceZone9  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 15 } 
+ 
+a3ComSysAtInterfaceZone10  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 16 } 
+ 
+a3ComSysAtInterfaceZone11  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 17 } 
+ 
+a3ComSysAtInterfaceZone12  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 18 } 
+ 
+a3ComSysAtInterfaceZone13  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 19 } 
+ 
+a3ComSysAtInterfaceZone14  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 20 } 
+ 
+a3ComSysAtInterfaceZone15  OBJECT-TYPE 
+    SYNTAX  ATName 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Zone name in this entry's zone list. 
+            This object may only only be set for interfaces 
+            with a3ComSysAtInterfaceType equal to seedInterface(1)." 
+::= { a3ComSysAtInterfaceEntry 21 } 
+ 
+ 
+a3ComSysAtInterfaceIfIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The  interface associated with this 
+            AppleTalk port.  The interface identified by a 
+            particular value of this index is the same interface 
+            as identified by the same value of ifIndex in the ifTable. 
+ 
+            Setting of this object is required for all interface creations." 
+::= { a3ComSysAtInterfaceEntry 22 } 
+ 
+a3ComSysAtInterfaceState  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              unused(1), 
+              initialize(2), 
+              terminate(3), 
+              failed(4), 
+              down(5), 
+              validate(6), 
+              discover(7), 
+              waiting(8), 
+              enabled(9) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The current state of the appletalk interface." 
+::= { a3ComSysAtInterfaceEntry 23 } 
+ 
+a3ComSysAtInterfaceStatus  OBJECT-TYPE 
+    SYNTAX  RowStatus 
+    ACCESS  read-write 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The status column for this IP interface.  This object can be set to: 
+            createAndGo(4) 
+            createAndWait(5) 
+            destroy(6) 
+ 
+            The following value may be read: 
+            active(1) 
+            notInService(2) 
+ 
+            Setting this object to createAndGo(4) causes the agent to 
+            attempt to create and commit the row based on the contents 
+            of the object in the row.  If all necessary information is 
+            present in the row and the values are acceptable to the 
+            agent, the agent will change the status to active(1).  If any 
+            of the necessary objects are not available the agent 
+            will reject the request. 
+ 
+            Setting this object to createAndWait(5) causes the agent to 
+            create an entry which has the value notInService(2).  Only three 
+            notInService(2) entries are permitted at any one time. 
+            Setting a row with status notInService(2) to active(1)  
+            will cause this entry to change to active(1) if the 
+            appropriate columns have been set. 
+ 
+            Setting this object to destroy(6) will remove this entry." 
+::= { a3ComSysAtInterfaceEntry 24 } 
+ 
+ 
+-- The A3ComSys Module Card group.  Implementation of this 
+-- group is mandatory for agents which manage system resources for 
+-- systems with modular components. 
+ 
+a3ComSysModuleCardCount  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The current count of module components present in the 
+            system." 
+::= { a3ComSysModuleCardGroup 1 } 
+ 
+ 
+-- The A3ComSys Module Card information table. 
+ 
+a3ComSysModuleCardInfoTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysModuleCardInfoEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of module card information entries.  A single entry exists in 
+            this list for each modular component in the system." 
+::= { a3ComSysModuleCardGroup 2 } 
+ 
+a3ComSysModuleCardInfoEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysModuleCardInfoEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A module card info entry contains information about a 
+            particular modular component within the system." 
+    INDEX  { a3ComSysModuleCardInfoIndex } 
+::= { a3ComSysModuleCardInfoTable 1 } 
+ 
+A3ComSysModuleCardInfoEntry ::= 
+    SEQUENCE { 
+		a3ComSysModuleCardInfoIndex 
+			INTEGER, 
+		a3ComSysModuleCardInfoFamily 
+			INTEGER, 
+		a3ComSysModuleCardInfoGenericType 
+			INTEGER, 
+		a3ComSysModuleCardInfoSpecificType 
+			INTEGER, 
+		a3ComSysModuleCardInfoPartNumber 
+			DisplayString, 
+		a3ComSysModuleCardInfoManufacturingDate 
+			DisplayString, 
+		a3ComSysModuleCardInfoModuleSerialNumber 
+			DisplayString, 
+		a3ComSysModuleCardInfoTLASerialNumber 
+			DisplayString, 
+		a3ComSysModuleCardInfo3CNumber 
+			DisplayString, 
+		a3ComSysModuleCardInfoICTTestStatus 
+			INTEGER, 
+		a3ComSysModuleCardInfoICTTestRevision 
+			DisplayString, 
+		a3ComSysModuleCardInfoSystemTestStatus 
+			INTEGER, 
+		a3ComSysModuleCardInfoFunctionalTestStatus 
+			INTEGER, 
+		a3ComSysModuleCardInfoFunctionalTestRevision 
+			DisplayString, 
+		a3ComSysModuleCardInfoBoardRevision 
+			DisplayString, 
+		a3ComSysModuleCardInfoRuntimeHours 
+			INTEGER 
+	} 
+ 
+a3ComSysModuleCardInfoIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the modular component identified by this 
+            entry." 
+::= { a3ComSysModuleCardInfoEntry 1 } 
+ 
+a3ComSysModuleCardInfoFamily  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              coreBuilder3500(1), 
+              superStack3900-24(2), 
+              superStack3900-36(3), 
+              superStack3900-DT(4), 
+              superStack9300(5), 
+              coreBuilder9400(6),
+              coreBuilder9000-RF12R(17),
+              coreBuilder9000-RF6MC(18),
+              coreBuilder9000-LF20R(19),
+              coreBuilder9000-LF10MC(20),
+              coreBuilder9000-LF36T(21),
+              coreBuilder9000-FG24(22),
+              coreBuilder9000-FG9(23),
+              coreBuilder9000-LG9MC(24),
+              coreBuilder9000-LG9(25),
+	      switch4005(26)
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The family code for this module." 
+::= { a3ComSysModuleCardInfoEntry 2 } 
+ 
+a3ComSysModuleCardInfoGenericType  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              backplaneOrMotherboard(1), 
+              processorBoard(2), 
+              enet10-100MbAdapter(3), 
+              adapterCard-1Port(4), 
+              adapterCard-0Port(7), 
+              adapterCard-3Port(8), 
+              mezzanine-1Port(9), 
+              mezzanine-2Port(10), 
+              mezzanine-1-2Port(11), 
+              mezzanine-3Port(12), 
+              systemDaughterCard-9Port(13) 
+            } 
+ 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The generic type code for this module." 
+::= { a3ComSysModuleCardInfoEntry 3 } 
+ 
+a3ComSysModuleCardInfoSpecificType  OBJECT-TYPE 
+    SYNTAX  INTEGER { 
+              nonApplicable(1), 
+ 
+              atmOC3MultiModeFiberSC(161), 
+              atmOC123MultiModeFiberSC(162), 
+              atmOC3SingleModeFiberSC(165), 
+              atmOC12SingleModeFiberSC(166), 
+              atmNoMedia(167), 
+ 
+              enet1000BaseSXMultiModeFiberSC(177), 
+              enet1000BaseLXSingleModeFiberSC(178), 
+              enet1000BaseCXHSSDC(179), 
+              packetSwitchingFabric1000BaseBackplane(180), 
+              enetGBIC(181), 
+              enet1000BaseSxMMFand1000BaseLxSMFSC(182), 
+              enet1000BaseSxMmfSCandGBIC(183),
+		  enet1000BaseTJRJ45 (184), 
+
+              enet10BaseTxRJ45(209), 
+              enet10or100BaseTxRJ45(225), 
+              enet10or100BaseTxTelco(226),
+              enet100BaseFXMultiModeFiberSC(227), 
+              enet100BaseFXSingleModeFiberSC(228), 
+ 
+              fddiMultiModeFiberSC(241), 
+              fddiSingleModeFiberSC(242) 
+            } 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The specific type code for this module." 
+::= { a3ComSysModuleCardInfoEntry 4 } 
+ 
+a3ComSysModuleCardInfoPartNumber  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The specific part number for this module." 
+::= { a3ComSysModuleCardInfoEntry 5 } 
+ 
+a3ComSysModuleCardInfoManufacturingDate  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The date that this module was manufactured in the 
+            format CCYY-MM-DD.  This is the ISO 8601 format."
+
+::= { a3ComSysModuleCardInfoEntry 6 } 
+ 
+a3ComSysModuleCardInfoModuleSerialNumber  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE(12)) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "3Com serial number." 
+::= { a3ComSysModuleCardInfoEntry 7 } 
+ 
+a3ComSysModuleCardInfoTLASerialNumber  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE(12)) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "TOP level assembly serial number for boards with 
+            non-removable daughter cards. Null string for 
+            all other board types." 
+::= { a3ComSysModuleCardInfoEntry 8 } 
+ 
+a3ComSysModuleCardInfo3CNumber  OBJECT-TYPE 
+    SYNTAX  DisplayString (SIZE(10)) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "On a backplane or non-removable module this is the 
+            3C number of the chassis. On a removable module this 
+            is the 3C number of the module." 
+::= { a3ComSysModuleCardInfoEntry 9 } 
+ 
+a3ComSysModuleCardInfoICTTestStatus  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "1 equals test passed, or greater than 1 identifies the 
+            test number failure (0 or FF indicates field yet not 
+            written)." 
+::= { a3ComSysModuleCardInfoEntry 10 } 
+ 
+a3ComSysModuleCardInfoICTTestRevision  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Manufacturing ATE test revision number (XX.XX)." 
+::= { a3ComSysModuleCardInfoEntry 11 } 
+ 
+a3ComSysModuleCardInfoSystemTestStatus  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "1 equals test passed, or greater than 1 identifies the 
+            test number failure (0 or FF indicates field yet not 
+            written)." 
+::= { a3ComSysModuleCardInfoEntry 12 } 
+ 
+a3ComSysModuleCardInfoFunctionalTestStatus  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "1 equals test passed, or greater than 1 identifies the 
+            test number failure (0 or FF indicates field yet not 
+            written)." 
+::= { a3ComSysModuleCardInfoEntry 13 } 
+ 
+a3ComSysModuleCardInfoFunctionalTestRevision  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Manufacturing functional test revision number (XX.XX)." 
+::= { a3ComSysModuleCardInfoEntry 14 } 
+ 
+a3ComSysModuleCardInfoBoardRevision  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "Board revision code. " 
+::= { a3ComSysModuleCardInfoEntry 15 } 
+ 
+a3ComSysModuleCardInfoRuntimeHours  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A total count of the number of hours this module has 
+            been in operation." 
+::= { a3ComSysModuleCardInfoEntry 16 } 
+ 
+ 
+ 
+-- The A3ComSys Diagnostics group.  Implementation of this 
+-- group is mandatory for agents which manage system resources for 
+-- systems with modular components. 
+ 
+ 
+-- The A3ComSys Diagnostics event information table.  Each PI-ROM maintains 
+-- its own last diagnostic event information, hence they are tabularized 
+-- separately. 
+ 
+a3ComSysDiagnosticsInfoTable  OBJECT-TYPE 
+    SYNTAX  SEQUENCE OF A3ComSysDiagnosticsInfoEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A list of module card information entries.  A single entry exists in 
+            this list for each modular component in the system." 
+::= { a3ComSysDiagnosticsGroup 1 } 
+ 
+a3ComSysDiagnosticsInfoEntry  OBJECT-TYPE 
+    SYNTAX  A3ComSysDiagnosticsInfoEntry 
+    ACCESS  not-accessible 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "A diagnostics info entry contains information about a particular 
+            diagnostics event on a modular component within the system." 
+    INDEX  { a3ComSysDiagnosticsInfoIndex } 
+::= { a3ComSysDiagnosticsInfoTable 1 } 
+ 
+A3ComSysDiagnosticsInfoEntry ::= 
+    SEQUENCE { 
+		a3ComSysDiagnosticsInfoIndex 
+			INTEGER, 
+		a3ComSysDiagnosticsInfoPOVDiagnosticsRevision 
+			DisplayString, 
+		a3ComSysDiagnosticsInfoExtendedDiagnosticsRevision 
+			DisplayString, 
+		a3ComSysDiagnosticsInfoDiagnosticFailureCode 
+			DisplayString, 
+		a3ComSysDiagnosticsInfoDiagnosticFailureDateTime 
+			DisplayString, 
+		a3ComSysDiagnosticsInfoDiagnosticFailureSlotNumber 
+			INTEGER, 
+		a3ComSysDiagnosticsInfoDiagnosticFailureCounter 
+			INTEGER, 
+		a3ComSysDiagnosticsInfoDiagnosticFieldDOACounter 
+			INTEGER 
+	} 
+ 
+a3ComSysDiagnosticsInfoIndex  OBJECT-TYPE 
+    SYNTAX  INTEGER (1..65535) 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The index of the diagnostics modular component identified by this 
+            entry." 
+::= { a3ComSysDiagnosticsInfoEntry 1 } 
+ 
+a3ComSysDiagnosticsInfoPOVDiagnosticsRevision  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The revision of the POV (power on verification) diagnostics 
+            software at the most recent failure. If there has been no diagnostic 
+            failures, than a 0 is displayed." 
+::= { a3ComSysDiagnosticsInfoEntry 2 } 
+ 
+a3ComSysDiagnosticsInfoExtendedDiagnosticsRevision  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The revision of the extended diagnostics software at the 
+            most recent failure.  If there has been no diagnostic 
+            failures, than a 0 is displayed." 
+::= { a3ComSysDiagnosticsInfoEntry 3 } 
+ 
+a3ComSysDiagnosticsInfoDiagnosticFailureCode  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The code written by the diagnostics at the most recent 
+            failure.  This identifies both the test number and failure  
+            code in the following format:  <testNumber>-<errorCode>. 
+            If there is no failure then 000-000 is displayed." 
+::= { a3ComSysDiagnosticsInfoEntry 4 } 
+ 
+a3ComSysDiagnosticsInfoDiagnosticFailureDateTime  OBJECT-TYPE 
+    SYNTAX  DisplayString 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The date and time of the most recent diagnostic failure 
+            for the module. The results are formated using the ISO 8601
+            standard : CYY-MM-DDThh:mm:ss."
+::= { a3ComSysDiagnosticsInfoEntry 5 } 
+ 
+a3ComSysDiagnosticsInfoDiagnosticFailureSlotNumber  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The slot number (network adapter cards only) of the most 
+            recent diagnostic failure for the module." 
+::= { a3ComSysDiagnosticsInfoEntry 6 } 
+ 
+a3ComSysDiagnosticsInfoDiagnosticFailureCounter  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The total number of diagnostic failures logged against this 
+            module." 
+::= { a3ComSysDiagnosticsInfoEntry 7 } 
+ 
+a3ComSysDiagnosticsInfoDiagnosticFieldDOACounter  OBJECT-TYPE 
+    SYNTAX  INTEGER 
+    ACCESS  read-only 
+    STATUS  mandatory 
+    DESCRIPTION   
+            "The total number of failures occurring at this module during 
+            the first 48 hours of operation." 
+::= { a3ComSysDiagnosticsInfoEntry 8 } 
+ 
+-- 
+-- The Switching Systems MIB traps. 
+-- 
+ 
+a3ComSysSystemOverTemperatureEvent TRAP-TYPE 
+    ENTERPRISE  a3ComSwitchingSystemsMib 
+    VARIABLES   { a3ComSysSystemOvertemperature } 
+    DESCRIPTION   
+            "The trap that is generated when the system temperature 
+            exceeds a certain threshold." 
+::= 1 
+ 
+a3ComSysPowerSupplyFailureEvent TRAP-TYPE 
+    ENTERPRISE  a3ComSwitchingSystemsMib   
+    VARIABLES   { a3ComSysPowerSupplyStatusIndex, 
+                  a3ComSysPowerSupplyStatus, 
+                  a3ComSysPowerSupplyStatusSupported } 
+    DESCRIPTION   
+            "The trap that is generated when a power supply unit 
+            fails." 
+::= 2 
+ 
+a3ComSysReservedTrap3 TRAP-TYPE 
+    ENTERPRISE  a3ComSwitchingSystemsMib 
+                  -- VARIABLES    
+    DESCRIPTION   
+            "This trap is reserved for future use." 
+::= 3 
+ 
+a3ComSysReservedTrap4 TRAP-TYPE 
+    ENTERPRISE  a3ComSwitchingSystemsMib 
+                  -- VARIABLES    
+    DESCRIPTION   
+            "This trap is reserved for future use." 
+::= 4 
+ 
+a3ComSysReservedTrap5 TRAP-TYPE 
+    ENTERPRISE  a3ComSwitchingSystemsMib 
+                  -- VARIABLES    
+    DESCRIPTION   
+            "This trap is reserved for future use." 
+::= 5 
+ 
+a3ComSysSystemFanFailureEvent TRAP-TYPE 
+    ENTERPRISE  a3ComSwitchingSystemsMib  
+    VARIABLES   { a3ComSysSystemFanFailure } 
+    DESCRIPTION   
+            "The trap that is generated when one of the system fans 
+            fails." 
+::= 7 
+ 
+a3ComSysModuleCardSysOverTemperatureEvent TRAP-TYPE 
+    ENTERPRISE  a3ComSwitchingSystemsMib  
+    VARIABLES   { a3ComSysModuleCardInfoIndex, 
+                  a3ComSysModuleCardInfoFamily, 
+                  a3ComSysModuleCardInfoGenericType } 
+    DESCRIPTION   
+            "The trap that is generated when the temperature of  
+            the system exceeds a certain threshold.  This trap is 
+            generated from agents that support the  
+            a3ComSysModuleCardInfoTable." 
+::= 8 
+ 
+a3ComSysModuleCardInsertEvent TRAP-TYPE 
+    ENTERPRISE  a3ComSwitchingSystemsMib  
+    VARIABLES   { a3ComSysModuleCardInfoIndex, 
+                  a3ComSysModuleCardInfoFamily, 
+                  a3ComSysModuleCardInfoGenericType, 
+                  a3ComSysModuleCardInfoSpecificType } 
+    DESCRIPTION   
+            "The trap that is generated when a board is inserted into a 
+            particular modular slot.  This trap is generated from agents  
+            that support the a3ComSysModuleCardInfoTable." 
+::= 9 
+ 
+a3ComSysModuleCardExtractEvent TRAP-TYPE 
+    ENTERPRISE  a3ComSwitchingSystemsMib  
+    VARIABLES   { a3ComSysModuleCardInfoIndex} 
+    DESCRIPTION   
+            "The trap that is generated when a board is extracted 
+            from a particular modular slot.  This trap is generated 
+            from agents that support the a3ComSysModuleCardInfoTable." 
+::= 10 
+
+a3ComSysEthernetPortMonitorEvent TRAP-TYPE
+    ENTERPRISE  a3ComSysEthernetPort
+    VARIABLES   { a3ComSysEthernetPortMonitorIndex,
+                  a3ComSysEthernetPortMonitorLastError }
+    DESCRIPTION
+            "The Trap is generated to inform the network manager of the misbehaved
+             port.  The misbehavior is due excessive collisions, multiple collisions,
+             runts, or FCS errors."
+::= 47
+
+a3ComSysEthernetPortErrorEvent TRAP-TYPE
+    ENTERPRISE  a3ComSysEthernetPort
+    VARIABLES   { a3ComSysEthernetPortErrorIndex,
+                  a3ComSysEthernetPortAsicType,
+                  a3ComSysEthernetPortErrorType }
+    DESCRIPTION
+            "The Trap is generated to inform the network manager of the misbehaved
+             port.  The misbehavior is due txUnderRun or rxOverRun errors."
+::= 48
+
+END 

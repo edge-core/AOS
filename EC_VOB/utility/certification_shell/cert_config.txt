@@ -1,0 +1,9 @@
+C=TW
+ST=Taiwan
+L=HsinChu
+O=Edgecore Networks Corp.
+OU=Tainan Lab
+CN=ES3528MV2
+emailAddress=support@edge-core.com
+passphrase=3528
+pkeypasswd=3528

@@ -1,0 +1,42 @@
+### set AOS path
+if [ -z "${AOS_PATH}" ]; then
+    AOS_PATH=""    
+fi  
+
+ifconfig lo 127.0.0.1
+
+#add for broadcom driver
+export SOC_BOOT_SCRIPT=${AOS_PATH}/usr/rc.soc
+export BCM_CONFIG_FILE=${AOS_PATH}/usr/config.bcm
+
+insmod ${AOS_PATH}/lib/modules/`uname -r`/linux-kernel-bde.ko dmasize=32M maxpayload=128
+insmod ${AOS_PATH}/lib/modules/`uname -r`/linux-user-bde.ko
+
+#temp solution, to avoid msgq exhaused by 4k vlan
+echo 131072 > /proc/sys/kernel/msgmnb
+
+echo 49152 > /proc/sys/kernel/msgmax
+
+echo 250 32000 32 256 > /proc/sys/kernel/sem
+
+# set maximum size of shared seg to 368M (include buffer for tftp too)
+echo 0x17000000 > /proc/sys/kernel/shmmax
+
+# set the maximum number of packets that can be queued on a UNIX datagram socket
+echo 500 > /proc/sys/net/unix/max_dgram_qlen
+
+# set the maximum buffer size allowed per socket.
+echo 65536 > /proc/sys/net/core/optmem_max
+
+# set the maximum buffer size (in bytes) for send/receive socket
+echo 10000000 > /proc/sys/net/core/rmem_max
+echo 10000000 > /proc/sys/net/core/wmem_max
+#sysctl -w net.core.rmem_max=10000000
+#sysctl -w net.core.wmem_max=10000000
+
+## lower down printk level to avoid enable_irq() warning.
+echo 3 > /proc/sys/kernel/printk
+
+# enlarge sockopt memory for multicast route
+echo 98364 > /proc/sys/net/core/optmem_max
+

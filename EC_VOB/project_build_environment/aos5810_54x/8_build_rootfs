@@ -1,0 +1,130 @@
+#!/bin/sh
+# Description: This script will build rootfs for formal rootfs
+#
+#              -V <x.x.x.x>  -> specify runtime version number
+
+# When AOS_INSTALLER_SCRIPT_COMPAT_VER_VAL is 10000, it means
+# that this script is capable of handling the installer file that
+# contains the install script file with aos_installer_script_ver >= 1.0.0
+# Refer to function get_script_ver_str_from_installer_file in the file
+# "aos_util_functions" for details of the version string format and version value.
+AOS_INSTALLER_SCRIPT_COMPAT_VER_VAL=10100
+
+# This function will copy the ONIE installer utility script
+# files to $ACCROOTFS/etc
+copy_onie_installer_utility_scripts()
+{
+	local script_list
+	local script_file
+
+	script_list="aos_get_installer_ver.sh aos_change_startup_installer.sh aos_verify_installer.sh aos_util_functions aos_installer.sh"
+	for script_file in $script_list
+	do
+		cp -f ${ACCUTIL}/onie_installer/common/$script_file $ACCROOTFS/etc
+		chmod 755 $ACCROOTFS/etc/$script_file
+		sed -i -e "s/%%AOS_INSTALLER_SCRIPT_COMPAT_VER_VAL%%$/$AOS_INSTALLER_SCRIPT_COMPAT_VER_VAL/" $ACCROOTFS/etc/$script_file
+	done
+
+	sed -i -e "s/install_when_change_startup/0/g" $ACCROOTFS/etc/aos_change_startup_installer.sh
+}
+
+copy_target_utility_scripts()
+{
+        local script_list
+        local script_file
+
+        script_list="mref_err_log.sh upload_all_flash_logs.sh"
+
+        for script_file in $script_list
+        do
+                cp -f ${ACCUTIL}/target_utility_scripts/$script_file $ACCROOTFS/etc
+                chmod 755 $ACCROOTFS/etc/$script_file
+        done
+
+        sed -i -e "s/tftp_command/tftp \$1 -m binary -c put flash_logs.tar/g" $ACCROOTFS/etc/upload_all_flash_logs.sh
+}
+
+# main entry
+if ! utils/check_build_env; then
+	cd utils
+	. ./build_env_init
+	cd -
+fi
+
+FAKEROOT_CMD=`which fakeroot`
+
+# In docker, there is no need to use fakeroot
+#if [ -z ${FAKEROOT_CMD} ] ; then
+#	echo "Error! fakeroot is not installed. Please ask the administrator to install it."
+#	exit 1
+#fi
+
+cd ${ACCPROJ}/utils
+./create_web_server.sh
+if [ $? != 0 ] ; then
+	echo "Create WEB server failed."
+	exit 1
+fi
+cd -
+
+# copy of file
+if [ -d fs/rootfs/usr/sbin/of ]; then
+  rm -rf fs/rootfs/usr/sbin/of
+  rm -rf fs/rootfs/usr/bin/of
+  rm -rf fs/rootfs/usr/lib/of
+  rm -rf fs/rootfs/etc/aos/of
+fi
+
+mkdir -p fs/rootfs/usr/sbin/of
+mkdir -p fs/rootfs/usr/bin/of
+mkdir -p fs/rootfs/usr/lib/of
+mkdir -p fs/rootfs/etc/aos/of
+
+PROJECT_NAME_OF_DIR=${PROJECT_NAME}_of/fs/rootfs/usr
+if [ -d ../${PROJECT_NAME_OF_DIR}/sbin ]; then
+  cp ../${PROJECT_NAME_OF_DIR}/sbin/* fs/rootfs/usr/sbin/of
+  ln -s ../onlp_platmgrd fs/rootfs/usr/sbin/of/onlp_platmgrd
+fi
+
+if [ -d ../${PROJECT_NAME_OF_DIR}/bin ]; then
+  cp ../${PROJECT_NAME_OF_DIR}/bin/* fs/rootfs/usr/bin/of
+fi
+
+if [ -d ../${PROJECT_NAME_OF_DIR}/lib ]; then
+  cp ../${PROJECT_NAME_OF_DIR}/lib/* fs/rootfs/usr/lib/of
+fi
+
+[ -r ../${PROJECT_NAME_OF_DIR}/usr/config.bcm ] && \
+cp -f ../${PROJECT_NAME_OF_DIR}/usr/config.bcm fs/rootfs/usr/config.bcm.of
+
+[ -r ../${PROJECT_NAME_OF_DIR}/usr/config.bcm.1 ] && \
+cp -f ../${PROJECT_NAME_OF_DIR}/usr/config.bcm.1 fs/rootfs/usr/config.bcm.of.1
+
+[ -r ../${PROJECT_NAME_OF_DIR}/usr/rc.soc ] && \
+cp -f ../${PROJECT_NAME_OF_DIR}/usr/rc.soc fs/rootfs/usr/rc.soc.of
+
+[ -r ../${PROJECT_NAME_OF_DIR}/usr/rc.soc.1 ] && \
+cp -f ../${PROJECT_NAME_OF_DIR}/usr/rc.soc.1 fs/rootfs/usr/rc.soc.of.1
+
+[ -r ../${PROJECT_NAME_OF_DIR}/of-config1.1.1.yin ] && \
+cp -f ../${PROJECT_NAME_OF_DIR}/of-config1.1.1.yin fs/rootfs/etc/aos/of/of-config1.1.1.yin && \
+cp -f ../${PROJECT_NAME_OF_DIR}/ofconfig-aug.yin fs/rootfs/etc/aos/of/ofconfig-aug.yin && \
+cp -f ../${PROJECT_NAME_OF_DIR}/paths_file fs/rootfs/etc/aos/of/paths_file
+
+
+# copy ONIE installer utility script files
+copy_onie_installer_utility_scripts
+
+copy_target_utility_scripts
+
+# copy aos_rc_init_func utility script files
+[ ! -d $ACCROOTFS/etc/init.d ] && mkdir $ACCROOTFS/etc/init.d
+cp -f ${ACCUTIL}/aos_rc_init_func/aos_mode_func $ACCROOTFS/etc/init.d
+
+
+${FAKEROOT_CMD} /bin/bash ${ACCPROJ}/build_rootfs.sh $*
+if [ $? -ne 0 ]; then
+	echo "Error while executing build_rootfs.sh"
+	exit 1
+fi
+exit 0

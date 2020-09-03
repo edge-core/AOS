@@ -1,0 +1,73 @@
+##
+## Utility functions to be used in AOS ONIE scripts
+##
+
+# Note! This file is copied from utility/onie_installer/common/aos_util_functions
+# to $ACCROOTFS/etc in the script "8_build_rootfs"
+#
+
+# function to convert the version string in format XX.XX.XX to
+# a numeric value. The maximum value for each "XX" is 99
+# the converted value will be stored in VERSION_VAL when success
+#
+# return value: 0  -  Success
+#               1  -  Failed
+ver_str_to_val()
+{
+	local __ver_str
+	local __major_part
+	local __minor_part
+	local __rev_part
+
+	__ver_str=$1
+	# validate ver_str format
+	echo $__ver_str | grep -e '^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$' 1>/dev/null
+	if [ $? -ne 0 ]; then
+		echo "Error! Illegal version format"
+		return 1
+	fi
+
+	__major_part=`echo $__ver_str | cut -d. -f1`
+	__minor_part=`echo $__ver_str | cut -d. -f2`
+	__rev_part=`echo $__ver_str | cut -d. -f3`	
+
+	# the range of each part shall not be greater than 99
+	if [ $__major_part -gt 99 ]; then
+		echo "Error! Illegal Major Version format"
+		return 1
+	fi
+	if [ $__minor_part -gt 99 ]; then
+		echo "Error! Illegal Minor Version format"
+		return 1
+	fi
+	if [ $__rev_part -gt 99 ]; then
+		echo "Error! Illegal Revision Version format"
+		return 1
+	fi
+
+	let VERSION_VAL=__major_part*10000+__minor_part*100+__rev_part
+	return 0
+}
+
+# function to get script version string from the specified installer
+# file. The script version string is put in FUNC_OUTPUT_VER_STR when
+# success.
+#
+# return value: 0  -  Success
+#               1  -  Failed
+#
+get_script_ver_str_from_installer_file()
+{
+	local __full_path_to_installer
+	local __ver_str_line
+
+	__full_path_to_installer=$1
+	__ver_str_line=`sed -n -e '1,/^exit_marker$/p' ${__full_path_to_installer} | grep -e '^aos_installer_script_ver=.*'`
+	if [ -z "$__ver_str_line" ]; then
+		FUNC_OUTPUT_VER_STR=""
+		return 1
+	fi
+	FUNC_OUTPUT_VER_STR=`echo $__ver_str_line|sed -e 's/^aos_installer_script_ver=//'`
+
+	return 0
+}

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+mkdir -p ${ACCROOTFS}/usr/bin
+cp /usr/bin/vtysh ${ACCROOTFS}/usr/bin
+cp -r /usr/bin/frr ${ACCROOTFS}/usr/bin
+mkdir -p ${ACCROOTFS}/usr/lib
+cp -r /usr/lib/frr ${ACCROOTFS}/usr/lib
+cp -r /usr/lib/x86_64-linux-gnu/libyang* ${ACCROOTFS}/usr/lib

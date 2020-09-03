@@ -1,0 +1,3576 @@
+{
+    "swagger": "2.0",
+    "basePath": "/api",
+    "paths": {
+        "/api/v1/running-config": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "transactionId",
+                        "in": "query",
+                        "required": true,
+                        "type": "number"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "transactionId",
+                        "in": "query",
+                        "required": true,
+                        "type": "number"
+                    }
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "commands",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/device": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/interfaces": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/interfaces/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "isEnabled",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "pvid",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "vlanMode",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    }
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ip",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "role",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "vrf",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 32767
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/interfaces/{id}/ipaddrs": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ip",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "role",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/interfaces/{id}/ipaddrs/{ipId}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ipId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/lldp": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "transmitInterval",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 5,
+                        "maximum": 32768
+                    },
+                    {
+                        "name": "delayInterval",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 8192
+                    }
+                ]
+            }
+        },
+        "/api/v1/lldp/interfaces": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/lldp/interfaces/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/stp": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "priority",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 61440
+                    }
+                ]
+            }
+        },
+        "/api/v1/stp/interfaces": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "ports",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    },
+                    {
+                        "name": "bpduGuard",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "bpduFilter",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "rootGuard",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "priority",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 240
+                    }
+                ]
+            }
+        },
+        "/api/v1/stp/interfaces/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+            },
+        "/api/v1/vlans": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "pvid",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "ifId",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "vid",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "name",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "members",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/vlans/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    }
+                ]
+            }
+        },
+        "/api/v1/vlans/{id}/members": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "ifId",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "isTagged",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/vlans/{id}/members/{memberId}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "memberId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/vlans/members": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "vids",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "ifId",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "isTagged",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/mac-vlans": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "vid",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "macBaseAddr",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/mac-vlans/{macBaseAddrId}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "macBaseAddrId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/ospf": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "pid",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    }
+                ]
+            }
+        },
+        "/api/v1/ospf/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    }
+                ]
+            }
+        },
+        "/api/v1/ospf/{id}/networks": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    },
+                    {
+                        "name": "ip",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "area",
+                        "in": "body",
+                        "required": true,
+                        "type": "number"
+                    }
+                ]
+            },
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    }
+                ]
+            }
+        },
+        "/api/v1/ospf/{id}/networks/{networkId}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    },
+                    {
+                        "name": "networkId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    },
+                    {
+                        "name": "networkId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/ospf/{id}/interfaces/{ifId}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    },
+                    {
+                        "name": "ifId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "isPassive",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/arps": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "required": false,
+                        "type": "number"
+                    }
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "destIp",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "destMac",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/arps/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/macs": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "lifeTime",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ifId",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "required": false,
+                        "type": "number"
+                    }
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "mac",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "vid",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "ifId",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/macs/mac-address-table/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/macs/interface/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number"
+                    }
+                ]
+            }
+        },
+        "/api/v1/macs/vxlan/{vni}/network-ports": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    },
+                    {
+                        "name": "mac",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "rVtep",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "permanent",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/macs/vxlan/{vni}/{mac}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    },
+                    {
+                        "name": "mac",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/statistics": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/statistics/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/statistics:clear": {
+            "put": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/statistics:clear/{id}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/mlag": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/mlag/domains": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "peerLink",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/mlag/domains/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/mlag/groups": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "mlagId",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 1000
+                    },
+                    {
+                        "name": "domainId",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "member",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/mlag/groups/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 1000
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 1000
+                    }
+                ]
+            }
+        },
+        "/api/v1/vxlan": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "udpDstPort",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    },
+                    {
+                        "name": "srcInterface",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/vxlan/vpns": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "vid",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "vni",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    }
+                ]
+            }
+        },
+        "/api/v1/vxlan/vpns/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/vxlan/{vni}/flood-rvteps": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    }
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    },
+                    {
+                        "name": "dstIp",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "vid",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "port",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    }
+                ]
+            }
+        },
+        "/api/v1/vxlan/{vni}/flood-rvteps/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/vxlan/{vni}/access-ports": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    }
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    },
+                    {
+                        "name": "port",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "vid",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    }
+                ]
+            }
+        },
+        "/api/v1/vxlan/{vni}/access-ports/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "vni",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 16777215
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/calendar": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "dateTime",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/ntp": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "clientStatus",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "authStatus",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/ntp/servers": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "ip",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "key",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/ntp/servers/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/ntp/authenticates": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    },
+                    {
+                        "name": "md5",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/ntp/authenticates/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    }
+                ]
+            }
+        },
+        "/api/v1/system/cpu": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/system/memory": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/system/fan": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/system/temperature": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/system/psu": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/logging/servers": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "ip",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "port",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/logging/servers/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/port-channels": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 27
+                    },
+                    {
+                        "name": "members",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/port-channels/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 27
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 27
+                    }
+                ]
+            }
+        },
+        "/api/v1/port-channels/{id}/members": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 27
+                    },
+                    {
+                        "name": "member",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 54
+                    }
+                ]
+            }
+        },
+        "/api/v1/port-channels/{id}/members/{memberId}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 27
+                    },
+                    {
+                        "name": "memberId",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 54
+                    }
+                ]
+            }
+        },
+        "/api/v1/vrfs": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "vrf",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "tableId",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 32767
+                    },
+                    {
+                        "name": "vlanIds",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/vrfs/{id}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "vlanIds",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/vrfs/{id}/{vid}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "vid",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    }
+                ]
+            }
+        },
+        "/api/v1/routes": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "destIp",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "prefix",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 32
+                    },
+                    {
+                        "name": "vrf",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "nexthop",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/routes/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/router/bgp/asn": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "asn",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 64512,
+                        "maximum": 65535
+                    },
+                    {
+                        "name": "deviceType",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "network",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "linkInterfaces",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/router/bgp/asn/{id}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 64512,
+                        "maximum": 65535
+                    },
+                    {
+                        "name": "network",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "linkInterfaces",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 64512,
+                        "maximum": 65535
+                    }
+                ]
+            }
+        },
+        "/api/v1/pfc": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "port",
+                        "in": "body",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "queues",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/pfc/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number"
+                    }
+                ]
+            }
+        },
+        "/api/v1/sflow": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "owner",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "destination",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "timeout",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 30,
+                        "maximum": 10000000
+                    },
+                    {
+                        "name": "maxDatagramSize",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 200,
+                        "maximum": 1500
+                    },
+                    {
+                        "name": "maxHeaderSize",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 64,
+                        "maximum": 256
+                    },
+                    {
+                        "name": "pollingInterval",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 10000000
+                    },
+                    {
+                        "name": "samplingRate",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 256,
+                        "maximum": 16777215
+                    },
+                    {
+                        "name": "ports",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/storm": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "ucastRate",
+                        "in": "body",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "ucastStatus",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "mcastRate",
+                        "in": "body",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "mcastStatus",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "bcastRate",
+                        "in": "body",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "bcastStatus",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/cos": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "queue",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 7
+                    },
+                    {
+                        "name": "dscp",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/cos/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 7
+                    }
+                ]
+            }
+        },
+        "/api/v1/ecn": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "queue",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 7
+                    },
+                    {
+                        "name": "ecn",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    }
+                ]
+            }
+        },
+        "/api/v1/ecn/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 7
+                    }
+                ]
+            }
+        },
+        "/api/v1/scheduler": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "queue",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 7
+                    },
+                    {
+                        "name": "weight",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    }
+                ]
+            }
+        },
+        "/api/v1/acls/mac": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "aces",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/acls/mac/{id}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "aces",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/acls/ip": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "aces",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/acls/ip/{id}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "type",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "aces",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/acls/interfaces": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "ifId",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "direction",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "counter",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/acls/interfaces/{ifId}/{id}/{type}/{direction}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "ifId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "direction",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/monitor/port": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "src",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "dst",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "mode",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/monitor/port/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/rspan": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 2
+                    },
+                    {
+                        "name": "src",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "dst",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "vid",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 4001,
+                        "maximum": 4006
+                    },
+                    {
+                        "name": "mode",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/rspan/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 2
+                    }
+                ]
+            }
+        },
+        "/api/v1/policy-routes": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "action",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ingressVlans",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    },
+                    {
+                        "name": "sequence",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 65535
+                    },
+                    {
+                        "name": "protocols",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    },
+                    {
+                        "name": "matchDestIp",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "nexthop",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "vrf",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 32767
+                    }
+                ]
+            }
+        },
+        "/api/v1/policy-routes/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dhcp-snooping": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "informationOptionEnable",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "verifyMacAddressEnable",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "informationOptionPolicy",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "subtype",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "remoteIdType",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "remoteIdValue",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limitRate",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 2048
+                    }
+                ]
+            }
+        },
+        "/api/v1/dhcp-snooping/binding": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/dhcp-snooping/binding:clear": {
+            "put": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/dhcp-snooping/vlans/{vlanId}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "vlanId",
+                        "in": "path",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dhcp-snooping/interfaces": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "trustStatus",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "ports",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dhcp-snooping/interfaces/{ifId}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "ifId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trustStatus",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "circuitId",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dhcp-relay/vlans": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "vlanId",
+                        "in": "body",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "servers",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dhcp-relay/vlans/{vlanId}/servers/{server}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "vlanId",
+                        "in": "path",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "server",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "vlanId",
+                        "in": "path",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "server",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dhcp-relay/restart": {
+            "put": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/voice-vlan": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "vlanId",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "agingTime",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 5,
+                        "maximum": 43200
+                    }
+                ]
+            }
+        },
+        "/api/v1/voice-vlan/oui": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "ouis",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    },
+                    {
+                        "name": "macAddr",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "mask",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "description",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/voice-vlan/oui/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/voice-vlan/interfaces": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "ports",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    },
+                    {
+                        "name": "mode",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "security",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "priority",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 6
+                    },
+                    {
+                        "name": "ruleOui",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "ruleLldp",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/pppoeia": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/pppoeia/interfaces": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "ports",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "vendorStrip",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "trust",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/pppoeia/interfaces/{id}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "circuitId",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "remoteId",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/pppoeia/interfaces/statistics": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/pppoeia/interfaces/statistics/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/network-access/interfaces": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "ports",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    },
+                    {
+                        "name": "dynamicVlan",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "guestVlan",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 4094
+                    }
+                ]
+            }
+        },
+        "/api/v1/traffic-segmentation": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "mode",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "sessionId",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4
+                    },
+                    {
+                        "name": "mgmtPort",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 54
+                    }
+                ]
+            }
+        },
+        "/api/v1/traffic-segmentation/sessions": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 8
+                    },
+                    {
+                        "name": "uplinks",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    },
+                    {
+                        "name": "downlinks",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    },
+                    {
+                        "name": "excludeVlans",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/traffic-segmentation/sessions/{sessionId}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 8
+                    }
+                ]
+            },
+            "get": {
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 8
+                    }
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 8
+                    },
+                    {
+                        "name": "uplinks",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    },
+                    {
+                        "name": "downlinks",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    },
+                    {
+                        "name": "excludeVlans",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dynamic-arp-inspection": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "logNumber",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 256
+                    },
+                    {
+                        "name": "logInterval",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 86400
+                    },
+                    {
+                        "name": "globalSrcMacValidation",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "globalDestMacValidation",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "globalIpAddrValidation",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "globalIpAllowZerosValidation",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dynamic-arp-inspection/log": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "startId",
+                        "in": "query",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 256
+                    },
+                    {
+                        "name": "ifId",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "vlanId",
+                        "in": "query",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    }
+                ]
+            }
+        },
+        "/api/v1/dynamic-arp-inspection/statistics": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/dynamic-arp-inspection/vlans": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/dynamic-arp-inspection/vlans/{vlanId}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "vlanId",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    }
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "vlanId",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "arpAclName",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "arpAclStatic",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dynamic-arp-inspection/interfaces": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/dynamic-arp-inspection/interfaces/{ifId}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "ifId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "ifId",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trustStatus",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "rateLimit",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 750
+                    }
+                ]
+            }
+        },
+        "/api/v1/lbd": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "interval",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 32767
+                    },
+                    {
+                        "name": "recover",
+                        "in": "body",
+                        "required": false,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1000000
+                    },
+                    {
+                        "name": "action",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "trap",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/lbd/interfaces": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "ports",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/lbd/interfaces/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dot1q-tunnel": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "/api/v1/dot1q-tunnel/services": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "port",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cvid",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "svid",
+                        "in": "body",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    }
+                ]
+            }
+        },
+        "/api/v1/dot1q-tunnel/services/{port}/{cvid}/{svid}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "port",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cvid",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    },
+                    {
+                        "name": "svid",
+                        "in": "path",
+                        "required": true,
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4094
+                    }
+                ]
+            }
+        },
+        "/api/v1/dot1q-tunnel/interfaces": {
+            "get": {
+                "parameters": [
+                ]
+            }
+        },
+        "/api/v1/dot1q-tunnel/interfaces/{port}": {
+            "put": {
+                "parameters": [
+                    {
+                        "name": "port",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "mode",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/time-range": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "absolute",
+                        "in": "body",
+                        "required": false,
+                        "type": "object"
+                    },
+                    {
+                        "name": "periodic",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/time-range/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/time-range/{id}/absolute": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/time-range/{id}/periodic/{time}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "time",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/qos/class-maps": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "description",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "elements",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/qos/class-maps/{name}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "description",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "elements",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/qos/policy-maps": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "description",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "elements",
+                        "in": "body",
+                        "required": false,
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "/api/v1/qos/policy-maps/{name}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "description",
+                        "in": "body",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "elements",
+                        "in": "body",
+                        "required": true,
+                        "type": "array"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/qos/service-policy/interfaces": {
+            "get": {
+                "parameters": [
+                ]
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "name": "port",
+                        "in": "body",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "direction",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "policyMap",
+                        "in": "body",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/api/v1/qos/service-policy/interfaces/{id}/direction/{direction}": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "direction",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "direction",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            },
+            "/api/v1/location-led": {
+                "put": {
+                    "parameters": [
+                        {
+                            "name": "status",
+                            "in": "body",
+                            "required": true,
+                            "type": "boolean"
+                        }
+                    ]
+                }
+            },
+            "/api/v1/sfp/dmm/interfaces": {
+                "get": {
+                    "parameters": [
+                    ]
+                }
+            },
+            "/api/v1/sfp/dmm/interfaces/{id}": {
+                "get": {
+                    "parameters": [
+                        {
+                            "name": "id",
+                            "in": "path",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

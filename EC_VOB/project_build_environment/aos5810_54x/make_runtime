@@ -1,0 +1,80 @@
+#!/bin/sh
+
+#ROOTFS_FILENAME=rootfs.cramfs
+ROOTFS_FILENAME=initrd.cpio.gz
+
+if ! utils/check_build_env; then
+	cd utils
+	. ./build_env_init
+	cd -
+fi
+
+if [ -f "${ACCROOTFS}/etc/runtime_ver" ]; then
+    ROOTFS_RUNTIME_VER=`cat ${ACCROOTFS}/etc/runtime_ver`
+else
+    echo "Please run 8_build_rootfs first."
+    exit 1
+fi
+
+if [ $# -eq 1 ]; then
+	runtime_image_filename=$1
+else
+	runtime_image_filename=runtime.bix
+fi
+
+
+cd ${ACCPROJ}/runtime
+
+cp -f ${KBUILD_OUTPUT}/arch/x86/boot/bzImage aos_vmlinuz
+if [ $? != 0 ]; then
+	echo "Error:aos_vmlinuz not copied."
+	exit 1
+fi
+
+cp -f ${ACCPROJ}/initramfs/${ROOTFS_FILENAME} .
+if [ $? != 0 ] ; then
+	echo "Error: ${ROOTFS_FILENAME} not copied."
+	exit 1
+fi
+
+cp -f ${ACCPROJ}/fs/aos_files.tgz .
+if [ $? != 0 ] ; then
+        echo "Error: aos_files.tgz not copied."
+        exit 1
+fi
+
+cd ${ACCPROJ}/fs/rootfs_addon && tar cJf ${ACCPROJ}/runtime/onl_rootfs_addon.tar.xz *
+if [ $? != 0 ] ; then
+        echo "Error: cannot create onl_rootfs_addon.tar.xz"
+        exit 1
+fi
+
+#rm -rf $runtime_image_filename 2>/dev/null
+
+# generate dtb file for mkimage
+#if [ ! -e ${KBUILD_OUTPUT}/scripts/dtc/dtc ] ; then
+#	echo "Error: dtc compiler not found. Please execute 1_build_kernel to generate dtc."
+#	exit 1
+#fi
+#${KBUILD_OUTPUT}/scripts/dtc/dtc -O dtb -o ${MODEL_NAME}.dtb -b 0 -p 1024 ${KERNDIR}/arch/powerpc/boot/dts/${MODEL_NAME}.dts
+#if [ $? != 0 ] ; then
+#	echo "Error: Failed to generate ${MODEL_NAME}.dtb."
+#	exit 1
+#fi
+
+#${KBUILD_OUTPUT}/scripts/dtc/dtc -O dtb -o aos6700_32x.dtb -b 0 -p 1024 ${KERNDIR}/arch/powerpc/boot/dts/aos6700_32x.dts
+#if [ $? != 0 ] ; then
+#	echo "Error: Failed to generate aos6700_32x.dtb."
+#	exit 1
+#fi
+
+# generate runtime.its from runtime_template.its
+#sed "s/%%VERSION%%/${ROOTFS_RUNTIME_VER}/" runtime_template.its > runtime.its
+
+#${BUILD_DIR}/tools/mkimage -f runtime.its $runtime_image_filename
+#if [ $? != 0 ] ; then
+#	echo "Error: Failed to generate $runtime_image_filename."
+#	exit 1
+#fi
+echo "$ACCPROJ/runtime/$runtime_image_filename is generated."
+exit 0
