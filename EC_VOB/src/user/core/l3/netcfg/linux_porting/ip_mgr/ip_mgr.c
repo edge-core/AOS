@@ -313,7 +313,8 @@ UI32_T IP_MGR_CreateInterface(IP_MGR_Interface_T *intf, UI32_T *drv_l3_intf_inde
     /* TODO:
      * Should assign a proper FIB ID to create l3 interface.
      */
-    fib_id = 0;
+    fib_id = SYS_ADPT_DEFAULT_FIB;
+
 #if (SYS_CPNT_IPV6 == TRUE)
     IPAL_ROUTE_GetIpv6Forwarding(&is_routing_v6);
 #endif
@@ -421,7 +422,7 @@ BOOL_T IP_MGR_DeleteInterface(UI32_T ifindex)
     /* TODO:
      * Should assign a proper FIB ID to create l3 interface.
      */
-    fib_id = 0;
+    fib_id = SYS_ADPT_DEFAULT_FIB;
 
     VLAN_OM_ConvertFromIfindex(ifindex, &vid);
 

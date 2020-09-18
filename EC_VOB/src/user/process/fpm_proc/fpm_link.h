@@ -289,8 +289,8 @@ void *fpm_write_data (void *zfpm_cli_fd);
 /* Process FPM FIB info */
 void fpm_route_info_decode(char *fib_buf);
 
-int fpm_amtrl3_ipv4_add (struct prefix *p, unsigned int fib_table, fpm_v4_route_t *entry);
-int fpm_amtrl3_ipv4_delete (struct prefix *p, unsigned int fib_table, fpm_v4_route_t *entry);
+int fpm_amtrl3_ipv4_add (unsigned int fib_table, fpm_v4_route_t *entry);
+int fpm_amtrl3_ipv4_delete (unsigned int fib_table, fpm_v4_route_t *entry);
 void fpm_handle_v4_route(enum route_operation rt_op, struct nlmsghdr * nl_msg);
 int fpm_processv4_route(struct nlmsghdr * nl_msg, fpm_v4_route_t *entry);
 void fpm_handle_v4_neighbor(enum route_operation rt_op, struct nlmsghdr * nl_msg);

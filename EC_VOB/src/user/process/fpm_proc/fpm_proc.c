@@ -384,7 +384,7 @@ void fpm_route_info_decode(char *fib_buf)
     /*IMPORTANT : Keep the below debugs, which will help to understand/ confirm
       what exactly Zebra Client is sending to dataplane/ forwarding.
     */
-    FPM_DBG_MSG(DBG_INF, "Process FPM FIB info - fpm_route_info_decode()");
+
     /* Data received in FPM mesg header format, decode it!! */
     hdr = (fpm_msg_hdr_t *)fib_buf;
     FPM_DBG_MSG(DBG_INF, "FPM Protocol Version :%d", hdr->version);
@@ -431,9 +431,6 @@ void fpm_handle_v4_route(enum route_operation rt_op, struct nlmsghdr * nl_msg)
     l3_next_hop_id_t    next_hop;
     unsigned int        netmask, err;
     fpm_v4_route_t      entry;
-
-    struct prefix *p = (struct prefix *)malloc(sizeof(struct prefix));
-    /* Didn't free this memory, this has to be freed later . TODO*/
 
     switch (fpm_processv4_route(nl_msg, &entry))
     {
@@ -508,14 +505,10 @@ void fpm_handle_v4_route(enum route_operation rt_op, struct nlmsghdr * nl_msg)
                 FPM_DBG_MSG(DBG_ERR, "pending_next_hop_add_direct()");
             }
         }
-        /* Update the prefix details */
-        p->family = AF_INET; // For IPv4
-        p->prefixlen = IPV4_MAX_PREFIXLEN; // IPv4
-        p->u.prefix4.s_addr = entry.dst_ip;
 
         /* fpm_amtrl3_ipv4_add() has platform dependent code/ func calls,
            Got the route entry details, now pass to AMTRL3 wrapper func */
-        if(fpm_amtrl3_ipv4_add (p, fib_table, &entry) == 0) {
+        if(fpm_amtrl3_ipv4_add (fib_table, &entry) == 0) {
             FPM_DBG_MSG(DBG_INF, "Successfully updated the AMTRL3");
         }
 
@@ -552,12 +545,9 @@ void fpm_handle_v4_route(enum route_operation rt_op, struct nlmsghdr * nl_msg)
                 FPM_DBG_MSG(DBG_ERR, "pending_next_hop_del_direct()");
             }
        }
-       /* Update the prefix details */
-       p->family = AF_INET; // As of now IPv4
-       p->prefixlen = IPV4_MAX_PREFIXLEN; // IPv4
-       p->u.prefix4.s_addr = entry.dst_ip;
+
        /* Got the route entry details, now pass to AMTRL3 wrapper func */
-       if(fpm_amtrl3_ipv4_delete(p, fib_table, &entry) == 0) {
+       if(fpm_amtrl3_ipv4_delete(fib_table, &entry) == 0) {
            FPM_DBG_MSG(DBG_INF, "Successfully updated the AMTRL3");
        }
 
@@ -771,7 +761,7 @@ int fpm_processv4_route(struct nlmsghdr * nl_msg, fpm_v4_route_t *entry)
  * Add a IPv4 route to the forwarding layer.
  * pass action_flags, fib_id, net_route_entry to AMTRL3
 */
-int fpm_amtrl3_ipv4_add (struct prefix *p, unsigned int fib_table, fpm_v4_route_t *entry)
+int fpm_amtrl3_ipv4_add (unsigned int fib_table, fpm_v4_route_t *entry)
 {
     BOOL_T ret = FALSE;
     AMTRL3_TYPE_InetCidrRouteEntry_T net_route_entry;
@@ -811,9 +801,8 @@ int fpm_amtrl3_ipv4_add (struct prefix *p, unsigned int fib_table, fpm_v4_route_
     net_route_entry.partial_entry.inet_cidr_route_next_hop.type = L_INET_ADDR_TYPE_IPV4;
     net_route_entry.partial_entry.inet_cidr_route_dest.addrlen = SYS_ADPT_IPV4_ADDR_LEN;
     net_route_entry.partial_entry.inet_cidr_route_next_hop.addrlen = SYS_ADPT_IPV4_ADDR_LEN;
-    net_route_entry.partial_entry.inet_cidr_route_pfxlen = (UI32_T)p->prefixlen;
-    memcpy(net_route_entry.partial_entry.inet_cidr_route_dest.addr, &(p->u.prefix), SYS_ADPT_IPV4_ADDR_LEN);
-
+    net_route_entry.partial_entry.inet_cidr_route_pfxlen = entry->dst_mask_len;
+    memcpy(net_route_entry.partial_entry.inet_cidr_route_dest.addr, &entry->dst_ip, SYS_ADPT_IPV4_ADDR_LEN);
 
     /* NOTE : Need to udnerstand what ATAN requires here, populate data which is
        known to AMTRL3.
@@ -864,7 +853,7 @@ int fpm_amtrl3_ipv4_add (struct prefix *p, unsigned int fib_table, fpm_v4_route_
 /*
  * Delete a IPv4 route to the forwarding layer.
  */
-int fpm_amtrl3_ipv4_delete (struct prefix *p, unsigned int fib_table, fpm_v4_route_t *entry)
+int fpm_amtrl3_ipv4_delete (unsigned int fib_table, fpm_v4_route_t *entry)
 {
     BOOL_T ret = FALSE;
     UI32_T fib_id;
@@ -914,8 +903,8 @@ int fpm_amtrl3_ipv4_delete (struct prefix *p, unsigned int fib_table, fpm_v4_rou
     net_route_entry.partial_entry.inet_cidr_route_next_hop.type = L_INET_ADDR_TYPE_IPV4;
     net_route_entry.partial_entry.inet_cidr_route_dest.addrlen = SYS_ADPT_IPV4_ADDR_LEN;
     net_route_entry.partial_entry.inet_cidr_route_next_hop.addrlen = SYS_ADPT_IPV4_ADDR_LEN;
-    net_route_entry.partial_entry.inet_cidr_route_pfxlen = (UI32_T)p->prefixlen;
-    memcpy(net_route_entry.partial_entry.inet_cidr_route_dest.addr, &(p->u.prefix), SYS_ADPT_IPV4_ADDR_LEN);
+    net_route_entry.partial_entry.inet_cidr_route_pfxlen = entry->dst_mask_len;
+    memcpy(net_route_entry.partial_entry.inet_cidr_route_dest.addr, &entry->dst_ip, SYS_ADPT_IPV4_ADDR_LEN);
 
     /* NOTE : Need to udnerstand what ATAN requires here, populate data which is
        known to AMTRL3.
