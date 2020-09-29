@@ -15,7 +15,7 @@
  *
  * Copyright(C)      Accton Corporation, 2007.
  */
- 
+
 #ifndef NETCFG_NETDEVICE_H
 #define NETCFG_NETDEVICE_H
 
@@ -50,7 +50,7 @@ static inline BOOL_T NETCFG_NETDEVICE_VidToIfname(UI32_T vid, char *ifname)
         sprintf(ifname, "VLAN%lu",(unsigned long)vid);
         return TRUE;
     }
-    
+
     sprintf(ifname, "INVALID");
     return FALSE;
 }
@@ -121,7 +121,12 @@ static inline BOOL_T NETCFG_NETDEVICE_IfindexToIfname(UI32_T ifindex, char *ifna
         return TRUE;
     }
 #endif
-     
+    else if (SYS_ADPT_LOOPBACK_IF_INDEX_BASE == ifindex)
+    {
+        sprintf(ifname, "lo");
+        return TRUE;
+    }
+
     sprintf(ifname, "INVALID");
     return FALSE;
 }
@@ -140,7 +145,7 @@ static inline BOOL_T NETCFG_NETDEVICE_IfnameToIfindex(char *ifname, UI32_T *ifin
         *ifindex = (UI32_T) tmp_ifindex;
         return TRUE;
     }
-	
+
 #if (SYS_CPNT_IP_TUNNEL == TRUE)
     if (sscanf(ifname, "TUNNEL%lu", &tmp_int)==1)
     {
@@ -156,7 +161,7 @@ static inline BOOL_T NETCFG_NETDEVICE_IfnameToIfindex(char *ifname, UI32_T *ifin
             return FALSE;
         return TRUE;
     }
-	
+
 #if (SYS_CPNT_CRAFT_PORT == TRUE)
     {
         if (strlen(ifname) == 5 &&
@@ -182,7 +187,7 @@ static inline BOOL_T NETCFG_NETDEVICE_TunnelIfindexToIfname(UI32_T ifindex, char
         sprintf(ifname, "TUNNEL%lu",(unsigned long)id); /* must be identical with PAL_TUNNEL_PREFIX */
         return TRUE;
     }
-    
+
     sprintf(ifname, "INVALID");
     return FALSE;
 }
@@ -191,13 +196,13 @@ static inline BOOL_T NETCFG_NETDEVICE_TunnelIfindexToIfname(UI32_T ifindex, char
 static inline BOOL_T NETCFG_NETDEVICE_LoopbackIfindexToIfname(UI32_T ifindex, char *ifname)
 {
     UI32_T id;
-    
+
     if (IP_LIB_ConvertLoopbackIfindexToId(ifindex, &id))
     {
         sprintf(ifname, "lo%lu",(unsigned long)id);
         return TRUE;
     }
-    
+
     sprintf(ifname, "INVALID");
     return FALSE;
 }
