@@ -626,6 +626,16 @@ int main(int argc, char *argv[])
     else if (addr_family == AF_INET6) /* ipv6 */
     {
         ifindex = atoi(if_name);
+
+        /* for interface not known by us, continue to run the original code in kernel.
+         */
+        {
+            char tmp_ifname[NETCFG_NETDEVICE_IFNAME_SIZE+1];
+
+            if(FALSE == NETCFG_NETDEVICE_IfindexToIfname(ifindex, tmp_ifname))
+                return EINVAL;
+        }
+
         if (ifindex == SYS_ADPT_CRAFT_INTERFACE_IFINDEX)
             return NETCFG_IP_PROC_SetCraft_v6Address(row_status);
         else if (ifindex == 1) /* for looback, not support set ipv6 address in netcfg */
