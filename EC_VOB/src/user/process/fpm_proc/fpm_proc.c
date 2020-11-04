@@ -24,6 +24,8 @@
 /* Header file from  sysinclude/mibconstants/leaf_2096.h */
 #include "leaf_2096.h"
 
+#include "netcfg_pom_ip.h"
+
 typedef struct {
     int     debuglvl;
 } arguments_t;
@@ -36,6 +38,12 @@ static arguments_t arguments = {
 #define str(s)  #s
 #define dbglvl_help   "The verbosity of debug messages (" xstr(FPM_DBG_MIN) \
                       "~" xstr(FPM_DBG_MAX) ")."
+
+#define FPM_INIT_PROC_RESOURCE(api)             \
+    if (api() == FALSE) {                       \
+        FPM_DBG_MSG(DBG_ERR, #api " Fail");     \
+        return -1;                              \
+    }
 
 static struct argp_option options[] =
 {
@@ -173,7 +181,6 @@ void fpm_link(int zfpm_serv_fd, struct sockaddr_in fpm_server)
 
 } /* End of fpm_link function */
 
-
 /* Read Zebra FPM Client data from the client */
 void *fpm_read_data (void *zfpm_serv_fd)
 {
@@ -297,8 +304,6 @@ void *fpm_read_data (void *zfpm_serv_fd)
     return 0;
 
 } /* End of FPM read data function */
-
-
 
 /* Process received data */
 void *fpm_process_data (void *arg)
@@ -506,9 +511,9 @@ void fpm_handle_v4_route(enum route_operation rt_op, struct nlmsghdr * nl_msg)
             }
         }
 
-        /* fpm_amtrl3_ipv4_add() has platform dependent code/ func calls,
+        /* fpm_amtrl3_ipv4_set() has platform dependent code/ func calls,
            Got the route entry details, now pass to AMTRL3 wrapper func */
-        if(fpm_amtrl3_ipv4_add (fib_table, &entry) == 0) {
+        if(fpm_amtrl3_ipv4_set (TRUE, fib_table, &entry) == 0) {
             FPM_DBG_MSG(DBG_INF, "Successfully updated the AMTRL3");
         }
 
@@ -547,15 +552,13 @@ void fpm_handle_v4_route(enum route_operation rt_op, struct nlmsghdr * nl_msg)
        }
 
        /* Got the route entry details, now pass to AMTRL3 wrapper func */
-       if(fpm_amtrl3_ipv4_delete(fib_table, &entry) == 0) {
+       if(fpm_amtrl3_ipv4_set(FALSE, fib_table, &entry) == 0) {
            FPM_DBG_MSG(DBG_INF, "Successfully updated the AMTRL3");
        }
 
     } /* rt_op == OP_DEL */
 
 } /* End of fpm_handle_v4_route() */
-
-
 
 /* Get the route entries for IPv4 routes */
 int fpm_processv4_route(struct nlmsghdr * nl_msg, fpm_v4_route_t *entry)
@@ -755,22 +758,22 @@ int fpm_processv4_route(struct nlmsghdr * nl_msg, fpm_v4_route_t *entry)
 
 } /* End of fpm_processv4_route */
 
-
-
 /*
- * Add a IPv4 route to the forwarding layer.
+ * Add/Del a IPv4 route to the forwarding layer.
  * pass action_flags, fib_id, net_route_entry to AMTRL3
 */
-int fpm_amtrl3_ipv4_add (unsigned int fib_table, fpm_v4_route_t *entry)
+int fpm_amtrl3_ipv4_set (unsigned char is_add, unsigned int fib_table, fpm_v4_route_t *entry)
 {
+    UI32_T  action_flags = AMTRL3_TYPE_FLAGS_IPV4;
+    UI32_T  fib_id;
+    char    *tag_str_p;
+    AMTRL3_TYPE_InetCidrRouteEntry_T net_route_entry = {0};
     BOOL_T ret = FALSE;
-    AMTRL3_TYPE_InetCidrRouteEntry_T net_route_entry;
-    UI32_T action_flags = AMTRL3_TYPE_FLAGS_IPV4;
-    UI32_T fib_id;
 
-    memset(&net_route_entry, 0, sizeof(AMTRL3_TYPE_InetCidrRouteEntry_T));
-    FPM_DBG_MSG(DBG_INF, "AMTRL3 : ipv4 ROUTE_ADD !");
-    FPM_DBG_MSG(DBG_INF, "AMTRL3 : ROUTE_ADD ..Finally reached AMTRL3 wrapper !!");
+    tag_str_p = is_add ? "Add" : "Del";
+
+    FPM_DBG_MSG(DBG_INF, "AMTRL3 : ipv4 ROUTE_%s !", tag_str_p);
+    FPM_DBG_MSG(DBG_INF, "AMTRL3 : ROUTE_%s ..Finally reached AMTRL3 wrapper !!", tag_str_p);
     fib_id = fib_table; // the table id from NL msg, need to pass till here
 
     /* Understand the AMTRL3, check the scenario and assign appropriate values,
@@ -779,8 +782,39 @@ int fpm_amtrl3_ipv4_add (unsigned int fib_table, fpm_v4_route_t *entry)
        #define VAL_ipCidrRouteProto_local      2L
        #define VAL_ipCidrRouteType_local       3L
     */
-    net_route_entry.partial_entry.inet_cidr_route_proto = VAL_ipCidrRouteProto_local;
-    net_route_entry.partial_entry.inet_cidr_route_type = VAL_ipCidrRouteType_local;
+    net_route_entry.partial_entry.inet_cidr_route_proto = VAL_ipCidrRouteProto_netmgmt;
+    net_route_entry.partial_entry.inet_cidr_route_type = VAL_ipCidrRouteType_other;
+
+    if (entry->dst_if_index == SYS_ADPT_CRAFT_INTERFACE_IFINDEX)
+    {
+        NETCFG_TYPE_CraftInetAddress_T  craft_addr = {0};
+
+        if (NETCFG_TYPE_OK == NETCFG_POM_IP_GetCraftInterfaceInetAddress(&craft_addr))
+        {
+            L_INET_ApplyMask(&craft_addr.addr);
+            if (0 == memcmp(&craft_addr.addr.addr, &entry->dst_ip, SYS_ADPT_IPV4_ADDR_LEN))
+                net_route_entry.partial_entry.inet_cidr_route_type  = VAL_ipCidrRouteType_local;
+        }
+    }
+    else
+    {
+        NETCFG_TYPE_InetRifConfig_T rif_config = {0};
+
+        rif_config.ifindex = entry->dst_if_index;
+
+        if (NETCFG_TYPE_OK == NETCFG_POM_IP_GetPrimaryRifFromInterface(&rif_config))
+        {
+            if (  (rif_config.addr.type == L_INET_ADDR_TYPE_IPV4)
+                ||(rif_config.addr.type == L_INET_ADDR_TYPE_IPV4Z)
+               )
+            {
+                L_INET_ApplyMask(&rif_config.addr);
+
+                if (0 == memcmp(&rif_config.addr.addr, &entry->dst_ip, SYS_ADPT_IPV4_ADDR_LEN))
+                    net_route_entry.partial_entry.inet_cidr_route_type  = VAL_ipCidrRouteType_local;
+            }
+        }
+    }
 
     /*
         Following macros can be used for addr type,
@@ -814,7 +848,7 @@ int fpm_amtrl3_ipv4_add (unsigned int fib_table, fpm_v4_route_t *entry)
                     &(entry->gateway), SYS_ADPT_IPV4_ADDR_LEN);
 
     // Keep the debugs to check the parameters before passing AMTRL3
-    FPM_DBG_MSG(DBG_INF, "FPM--> AMTRL3 ADD update");
+    FPM_DBG_MSG(DBG_INF, "FPM--> AMTRL3 %s update", tag_str_p);
     FPM_DBG_MSG(DBG_INF, "action_flags	: %02x", action_flags);
     FPM_DBG_MSG(DBG_INF, "fib_id		: %d", fib_id);
     FPM_DBG_MSG(DBG_INF, "AMTRL3_TYPE_InetCidrRouteEntry_T Info");
@@ -822,10 +856,10 @@ int fpm_amtrl3_ipv4_add (unsigned int fib_table, fpm_v4_route_t *entry)
     FPM_DBG_MSG(DBG_INF, "inet-cidr_route_proto : %d", net_route_entry.partial_entry.inet_cidr_route_proto);
     FPM_DBG_MSG(DBG_INF, "AMTRL3 : Info updated, Now SET function will be called");
 
-    FPM_DBG_MSG(DBG_INF, "AMTRL3 Add Info: action_flags %d fib_id %d \n" \
+    FPM_DBG_MSG(DBG_INF, "AMTRL3 %s Info: action_flags %d fib_id %d \n" \
               "net_route_entry:dest_type %d next_hop %d dest_addrlen %d nh_addrlen %d \n"
               "pref_len %d if_index %d route_proto %d route_type %d \n", \
-                      action_flags, fib_id, \
+                      tag_str_p, action_flags, fib_id, \
                       net_route_entry.partial_entry.inet_cidr_route_dest.type, \
                       net_route_entry.partial_entry.inet_cidr_route_next_hop.type, \
                       net_route_entry.partial_entry.inet_cidr_route_dest.addrlen, \
@@ -836,117 +870,21 @@ int fpm_amtrl3_ipv4_add (unsigned int fib_table, fpm_v4_route_t *entry)
                       net_route_entry.partial_entry.inet_cidr_route_type
                       );
 
-    ret = AMTRL3_PMGR_SetInetCidrRouteEntry(action_flags, fib_id, &net_route_entry);
+    if (is_add)
+        ret = AMTRL3_PMGR_SetInetCidrRouteEntry(action_flags, fib_id, &net_route_entry);
+    else
+        ret = AMTRL3_PMGR_DeleteInetCidrRouteEntry(action_flags, fib_id, &net_route_entry);
+
     if (ret == FALSE) {
-        FPM_DBG_MSG(DBG_ERR, "AMTRL3 : ipv4_route_add can't connect to Amtrl3: %d", ret);
+        FPM_DBG_MSG(DBG_ERR, "AMTRL3 : can't connect to Amtrl3: %d", ret);
         return -1;
     } else {
-        FPM_DBG_MSG(DBG_INF, "AMTRL3 : Connect to Amtrl3 and add_ipv4_route success: %d", ret);
+        FPM_DBG_MSG(DBG_INF, "AMTRL3 : Connect to Amtrl3 and success: %d", ret);
     }
 
     return 0;
 
-} // End of fpm_amtrl3_ipv4_add()
-
-
-
-/*
- * Delete a IPv4 route to the forwarding layer.
- */
-int fpm_amtrl3_ipv4_delete (unsigned int fib_table, fpm_v4_route_t *entry)
-{
-    BOOL_T ret = FALSE;
-    UI32_T fib_id;
-    AMTRL3_TYPE_InetCidrRouteEntry_T net_route_entry;
-    UI32_T action_flags = AMTRL3_TYPE_FLAGS_IPV4;
-
-    memset(&net_route_entry, 0, sizeof(AMTRL3_TYPE_InetCidrRouteEntry_T));
-    FPM_DBG_MSG(DBG_INF, "AMTRL3 : ipv4 ROUTE_DEL !");
-    FPM_DBG_MSG(DBG_INF, "AMTRL3 : ROUTE_DEL ..Finally reached AMTRL3 wrapper !!");
-
-    fib_id = fib_table; // table id from NL msg, need to pass till here
-
-    /* Understand the AMTRL3, check the scenario and assign appropriate values,
-       Source : sysinclude/mibconstants
-
-       #define VAL_ipCidrRouteProto_local      2L
-       #define VAL_ipCidrRouteType_local       3L
-    */
-
-    /* NOTE : Update the net_route_entry with proper values, which are NOT same as in add
-       scenario.
-
-       For connected route,
-       net_route_entry->partial_entry.inet_cidr_route_proto = VAL_ipCidrRouteProto_local
-
-    */
-
-    net_route_entry.partial_entry.inet_cidr_route_proto = VAL_ipCidrRouteProto_local;
-    net_route_entry.partial_entry.inet_cidr_route_type = VAL_ipCidrRouteType_local;
-
-    /*
-    Following macros can be used for addr type,
-        L_INET_ADDR_TYPE_UNKNOWN    = 0,
-        L_INET_ADDR_TYPE_IPV4       = 1,
-        L_INET_ADDR_TYPE_IPV6       = 2,
-        L_INET_ADDR_TYPE_IPV4Z      = 3,
-        L_INET_ADDR_TYPE_IPV6Z      = 4,
-        L_INET_ADDR_TYPE_DNS        = 16
-
-    Address length,
-        #define SYS_ADPT_IPV4_ADDR_LEN  4
-        #define SYS_ADPT_IPV6_ADDR_LEN	16
-    */
-
-    /* fill route entry for non ECMP route to be deleted*/
-    net_route_entry.partial_entry.inet_cidr_route_dest.type = L_INET_ADDR_TYPE_IPV4;
-    net_route_entry.partial_entry.inet_cidr_route_next_hop.type = L_INET_ADDR_TYPE_IPV4;
-    net_route_entry.partial_entry.inet_cidr_route_dest.addrlen = SYS_ADPT_IPV4_ADDR_LEN;
-    net_route_entry.partial_entry.inet_cidr_route_next_hop.addrlen = SYS_ADPT_IPV4_ADDR_LEN;
-    net_route_entry.partial_entry.inet_cidr_route_pfxlen = entry->dst_mask_len;
-    memcpy(net_route_entry.partial_entry.inet_cidr_route_dest.addr, &entry->dst_ip, SYS_ADPT_IPV4_ADDR_LEN);
-
-    /* NOTE : Need to udnerstand what ATAN requires here, populate data which is
-       known to AMTRL3.
-
-       Understand ATAN/ AMTRL3 code to make it better!!
-    */
-    net_route_entry.partial_entry.inet_cidr_route_if_index = entry->dst_if_index;
-    memcpy(net_route_entry.partial_entry.inet_cidr_route_next_hop.addr,
-                    &(entry->gateway), SYS_ADPT_IPV4_ADDR_LEN);
-
-    FPM_DBG_MSG(DBG_INF, "FPM--> AMTRL3  DELETE update");
-    FPM_DBG_MSG(DBG_INF, "action_flags	: %02x", action_flags);
-    FPM_DBG_MSG(DBG_INF, "fib_id		: %d", fib_id);
-    FPM_DBG_MSG(DBG_INF, "AMTRL3_TYPE_InetCidrRouteEntry_T Info");
-    FPM_DBG_MSG(DBG_INF, "AMTRL3_TYPE_InetCidrRoutePartialEntry_T Info");
-    FPM_DBG_MSG(DBG_INF, "inet-cidr_route_proto : %d", net_route_entry.partial_entry.inet_cidr_route_proto);
-
-    FPM_DBG_MSG(DBG_INF, "AMTRL3 Del Info: action_flags %d fib_id %d \n" \
-              "net_route_entry:dest_type %d next_hop %d dest_addrlen %d nh_addrlen %d \n"
-              "pref_len %d if_index %d route_proto %d route_type %d \n", \
-                      action_flags, fib_id, \
-                      net_route_entry.partial_entry.inet_cidr_route_dest.type, \
-                      net_route_entry.partial_entry.inet_cidr_route_next_hop.type, \
-                      net_route_entry.partial_entry.inet_cidr_route_dest.addrlen, \
-                      net_route_entry.partial_entry.inet_cidr_route_next_hop.addrlen, \
-                      net_route_entry.partial_entry.inet_cidr_route_pfxlen, \
-                      net_route_entry.partial_entry.inet_cidr_route_if_index, \
-                      net_route_entry.partial_entry.inet_cidr_route_proto, \
-                      net_route_entry.partial_entry.inet_cidr_route_type
-                      );
-
-    ret =  AMTRL3_PMGR_DeleteInetCidrRouteEntry(action_flags, fib_id, &net_route_entry);
-
-    if (ret == FALSE) {
-        FPM_DBG_MSG(DBG_ERR, "AMTRL3 : ipv4 route Delete: can't connect to Amtrl3 %d", ret);
-        return -1;
-    } else {
-        FPM_DBG_MSG(DBG_INF, "Connect to Amtrl3 and delete ipv4 route success %d", ret);
-    }
-
-    return 0;
-}
+} // End of fpm_amtrl3_ipv4_set()
 
 /* return 1 if dbg flag is on
  */
@@ -963,9 +901,8 @@ int main(int argc, char *argv[])
     in_addr_t fpm_server_ip; // IP address for the server socket
     unsigned short fpm_server_port = FPM_DEFAULT_PORT; // Port for the server socket
 
-    if (AMTRL3_PMGR_InitiateProcessResource() == FALSE) {
-        return -1;
-    }
+    FPM_INIT_PROC_RESOURCE(AMTRL3_PMGR_InitiateProcessResource);
+    FPM_INIT_PROC_RESOURCE(NETCFG_POM_IP_InitiateProcessResource);
 
     fpm_init_signals();
 

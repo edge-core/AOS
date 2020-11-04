@@ -8,6 +8,8 @@ fpm_proc_SOURCES = \
 fpm_proc_CPPFLAGS = \
     $(COMMON_CPPFLAGS) \
     -I$(ACCSRC)/user/core/l3/amtrl3/include \
+    -I$(ACCSRC)/user/core/l3/netcfg/include \
+    -I$(ACCSRC)/user/core/l3/netcfg/ipcfg/include \
     -I$(ACCSRC)/sysinclude/mibconstants \
     -I$(FRR_SRC_DIR)/fpm
 
